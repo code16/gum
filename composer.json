@@ -1,0 +1,41 @@
+{
+  "name": "code16/gum",
+  "description": "",
+  "authors": [{
+    "name": "Philippe Lonchampt",
+    "email": "philippe@code16.fr"
+  }],
+  "require": {
+    "php": ">=7.0.0",
+    "laravel/framework": "5.5.*",
+    "code16/sharp": "dev-master",
+    "webpatser/laravel-uuid": "^3.0"
+  },
+  "require-dev": {
+    "fzaninotto/faker": "~1.4",
+    "mockery/mockery": "0.9.*",
+    "phpunit/phpunit": "~6.0",
+    "doctrine/dbal": "~2.5",
+    "orchestra/testbench": "~3.5"
+  },
+  "autoload": {
+    "files": [
+      "src/gum_helpers.php"
+    ],
+    "psr-4": {
+      "Code16\\Gum\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Code16\\Gum\\Tests\\": "tests/"
+    }
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "Code16\\Gum\\GumServiceProvider"
+      ]
+    }
+  }
+}
