@@ -29,9 +29,10 @@ class SectionFilter implements EntityListRequiredFilter
 
                 $sections += Section::whereExists(function($query) use($rootSection) {
                     return $query->from("content_urls")
+                        ->where("domain", $rootSection->domain)
                         ->whereRaw("content_id = sections.id")
                         ->where("content_type", Section::class)
-                        ->where("uri", "like", "{$rootSection->url->uri}%");
+                        ->where("uri", "like", "{$rootSection->url->uri}/%");
                 })
                     ->get()
                     ->pluck("url.uri", "id")
