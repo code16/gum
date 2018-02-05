@@ -24,6 +24,11 @@ class ContentUrl extends Model
         return $query->where("uri", $path);
     }
 
+    public function scopeForDomain(Builder $query, string $domain = null)
+    {
+        return $query->where("domain", $domain);
+    }
+
     /**
      * @return bool
      */
@@ -56,7 +61,8 @@ class ContentUrl extends Model
         // First create the Section's url if missing.
         if(is_null($sectionUrl = $section->url)) {
             $sectionUrl = $section->url()->create([
-                "uri" => (new ContentUrl())->findAvailableUriFor($section),
+                "uri" => (new ContentUrl())->findAvailableUriFor($section, $section->domain),
+                "domain" => $section->domain,
                 "visibility" => "ONLINE",
             ]);
         }
@@ -107,7 +113,8 @@ class ContentUrl extends Model
             : $content->urls()->where('parent_id', $containerUrl->id)->first();
 
         return $existingUrl ?: ContentUrl::create([
-            "uri" => $containerUrl->findAvailableUriFor($content),
+            "uri" => $containerUrl->findAvailableUriFor($content, $containerUrl->domain),
+            "domain" => $containerUrl->domain,
             "content_id" => $content->id,
             "content_type" => get_class($content),
             "visibility" => $visibility ?: $containerUrl->visibility,
@@ -142,15 +149,19 @@ class ContentUrl extends Model
      * @param string|null $subContentSlug
      * @return string
      */
-    public function findAvailableUriFor($subContent, string $subContentSlug = null)
+    public function findAvailableUriFor($subContent, string $domain = null, string $subContentSlug = null)
     {
         $subContentSlug = $subContentSlug ?: $subContent->slug;
         $uri = preg_replace('#/+#', '/', sprintf("%s/%s", $this->uri, $subContentSlug));
 
-        if ($existingUrl = ContentUrl::where("uri", $uri)->first()) {
+        if ($existingUrl = ContentUrl::where("uri", $uri)
+            ->forDomain($domain)
+            ->first())
+        {
             // Slug issue
             return $this->findAvailableUriFor(
                 $subContent,
+                $domain,
                 append_suffix_to_slug($subContentSlug)
             );
         }

@@ -198,4 +198,34 @@ class ContentUrlCreationTest extends TestCase
 
         $this->assertNotEquals($tile1->fresh()->uri, url($tile2->fresh()->uri));
     }
+
+    /** @test */
+    function the_url_can_be_namespace_with_a_domain()
+    {
+        $section = factory(Section::class)->create(["domain" => "abc"]);
+        $tileblock = $section->tileblocks()->create(factory(Tileblock::class)->make()->toArray());
+
+        $tileblock->tiles()->create(factory(Tile::class)->make([
+            "linkable_id" => factory(Page::class)->create()->id, "linkable_type" => Page::class
+        ])->toArray());
+
+        $pagegroup = factory(Pagegroup::class)->create();
+        (factory(Page::class)->create())->pagegroup()->associate($pagegroup)->save();
+        $tileblock->tiles()->create(factory(Tile::class)->make([
+            "linkable_id" => $pagegroup->id, "linkable_type" => Pagegroup::class
+        ])->toArray());
+        (factory(Page::class)->create())->pagegroup()->associate($pagegroup)->save();
+
+        $subsection = factory(Section::class)->create(["domain" => "abc"]);
+        $tileblock->tiles()->create(factory(Tile::class)->make([
+            "linkable_id" => $subsection->id, "linkable_type" => Section::class
+        ])->toArray());
+
+        $allUrls = ContentUrl::all();
+        $this->assertCount(6, $allUrls);
+
+        foreach($allUrls as $url) {
+            $this->assertEquals("abc", $url->domain);
+        }
+    }
 }

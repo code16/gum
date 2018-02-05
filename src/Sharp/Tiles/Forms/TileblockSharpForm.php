@@ -42,6 +42,10 @@ abstract class TileblockSharpForm extends SharpForm
                 ->setReadOnly()
                 ->setLabel("Section")
         )->addField(
+            SharpFormTextField::make("style_key")
+                ->setLabel("Thème (TODO SELECT)")
+                ->setHelpMessage("Laisser vide à moins de ne pas vouloir reprendre le thème de la section dans laquelle se trouvent les tuiles")
+        )->addField(
             SharpFormDateField::make("published_at")
                 ->setMondayFirst()
                 ->setHasTime(true)
@@ -89,6 +93,8 @@ abstract class TileblockSharpForm extends SharpForm
             if($this->hasLayoutVariants()) {
                 $column->withSingleField("layout_variant");
             }
+
+            $column->withSingleField("style_key");
 
             $column->withFieldset("Date de mise en ligne", function(FormLayoutFieldset $fieldset) {
                 $fieldset->withSingleField("published_at")

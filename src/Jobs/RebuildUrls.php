@@ -29,7 +29,7 @@ class RebuildUrls
             ->each(function(Section $section) {
                 // Handle sections witch aren't linked with a Tile (root sections)
                 $section->url()->create([
-                    "uri" => (new ContentUrl())->findAvailableUriFor($section),
+                    "uri" => (new ContentUrl())->findAvailableUriFor($section, $section->domain),
                     "visibility" => "ONLINE",
                 ]);
 
