@@ -15,7 +15,7 @@ class CreateContentUrlsTable extends Migration
     {
         Schema::create('content_urls', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('uri')->unique();
+            $table->string('uri')->index();
 
             $table->string("content_id")->nullable();
             $table->string("content_type")->nullable();

@@ -145,7 +145,7 @@ class ContentUrl extends Model
     public function findAvailableUriFor($subContent, string $subContentSlug = null)
     {
         $subContentSlug = $subContentSlug ?: $subContent->slug;
-        $uri = sprintf("%s/%s", $this->uri, $subContentSlug);
+        $uri = preg_replace('#/+#', '/', sprintf("%s/%s", $this->uri, $subContentSlug));
 
         if ($existingUrl = ContentUrl::where("uri", $uri)->first()) {
             // Slug issue

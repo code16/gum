@@ -22,6 +22,7 @@ class SectionRootFilter implements EntityListRequiredFilter
             ["-" => "- Aucune -"] +
             Section::domain(SharpGumSessionValue::getDomain())
                 ->where("is_root", true)
+                ->where("slug", "!=", "")
                 ->orderBy("root_menu_order")
                 ->get()
                 ->pluck("url.uri", "id")

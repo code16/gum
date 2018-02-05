@@ -41,6 +41,15 @@ class Section extends Model
         return $query;
     }
 
+    /**
+     * @param Builder $query
+     * @return Builder
+     */
+    public function scopeHome(Builder $query)
+    {
+        return $query->where("slug", "");
+    }
+
     public function tileblocks()
     {
         return $this->hasMany(Tileblock::class)

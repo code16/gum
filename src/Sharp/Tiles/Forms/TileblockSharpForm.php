@@ -34,17 +34,11 @@ abstract class TileblockSharpForm extends SharpForm
     function buildFormFields()
     {
         $this->addField(
-            SharpFormAutocompleteField::make("layout", "local")
-                ->setResultItemInlineTemplate("{{label}}")
-                ->setListItemInlineTemplate("{{label}}")
-                ->setLocalValues([$this->layoutKey() => $this->layoutLabel()])
+            SharpFormTextField::make("layout_label")
                 ->setReadOnly()
                 ->setLabel("Type de tuiles")
         )->addField(
-            SharpFormAutocompleteField::make("section", "local")
-                ->setResultItemInlineTemplate("{{label}}")
-                ->setListItemInlineTemplate("{{label}}")
-                ->setLocalValues([SharpGumSessionValue::get("section") => Section::find(SharpGumSessionValue::get("section"))->title])
+            SharpFormTextField::make("section_label")
                 ->setReadOnly()
                 ->setLabel("Section")
         )->addField(
@@ -89,8 +83,8 @@ abstract class TileblockSharpForm extends SharpForm
     function buildFormLayout()
     {
         $this->addColumn(4, function (FormLayoutColumn $column) {
-            $column->withSingleField("section")
-                ->withSingleField("layout");
+            $column->withSingleField("section_label")
+                ->withSingleField("layout_label");
 
             if($this->hasLayoutVariants()) {
                 $column->withSingleField("layout_variant");
@@ -113,7 +107,6 @@ abstract class TileblockSharpForm extends SharpForm
                             $item->withSingleField("visual:is_video");
                         }
                     }
-
                     if($this->tileHasField("surtitle") && $this->tileHasField("video")) {
                         $item->withFields("surtitle|5", "visual:video_url|7");
                     } elseif($this->tileHasField("surtitle")) {
@@ -150,6 +143,12 @@ abstract class TileblockSharpForm extends SharpForm
             ->setCustomTransformer('has_unpublished_date', function($value, $tileblock) {
                 return !is_null($tileblock->unpublished_at);
             })
+            ->setCustomTransformer('section_label', function($value, $tileblock) {
+                return $tileblock->section->title;
+            })
+            ->setCustomTransformer('layout_label', function($value, $tileblock) {
+                return $this->layoutLabel();
+            })
             ->setCustomTransformer('tiles[page]', function($value, $tile) {
                 return $tile->linkable_type == Page::class ? $tile->linkable_id : null;
             })
@@ -167,15 +166,14 @@ abstract class TileblockSharpForm extends SharpForm
 
     public function create(): array
     {
-        $tileblock = new Tileblock([
-            "layout" => $this->layoutKey()
-        ]);
-
-        $tileblock->section()->associate(
-            Section::find(SharpGumSessionValue::get("section"))
-        );
-
-        return $this->transform($tileblock);
+        return $this
+            ->setCustomTransformer('layout_label', function($value, $tileblock) {
+                return $this->layoutLabel();
+            })
+            ->setCustomTransformer('section_label', function($value, $tileblock) {
+                return Section::find(SharpGumSessionValue::get("section"))->title;
+            })
+            ->transform(new Tileblock());
     }
 
     /**
@@ -188,7 +186,7 @@ abstract class TileblockSharpForm extends SharpForm
         $tileblock = $id ? Tileblock::findOrFail($id) : new Tileblock();
 
         $this
-            ->ignore("section")
+            ->ignore(["section_label", "layout_label"])
             ->save($tileblock, $this->cleanUpData($data));
 
         return $tileblock->id;
@@ -282,7 +280,7 @@ abstract class TileblockSharpForm extends SharpForm
 
         if($this->context()->isCreation()) {
             $data["layout"] = $this->layoutKey();
-            $data["section_id"] = session("sharpgum_tileblock_section");
+            $data["section_id"] = SharpGumSessionValue::get("section");
         }
 
         return $data;

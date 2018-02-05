@@ -50,7 +50,6 @@ class SectionFilter implements EntityListRequiredFilter
     {
         if($sectionId = SharpGumSessionValue::get("section")) {
             if(Section::domain(SharpGumSessionValue::getDomain())->find($sectionId)) {
-//                dd(SharpGumSessionValue::getDomain(), $sectionId);
                 return $sectionId;
             }
         }

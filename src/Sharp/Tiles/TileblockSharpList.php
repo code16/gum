@@ -6,6 +6,7 @@ use Code16\Gum\Models\Tile;
 use Code16\Gum\Models\Tileblock;
 use Code16\Gum\Sharp\Utils\DomainFilter;
 use Code16\Gum\Sharp\Utils\SectionFilter;
+use Code16\Gum\Sharp\Utils\SectionWithHomeFilter;
 use Code16\Gum\Sharp\Utils\SharpGumSessionValue;
 use Code16\Sharp\EntityList\Containers\EntityListDataContainer;
 use Code16\Sharp\EntityList\EntityListQueryParams;
@@ -76,9 +77,14 @@ class TileblockSharpList extends SharpEntityList
      */
     function getListData(EntityListQueryParams $params)
     {
-        $tileblocks = Tileblock::where("section_id", $params->filterFor("section"))
-            ->with("tiles", "tiles.contentUrl")
+        $tileblocks = Tileblock::with("tiles", "tiles.contentUrl")
             ->orderBy("order");
+
+        if($params->filterFor("section")) {
+            $tileblocks->where("section_id", $params->filterFor("section"));
+        } else {
+            $tileblocks->whereNull("section_id");
+        }
 
         return $this
             ->setCustomTransformer("layout_label", function($value, $tileblock) {

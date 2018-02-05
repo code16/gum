@@ -66,7 +66,8 @@ class RootSectionSharpList extends SharpEntityList
     {
         $sections = Section::domain(SharpGumSessionValue::getDomain())
             ->orderBy('root_menu_order')
-            ->where("is_root", true);
+            ->where("is_root", true)
+            ->where("slug", "!=", "");
 
         if($params->specificIds()) {
             $sections->whereIn("id", $params->specificIds());
