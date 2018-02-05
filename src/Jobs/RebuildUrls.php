@@ -22,14 +22,12 @@ class RebuildUrls
     {
         $this->clearUrls();
 
-        Section::all()
-            ->filter(function(Section $section) {
-                return count(explode("/", $section->slug)) == 1;
-            })
+        Section::where("is_root", true)
             ->each(function(Section $section) {
                 // Handle sections witch aren't linked with a Tile (root sections)
                 $section->url()->create([
                     "uri" => (new ContentUrl())->findAvailableUriFor($section, $section->domain),
+                    "domain" => $section->domain,
                     "visibility" => "ONLINE",
                 ]);
 

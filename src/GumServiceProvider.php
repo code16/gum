@@ -2,6 +2,7 @@
 
 namespace Code16\Gum;
 
+use Code16\Gum\Console\RebuildUrlsCommand;
 use Code16\Gum\Middleware\BuildGumContext;
 use Code16\Gum\Models\ContentUrl;
 use Code16\Gum\Models\Observers\ContentUrlObserver;
@@ -30,6 +31,12 @@ class GumServiceProvider extends ServiceProvider
         Pagegroup::observe(PagegroupObserver::class);
         Section::observe(SectionObserver::class);
         ContentUrl::observe(ContentUrlObserver::class);
+
+        if ($this->app->runningInConsole()) {
+            $this->commands([
+                RebuildUrlsCommand::class
+            ]);
+        }
     }
 
     public function register()
