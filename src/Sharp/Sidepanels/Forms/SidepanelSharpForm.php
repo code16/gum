@@ -20,7 +20,6 @@ use Code16\Sharp\Http\WithSharpFormContext;
 abstract class SidepanelSharpForm extends SharpForm
 {
     use WithSharpFormEloquentUpdater, WithSharpFormContext;
-    protected $configFields = ["visual","download","body_text","link"];
 
     /**
      * Build form fields using ->addField()
@@ -45,7 +44,7 @@ abstract class SidepanelSharpForm extends SharpForm
                 ->setLabel("Page")
         );
 
-        if($this->has("visual")) {
+        if($this->hasField("visual")) {
             $this->addField(
                 SharpFormUploadField::make("visual")
                     ->setLabel("Visuel")
@@ -66,7 +65,7 @@ abstract class SidepanelSharpForm extends SharpForm
             );
         }
 
-        if($this->has("download")) {
+        if($this->hasField("download")) {
             $this->addField(
                 SharpFormUploadField::make("downloadableFile")
                     ->setLabel("Fichier")
@@ -81,7 +80,7 @@ abstract class SidepanelSharpForm extends SharpForm
             );
         }
 
-        if($this->has("body_text")) {
+        if($this->hasField("body_text")) {
             $this->addField(
                 SharpFormWysiwygField::make("body_text")
                     ->setLabel("Texte")
@@ -95,7 +94,7 @@ abstract class SidepanelSharpForm extends SharpForm
             );
         }
 
-        if($this->has("link")) {
+        if($this->hasField("link")) {
             $this->addField(
                 SharpFormTextField::make("link")
                     ->setLabel("Lien")
@@ -114,26 +113,26 @@ abstract class SidepanelSharpForm extends SharpForm
             $column->withSingleField("container")
                 ->withSingleField("layout");
 
-            if($this->has("body_text")) {
+            if($this->hasField("body_text")) {
                 $column->withSingleField("body_text");
             }
 
-            if($this->has("link")) {
+            if($this->hasField("link")) {
                 $column->withSingleField("link");
             }
 
         })->addColumn(6, function (FormLayoutColumn $column) {
-            if($this->has("visual")) {
+            if($this->hasField("visual")) {
                 $column->withSingleField("visual")
                     ->withSingleField("visual:legend");
 
-                if($this->has("video")) {
+                if($this->hasField("video")) {
                     $column->withSingleField("visual:is_video")
                         ->withSingleField("visual:video_url");
                 }
             }
 
-            if($this->has("download")) {
+            if($this->hasField("download")) {
                 $column->withSingleField("downloadableFile")
                     ->withSingleField("downloadableFile:title");
             }
@@ -191,11 +190,13 @@ abstract class SidepanelSharpForm extends SharpForm
     }
 
     /**
-     * @param array $fields
+     * @return array
      */
-    protected function configure(array $fields)
+    protected function sidepanelFields(): array
     {
-        $this->configFields = $fields;
+        return [
+            "visual", "download", "body_text", "link"
+        ];
     }
 
     /**
@@ -212,7 +213,7 @@ abstract class SidepanelSharpForm extends SharpForm
      * @param $field
      * @return bool
      */
-    private function has($field): bool
+    private function hasField($field): bool
     {
         return in_array($field, $this->configFields);
     }
@@ -223,25 +224,6 @@ abstract class SidepanelSharpForm extends SharpForm
      */
     protected function cleanUpData($data): array
     {
-//        if(! ($data['has_unpublished_date'] ?? false)) {
-//            $data['unpublished_at'] = null;
-//        }
-//        unset($data["has_unpublished_date"]);
-//
-//        if(isset($data["tiles"])) {
-//            foreach ($data["tiles"] as &$dataTile) {
-//                if ($dataTile["link_type"] != "free") {
-//                    $dataTile["linkable_type"] = $dataTile["link_type"];
-//                    $dataTile["linkable_id"] = $dataTile[strtolower(basename(str_replace('\\', '/', $dataTile["link_type"])))];
-//                } else {
-//                    $dataTile["linkable_type"] = null;
-//                    $dataTile["linkable_id"] = null;
-//                }
-//
-//                unset($dataTile["link_type"], $dataTile["page"], $dataTile["section"], $dataTile["pagegroup"]);
-//            }
-//        }
-//
         if($this->context()->isCreation()) {
             $data["layout"] = $this->layoutKey();
             $data["container_id"] = SharpGumSessionValue::get("sidepanel_page");

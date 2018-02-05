@@ -2,25 +2,10 @@
 
 namespace Code16\Gum\Tests\Feature\Sharp;
 
-use Code16\Gum\Tests\Feature\Utils\UserModel;
-use Code16\Gum\Tests\TestCase;
-use Code16\Sharp\Utils\Testing\SharpAssertions;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-
-class SidepanelSharpTest extends TestCase
+class SidepanelSharpTest extends GumSharpTestCase
 {
-    use RefreshDatabase, SharpAssertions;
 
-    protected function setUp()
-    {
-        parent::setUp();
-
-        $this->initSharpAssertions();
-        $this->loginAsSharpUser(factory(UserModel::class)->create());
-    }
-
-
-//    /** @test */
+    //    /** @test */
 //    function we_can_update_a_sidepanel()
 //    {
 //        $panel = factory(Sidepanel::class)->create();

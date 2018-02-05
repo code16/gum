@@ -4,23 +4,9 @@ namespace Code16\Gum\Tests\Feature\Sharp;
 
 use Code16\Gum\Models\Section;
 use Code16\Gum\Sharp\Utils\SharpGumSessionValue;
-use Code16\Gum\Tests\Feature\Utils\UserModel;
-use Code16\Gum\Tests\TestCase;
-use Code16\Sharp\Utils\Testing\SharpAssertions;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 
-class SectionSharpTest extends TestCase
+class SectionSharpTest extends GumSharpTestCase
 {
-    use RefreshDatabase, SharpAssertions;
-
-    protected function setUp()
-    {
-        parent::setUp();
-
-        $this->initSharpAssertions();
-        $this->loginAsSharpUser(factory(UserModel::class)->create());
-    }
-
 
     /** @test */
     function we_can_update_a_section()

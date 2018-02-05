@@ -7,23 +7,9 @@ use Code16\Gum\Models\Pagegroup;
 use Code16\Gum\Models\Section;
 use Code16\Gum\Models\Tile;
 use Code16\Gum\Models\Tileblock;
-use Code16\Gum\Tests\Feature\Utils\UserModel;
-use Code16\Gum\Tests\TestCase;
-use Code16\Sharp\Utils\Testing\SharpAssertions;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 
-class PageSharpTest extends TestCase
+class PageSharpTest extends GumSharpTestCase
 {
-    use RefreshDatabase, SharpAssertions;
-
-    protected function setUp()
-    {
-        parent::setUp();
-
-        $this->initSharpAssertions();
-        $this->loginAsSharpUser(factory(UserModel::class)->create());
-    }
-
 
     /** @test */
     function we_can_update_a_page()
