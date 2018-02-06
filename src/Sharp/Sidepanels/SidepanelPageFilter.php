@@ -2,6 +2,7 @@
 
 namespace Code16\Gum\Sharp\Sidepanels;
 
+use Code16\Gum\Models\ContentUrl;
 use Code16\Gum\Models\Page;
 use Code16\Gum\Sharp\Utils\SharpGumSessionValue;
 use Code16\Sharp\EntityList\EntityListRequiredFilter;
@@ -24,7 +25,21 @@ class SidepanelPageFilter implements EntityListRequiredFilter
         $this->queryDomain($pages);
 
         return $pages->with("urls")->get()
-            ->pluck("title", "id")
+            ->map(function(Page $page) {
+                return [
+                    "id" => $page->id,
+                    "label" => $page->title,
+                    "uri" => $page->urls->map(function(ContentUrl $url) {
+                        $uri = $url->uri;
+                        if(strlen($uri) > 60) {
+                            $uri = substr($url->uri, 0, 25)
+                                . ' [...] '
+                                . substr($url->uri, -25);
+                        }
+                        return implode(" <strong>/</strong> ", explode("/", $uri));
+                    })->implode('<br>')
+                ];
+            })
             ->all();
     }
 
@@ -54,12 +69,12 @@ class SidepanelPageFilter implements EntityListRequiredFilter
 
     public function searchKeys(): array
     {
-        return ["title", "url"];
+        return ["label", "uri"];
     }
 
     public function template()
     {
-        return "{{title}}<br><small>{{uri}}</small>";
+        return "{{label}}<br><small><span style='color:gray' v-html='uri'></span></small>";
     }
 
     private function queryDomain(&$pages)
