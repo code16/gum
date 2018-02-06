@@ -27,7 +27,7 @@ class RootSectionSharpForm extends SectionSharpForm
             $section = Section::find($id);
             $section->url()->create([
                 "uri" => (new ContentUrl())->findAvailableUriFor($section, $section->domain),
-                "visibility" => "ONLINE",
+                "visibility" => "OFFLINE",
             ]);
         }
 

@@ -47,7 +47,8 @@ class RootSectionSharpList extends SharpEntityList
      */
     function buildListConfig()
     {
-        $this->setReorderable(RootSectionSharpReorderHandler::class);
+        $this->setReorderable(RootSectionSharpReorderHandler::class)
+            ->setEntityState("visibility", RootSectionVisibilityStateHandler::class);
 
         if(sizeof(config("gum.domains"))) {
             $this->addFilter("domain", DomainFilter::class, function($value, EntityListQueryParams $params) {
@@ -65,6 +66,7 @@ class RootSectionSharpList extends SharpEntityList
     function getListData(EntityListQueryParams $params)
     {
         $sections = Section::domain(SharpGumSessionValue::getDomain())
+            ->with("url")
             ->orderBy('root_menu_order')
             ->where("is_root", true)
             ->where("slug", "!=", "");
@@ -75,6 +77,9 @@ class RootSectionSharpList extends SharpEntityList
 
         return $this
             ->setCustomTransformer("urls", UrlsCustomTransformer::class)
+            ->setCustomTransformer("visibility", function($value, Section $section) {
+                return $section->url->visibility;
+            })
             ->transform($sections->get());
     }
 }
