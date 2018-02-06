@@ -53,7 +53,7 @@ class GumSharpTestCase extends TestCase
                         "validator" => \Code16\Gum\Sharp\Pagegroups\PagegroupSharpValidator::class,
                     ],
                     "tileblocks" => [
-                        "list" => \Code16\Gum\Sharp\Tiles\AcaciaTileblockSharpList::class,
+                        "list" => \Code16\Gum\Sharp\Tiles\TileblockSharpList::class,
                         "forms" => [
                         ]
                     ],

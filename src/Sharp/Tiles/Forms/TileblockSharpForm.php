@@ -113,12 +113,9 @@ abstract class TileblockSharpForm extends SharpForm
                             $item->withSingleField("visual:is_video");
                         }
                     }
-                    if($this->tileHasField("surtitle") && $this->tileHasField("video")) {
-                        $item->withFields("surtitle|5", "visual:video_url|7");
-                    } elseif($this->tileHasField("surtitle")) {
+
+                    if($this->tileHasField("surtitle")) {
                         $item->withSingleField("surtitle");
-                    } elseif($this->tileHasField("video")) {
-                        $item->withSingleField("visual:video_url");
                     }
 
                     if($this->tileHasField("title") && $this->tileHasField("body_text")) {
@@ -321,10 +318,6 @@ abstract class TileblockSharpForm extends SharpForm
                     ->setStorageBasePath("data/tiles/{id}")
             )->addItemField(
                 SharpFormCheckField::make("visual:is_video", "Tuile vidéo")
-            )->addItemField(
-                SharpFormTextField::make("visual:video_url")
-                    ->addConditionalDisplay("visual:is_video")
-                    ->setLabel("URL de la vidéo")
             );
         }
 
@@ -381,7 +374,6 @@ abstract class TileblockSharpForm extends SharpForm
         )->addItemField(
             SharpFormAutocompleteField::make("section", "local")
                 ->setLocalSearchKeys(["label"])
-                ->addConditionalDisplay("!visual:is_video")
                 ->addConditionalDisplay("link_type", Section::class)
                 ->setResultItemInlineTemplate("{{label}}")
                 ->setListItemInlineTemplate("{{label}}")
@@ -390,7 +382,6 @@ abstract class TileblockSharpForm extends SharpForm
         )->addItemField(
             SharpFormAutocompleteField::make("page", "local")
                 ->setLocalSearchKeys(["label"])
-                ->addConditionalDisplay("!visual:is_video")
                 ->addConditionalDisplay("link_type", Page::class)
                 ->setResultItemInlineTemplate("{{label}}")
                 ->setListItemInlineTemplate("{{label}}")
@@ -399,7 +390,6 @@ abstract class TileblockSharpForm extends SharpForm
         )->addItemField(
             SharpFormAutocompleteField::make("pagegroup", "local")
                 ->setLocalSearchKeys(["label"])
-                ->addConditionalDisplay("!visual:is_video")
                 ->addConditionalDisplay("link_type", Pagegroup::class)
                 ->setResultItemInlineTemplate("{{label}}")
                 ->setListItemInlineTemplate("{{label}}")
@@ -407,7 +397,6 @@ abstract class TileblockSharpForm extends SharpForm
                 ->setLabel("Groupe de pages")
         )->addItemField(
             SharpFormTextField::make("free_link_url")
-                ->addConditionalDisplay("!visual:is_video")
                 ->addConditionalDisplay("link_type", "free")
                 ->setLabel("Lien")
         );
