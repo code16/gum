@@ -19,7 +19,13 @@ class SidepanelPageFilter implements EntityListRequiredFilter
      */
     public function values()
     {
-        return Page::orderBy("title")->get()->pluck("title", "id")->all();
+        $pages = Page::orderBy("title");
+
+        $this->queryDomain($pages);
+
+        return $pages->with("urls")->get()
+            ->pluck("title", "id")
+            ->all();
     }
 
     /**
@@ -27,9 +33,50 @@ class SidepanelPageFilter implements EntityListRequiredFilter
      */
     public function defaultValue()
     {
-        return SharpGumSessionValue::get(
-            "sidepanel_page",
-            Page::orderBy("title")->first()->id
-        );
+        if($pageId = SharpGumSessionValue::get("sidepanel_page")) {
+            $page = Page::where("id", $pageId);
+            $this->queryDomain($page);
+            if($page->count()) {
+                return $pageId;
+            }
+        }
+
+        $page = Page::orderBy("title");
+        $this->queryDomain($page);
+
+        return $page->first()->id ?? null;
+    }
+
+    public function isSearchable(): bool
+    {
+        return true;
+    }
+
+    public function searchKeys(): array
+    {
+        return ["title", "url"];
+    }
+
+    public function template()
+    {
+        return "{{title}}<br><small>{{uri}}</small>";
+    }
+
+    private function queryDomain(&$pages)
+    {
+        if(sizeof(config("gum.domains"))) {
+            $pages->where(function ($query) {
+                $query->whereExists(function ($query) {
+                    return $query->from("content_urls")
+                        ->whereRaw("content_id = pages.id")
+                        ->where("content_type", Page::class)
+                        ->where("domain", SharpGumSessionValue::getDomain());
+                })->orWhereNotExists(function ($query) {
+                    return $query->from("content_urls")
+                        ->whereRaw("content_id = pages.id")
+                        ->where("content_type", Page::class);
+                });
+            });
+        }
     }
 }

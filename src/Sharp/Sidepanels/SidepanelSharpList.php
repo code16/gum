@@ -2,14 +2,14 @@
 
 namespace Code16\Gum\Sharp\Sidepanels;
 
-use Code16\Gum\Models\Page;
 use Code16\Gum\Models\Sidepanel;
+use Code16\Gum\Sharp\Utils\DomainFilter;
 use Code16\Gum\Sharp\Utils\SharpGumSessionValue;
 use Code16\Sharp\EntityList\Containers\EntityListDataContainer;
 use Code16\Sharp\EntityList\EntityListQueryParams;
 use Code16\Sharp\EntityList\SharpEntityList;
 
-class SidepanelSharpList extends SharpEntityList
+abstract class SidepanelSharpList extends SharpEntityList
 {
 
     /**
@@ -48,10 +48,18 @@ class SidepanelSharpList extends SharpEntityList
     {
         $this
             ->setMultiformAttribute("layout")
-            ->setReorderable(SidepanelSharpReorderHandler::class)
-            ->addFilter("page", SidePanelPageFilter::class, function($value, EntityListQueryParams $params) {
-                SharpGumSessionValue::set("sidepanel_page", $value);
+            ->setReorderable(SidepanelSharpReorderHandler::class);
+
+        if(sizeof(config("gum.domains"))) {
+            $this->addFilter("domain", DomainFilter::class, function($value, EntityListQueryParams $params) {
+                SharpGumSessionValue::setDomain($value);
             });
+        }
+
+        $this->addFilter("container", $this->containerFilter(), function($value) {
+            SharpGumSessionValue::set($this->containerName(), $value);
+            SharpGumSessionValue::set("sidepanel_container_type", $this->containerType());
+        });
     }
 
     /**
@@ -62,8 +70,8 @@ class SidepanelSharpList extends SharpEntityList
      */
     function getListData(EntityListQueryParams $params)
     {
-        $sidepanels = Sidepanel::where("container_id", $params->filterFor("page"))
-            ->where("container_type", Page::class)
+        $sidepanels = Sidepanel::where("container_id", $params->filterFor("container"))
+            ->where("container_type", $this->containerType())
             ->orderBy("order");
 
         return $this
@@ -95,4 +103,19 @@ class SidepanelSharpList extends SharpEntityList
     {
         return "";
     }
+
+    /**
+     * @return string
+     */
+    protected abstract function containerFilter(): string;
+
+    /**
+     * @return string
+     */
+    protected abstract function containerType(): string;
+
+    /**
+     * @return string
+     */
+    protected abstract function containerName(): string;
 }

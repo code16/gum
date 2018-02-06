@@ -76,4 +76,10 @@ class Section extends Model
     {
         return $this->morphOne(ContentUrl::class, "content");
     }
+
+    public function sidepanels()
+    {
+        return $this->morphMany(Sidepanel::class, "container")
+            ->orderBy("order");
+    }
 }

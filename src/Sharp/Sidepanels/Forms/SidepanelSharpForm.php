@@ -7,7 +7,6 @@ use Code16\Gum\Models\Sidepanel;
 use Code16\Gum\Sharp\Utils\SharpGumSessionValue;
 use Code16\Sharp\Form\Eloquent\Transformers\FormUploadModelTransformer;
 use Code16\Sharp\Form\Eloquent\WithSharpFormEloquentUpdater;
-use Code16\Sharp\Form\Fields\SharpFormAutocompleteField;
 use Code16\Sharp\Form\Fields\SharpFormCheckField;
 use Code16\Sharp\Form\Fields\SharpFormTextareaField;
 use Code16\Sharp\Form\Fields\SharpFormTextField;
@@ -29,19 +28,13 @@ abstract class SidepanelSharpForm extends SharpForm
     function buildFormFields()
     {
         $this->addField(
-            SharpFormAutocompleteField::make("layout", "local")
-                ->setResultItemInlineTemplate("{{label}}")
-                ->setListItemInlineTemplate("{{label}}")
-                ->setLocalValues([$this->layoutKey() => $this->layoutLabel()])
+            SharpFormTextField::make("layout_label")
                 ->setReadOnly()
                 ->setLabel("Type de panneau")
         )->addField(
-            SharpFormAutocompleteField::make("container", "local")
-                ->setResultItemInlineTemplate("{{label}}")
-                ->setListItemInlineTemplate("{{label}}")
-                ->setLocalValues([SharpGumSessionValue::get("sidepanel_page") => Page::find(SharpGumSessionValue::get("sidepanel_page"))->title])
+            SharpFormTextField::make("container_label")
                 ->setReadOnly()
-                ->setLabel("Page")
+                ->setLabel("Conteneur")
         );
 
         if($this->hasField("visual")) {
@@ -110,8 +103,8 @@ abstract class SidepanelSharpForm extends SharpForm
     function buildFormLayout()
     {
         $this->addColumn(6, function (FormLayoutColumn $column) {
-            $column->withSingleField("container")
-                ->withSingleField("layout");
+            $column->withSingleField("container_label")
+                ->withSingleField("layout_label");
 
             if($this->hasField("body_text")) {
                 $column->withSingleField("body_text");
@@ -150,20 +143,31 @@ abstract class SidepanelSharpForm extends SharpForm
         return $this
             ->setCustomTransformer('visual', FormUploadModelTransformer::class)
             ->setCustomTransformer('downloadableFile', FormUploadModelTransformer::class)
+            ->setCustomTransformer('container_label', function($value, $sidepanel) {
+                return $sidepanel->container->title;
+            })
+            ->setCustomTransformer('layout_label', function() {
+                return $this->layoutLabel();
+            })
             ->transform(Sidepanel::with("visual", "downloadableFile", "container")->findOrFail($id));
     }
 
+    /**
+     * @return array
+     */
     public function create(): array
     {
-        $sidepanel = new Sidepanel([
-            "layout" => $this->layoutKey()
-        ]);
-
-        $sidepanel->container()->associate(
-            Page::find(SharpGumSessionValue::get("sidepanel_page"))
-        );
-
-        return $this->transform($sidepanel);
+        return $this
+            ->setCustomTransformer('layout_label', function() {
+                return $this->layoutLabel();
+            })
+            ->setCustomTransformer('container_label', function() {
+                return call_user_func([
+                    SharpGumSessionValue::get("sidepanel_container_type"),
+                    "find"
+                ], $this->containerId())->title;
+            })
+            ->transform(new Sidepanel());
     }
 
     /**
@@ -175,7 +179,7 @@ abstract class SidepanelSharpForm extends SharpForm
     {
         $sidepanel = $id ? Sidepanel::findOrFail($id) : new Sidepanel();
 
-        $this->ignore("container")
+        $this->ignore(["container_label", "layout_label"])
             ->save($sidepanel, $this->cleanUpData($data));
 
         return $sidepanel->id;
@@ -215,7 +219,7 @@ abstract class SidepanelSharpForm extends SharpForm
      */
     private function hasField($field): bool
     {
-        return in_array($field, $this->configFields);
+        return in_array($field, $this->sidepanelFields());
     }
 
     /**
@@ -226,8 +230,8 @@ abstract class SidepanelSharpForm extends SharpForm
     {
         if($this->context()->isCreation()) {
             $data["layout"] = $this->layoutKey();
-            $data["container_id"] = SharpGumSessionValue::get("sidepanel_page");
-            $data["container_type"] = Page::class;
+            $data["container_id"] = $this->containerId();
+            $data["container_type"] = SharpGumSessionValue::get("sidepanel_container_type");
         }
 
         return $data;
@@ -239,5 +243,15 @@ abstract class SidepanelSharpForm extends SharpForm
     protected function getDownloadableFileFilter()
     {
         return ["pdf","zip"];
+    }
+
+    /**
+     * @return string
+     */
+    protected function containerId()
+    {
+        return SharpGumSessionValue::get("sidepanel_container_type") == Page::class
+            ? SharpGumSessionValue::get("page")
+            : SharpGumSessionValue::get("section");
     }
 }

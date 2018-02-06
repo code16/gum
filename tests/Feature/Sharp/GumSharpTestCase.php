@@ -58,7 +58,7 @@ class GumSharpTestCase extends TestCase
                         ]
                     ],
                     "sidepanels" => [
-                        "list" => \Code16\Gum\Sharp\Sidepanels\AcaciaSidepanelSharpList::class,
+                        "list" => \Code16\Gum\Sharp\Sidepanels\AcaciaPageSidepanelSharpList::class,
                         "forms" => [
                         ]
                     ],
