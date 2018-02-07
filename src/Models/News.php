@@ -10,10 +10,17 @@ class News extends Model
     protected $table = "news";
     protected $dates = ["created_at", "updated_at", "published_at"];
 
-    public function mainVisual()
+    public function visual()
     {
         return $this->morphOne(Media::class, "model")
-            ->where("model_key", "mainVisual");
+            ->where("model_key", "visual");
+    }
+
+    public function attachments()
+    {
+        return $this->morphMany(Media::class, "model")
+            ->where("model_key", "attachments")
+            ->orderBy("order");
     }
 
     public function tags()
@@ -24,7 +31,7 @@ class News extends Model
 
     public function getDefaultAttributesFor($attribute)
     {
-        return in_array($attribute, ["mainVisual"])
+        return in_array($attribute, ["visual", "attachments"])
             ? ["model_key" => $attribute]
             : [];
     }
