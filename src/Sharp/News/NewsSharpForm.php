@@ -4,11 +4,13 @@ namespace Code16\Gum\Sharp\News;
 
 use Carbon\Carbon;
 use Code16\Gum\Models\News;
+use Code16\Gum\Models\Tag;
 use Code16\Sharp\Form\Eloquent\Transformers\FormUploadModelTransformer;
 use Code16\Sharp\Form\Eloquent\WithSharpFormEloquentUpdater;
 use Code16\Sharp\Form\Fields\SharpFormDateField;
 use Code16\Sharp\Form\Fields\SharpFormListField;
 use Code16\Sharp\Form\Fields\SharpFormMarkdownField;
+use Code16\Sharp\Form\Fields\SharpFormTagsField;
 use Code16\Sharp\Form\Fields\SharpFormTextareaField;
 use Code16\Sharp\Form\Fields\SharpFormTextField;
 use Code16\Sharp\Form\Fields\SharpFormUploadField;
@@ -82,13 +84,15 @@ class NewsSharpForm extends SharpForm
             );
         }
 
-//        )->addField(
-//            SharpFormTagsField::make("tags", Tag::ofType(News::class)->get()->pluck("name", "id")->all())
-//                ->setCreatable()
-//                ->setCreateAttribute("name")
-//                ->setCreateText("Nouveau : ")
-//                ->setLabel("Étiquettes")
-//        )
+        if($this->hasField("tags")) {
+            $this->addField(
+                SharpFormTagsField::make("tags", Tag::orderBy("name")->pluck("name", "id")->toArray())
+                    ->setCreatable()
+                    ->setCreateAttribute("name")
+                    ->setCreateText("Nouveau :")
+                    ->setLabel("Tags")
+            );
+        }
 
         if($this->hasField("attachments")) {
             $attachments = SharpFormListField::make("attachments")
@@ -124,6 +128,10 @@ class NewsSharpForm extends SharpForm
     {
         $this->addColumn(6, function (FormLayoutColumn $column) {
             $column->withSingleField("published_at");
+
+            if($this->hasField("tags")) {
+                $column->withSingleField("tags");
+            }
 
             if($this->hasField("title")) {
                 $column->withSingleField("title");
@@ -177,7 +185,7 @@ class NewsSharpForm extends SharpForm
         return $this
             ->setCustomTransformer('visual', FormUploadModelTransformer::class)
             ->setCustomTransformer('attachments', FormUploadModelTransformer::class)
-            ->transform(News::with("visual", "attachments")->findOrFail($id));
+            ->transform(News::with("visual", "attachments", "tags")->findOrFail($id));
     }
 
     /**
@@ -218,7 +226,7 @@ class NewsSharpForm extends SharpForm
     protected function newsFields(): array
     {
         return [
-            "visual", "legend", "title", "surtitle",
+            "visual", "legend", "title", "surtitle", "tags",
             "body_text", "heading_text", "attachments"
         ];
     }

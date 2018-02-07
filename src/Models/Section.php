@@ -82,4 +82,9 @@ class Section extends Model
         return $this->morphMany(Sidepanel::class, "container")
             ->orderBy("order");
     }
+
+    public function tags()
+    {
+        return $this->morphToMany(Tag::class, "taggable");
+    }
 }

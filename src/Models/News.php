@@ -25,8 +25,7 @@ class News extends Model
 
     public function tags()
     {
-        return $this->morphMany(Tag::class, "model")
-            ->orderBy("order");
+        return $this->morphToMany(Tag::class, "taggable");
     }
 
     public function getDefaultAttributesFor($attribute)

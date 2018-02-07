@@ -3,8 +3,11 @@
 namespace Code16\Gum\Sharp\Sections;
 
 use Code16\Gum\Models\Section;
+use Code16\Gum\Models\Tag;
 use Code16\Gum\Sharp\Utils\SharpGumSessionValue;
 use Code16\Sharp\Form\Eloquent\WithSharpFormEloquentUpdater;
+use Code16\Sharp\Form\Fields\SharpFormCheckField;
+use Code16\Sharp\Form\Fields\SharpFormTagsField;
 use Code16\Sharp\Form\Fields\SharpFormTextareaField;
 use Code16\Sharp\Form\Fields\SharpFormTextField;
 use Code16\Sharp\Form\Fields\SharpFormWysiwygField;
@@ -49,14 +52,14 @@ class SectionSharpForm extends SharpForm
                 ->setLabel("URL")
                 ->setHelpMessage("Il s'agit de l'URL (slug) de la section ; laissez ce champ vide pour remplissage automatique à partir du titre. Ne peut contenir que des lettres, des chiffres et des tirets.Attention, si vous modifiez cette valeur, les URLs du site seront modifiées.")
         );
-//        )->addField(
-//            SharpFormAutocompleteField::make("news_tag", "local")
-//                ->setLabel("Actualités concernées")
-//                ->setLocalValues(Tag::ofType(News::class)->get()->pluck("name", "id")->all())
-//                ->setResultItemInlineTemplate("{{label}}")
-//                ->setListItemInlineTemplate("{{label}}")
-//                ->addConditionalDisplay("layout", "news_banner")
-//        );
+
+        $this->addField(
+            SharpFormCheckField::make("has_news", "Propose des actualités")
+        )->addField(
+            SharpFormTagsField::make("tags", Tag::orderBy("name")->pluck("name", "id")->toArray())
+                ->addConditionalDisplay("has_news")
+                ->setLabel("Tags concernés")
+        );
     }
 
     /**
@@ -74,7 +77,10 @@ class SectionSharpForm extends SharpForm
                 ->withSingleField("style_key");
 
         })->addColumn(6, function (FormLayoutColumn $column) {
-            $column->withSingleField("heading_text");
+            $column
+                ->withSingleField("heading_text")
+                ->withSingleField("has_news")
+                ->withSingleField("tags");
         });
     }
 
@@ -86,7 +92,7 @@ class SectionSharpForm extends SharpForm
      */
     function find($id): array
     {
-        return $this->transform(Section::findOrFail($id));
+        return $this->transform(Section::with("tags")->findOrFail($id));
     }
 
     /**

@@ -24,9 +24,9 @@ class NewsSharpList extends SharpEntityList
         )->addDataContainer(
             EntityListDataContainer::make("title")
                 ->setLabel("Titre")
-//        )->addDataContainer(
-//            EntityListDataContainer::make("tags")
-//                ->setLabel("Étiquettes")
+        )->addDataContainer(
+            EntityListDataContainer::make("tags")
+                ->setLabel("Tags")
         )->addDataContainer(
             EntityListDataContainer::make("heading_text")
                 ->setLabel("Chapô")
@@ -45,7 +45,7 @@ class NewsSharpList extends SharpEntityList
     {
         $this->addColumn("visual", 2, 3)
             ->addColumn("title", 2, 5)
-//            ->addColumnLarge("tags", 2)
+            ->addColumnLarge("tags", 2)
             ->addColumnLarge("heading_text", 4)
             ->addColumn("published_at", 2, 4);
     }
@@ -69,7 +69,7 @@ class NewsSharpList extends SharpEntityList
      */
     function getListData(EntityListQueryParams $params)
     {
-        $news = News::with("visual")
+        $news = News::with("visual", "tags")
             ->orderBy("published_at", "desc");
 
         if($params->specificIds()) {
@@ -78,9 +78,9 @@ class NewsSharpList extends SharpEntityList
 
         return $this
             ->setCustomTransformer("visual", new SharpUploadModelAttributeTransformer(200))
-//            ->setCustomTransformer("tags", function($value, $news) {
-//                return implode(", ", $news->tags->pluck("name")->all());
-//            })
+            ->setCustomTransformer("tags", function($value, $news) {
+                return implode(", ", $news->tags->pluck("name")->all());
+            })
             ->setCustomTransformer("published_at", function($value, $news) {
                 $date = $news->published_at->formatLocalized("%e %b %Y à %Hh%M");
 
