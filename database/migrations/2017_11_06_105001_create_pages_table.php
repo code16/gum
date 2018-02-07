@@ -19,8 +19,6 @@ class CreatePagesTable extends Migration
             $table->string("title");
             $table->string("short_title")->nullable();
             $table->text("body_text")->nullable();
-            $table->boolean("is_standalone")->default(false);
-            $table->boolean("has_news")->default(false);
 
             $table->unsignedSmallInteger('pagegroup_order')->default(100);
             $table->string('pagegroup_id')->nullable();

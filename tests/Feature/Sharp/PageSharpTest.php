@@ -79,7 +79,7 @@ class PageSharpTest extends GumSharpTestCase
         ]))->assertStatus(422);
 
         $this->storeSharpForm("pages", $this->getFormValues([
-            "body_text" => ["text" => ""]
+            "body_text" => ""
         ]))->assertStatus(422);
     }
 
