@@ -57,8 +57,7 @@ class NewsSharpList extends SharpEntityList
      */
     function buildListConfig()
     {
-//        $this
-//            ->setEntityState("visibility", PageBlocEntityState::class);
+        $this->setEntityState("visibility", NewsVisibilityStateHandler::class);
     }
 
     /**

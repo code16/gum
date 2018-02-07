@@ -60,6 +60,15 @@ class News extends Model
         return $query->orderBy("published_at", "desc");
     }
 
+    /**
+     * @param Builder $query
+     * @return Builder
+     */
+    public function scopeOnline(Builder $query)
+    {
+        return $query->where("visibility", "ONLINE");
+    }
+
     public function visual()
     {
         return $this->morphOne(Media::class, "model")
@@ -83,5 +92,29 @@ class News extends Model
         return in_array($attribute, ["visual", "attachments"])
             ? ["model_key" => $attribute]
             : [];
+    }
+
+    /**
+     * @return bool
+     */
+    public function isVisible(): bool
+    {
+        return $this->visibility == "ONLINE";
+    }
+
+    /**
+     * @return bool
+     */
+    public function isPublished(): bool
+    {
+        return $this->published_at <= Carbon::now();
+    }
+
+    /**
+     * @return string
+     */
+    public function getUrlAttribute()
+    {
+        return route("news.article", ["news" => $this->id, "slug" => str_slug($this->title)]);
     }
 }
