@@ -24,10 +24,12 @@ class News extends Model
             return $query;
         }
 
-        return $query->join('taggables', function ($join) {
-            $join->on('news.id', '=', 'taggables.taggable_id')
-                ->where('taggables.taggable_type', News::class);
-        })->whereIn("taggables.tag_id", $tags->pluck("id"));
+        return $query->select("news.*")
+            ->join('taggables', function ($join) {
+                $join->on('news.id', '=', 'taggables.taggable_id')
+                    ->where('taggables.taggable_type', News::class);
+            })
+            ->whereIn("taggables.tag_id", $tags->pluck("id"));
     }
 
     /**
