@@ -24,8 +24,8 @@ class NewsSharpValidator extends FormRequest
     public function rules()
     {
         return [
-            "title" => "required",
-            "published_at" => 'required|date',
+            'title' => 'required',
+            'published_at' => 'required|date',
         ];
     }
 }
