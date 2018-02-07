@@ -2,6 +2,7 @@
 
 namespace Code16\Gum\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
@@ -12,7 +13,12 @@ class News extends Model
     protected $table = "news";
     protected $dates = ["created_at", "updated_at", "published_at"];
 
-    public function scopeForTags($query, Collection $tags = null)
+    /**
+     * @param Builder $query
+     * @param Collection|null $tags
+     * @return Builder
+     */
+    public function scopeForTags(Builder $query, Collection $tags = null)
     {
         if(!$tags) {
             return $query;
@@ -24,12 +30,30 @@ class News extends Model
         })->whereIn("taggables.tag_id", $tags->pluck("id"));
     }
 
-    public function scopePublished($query)
+    /**
+     * @param Builder $query
+     * @param string $tagName
+     * @return Builder
+     */
+    public function scopeForTag(Builder $query, string $tagName)
+    {
+        return $this->scopeForTags($query, collect([Tag::where("name", $tagName)->first()]));
+    }
+
+    /**
+     * @param Builder $query
+     * @return Builder
+     */
+    public function scopePublished(Builder $query)
     {
         return $query->where("published_at", "<=", Carbon::now());
     }
 
-    public function scopeNewest($query)
+    /**
+     * @param Builder $query
+     * @return Builder
+     */
+    public function scopeNewest(Builder $query)
     {
         return $query->orderBy("published_at", "desc");
     }
