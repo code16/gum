@@ -2,7 +2,7 @@
 
 namespace Code16\Gum\Models\Utils;
 
-use Webpatser\Uuid\Uuid;
+use Illuminate\Support\Str;
 
 trait WithUuid
 {
@@ -15,7 +15,7 @@ trait WithUuid
         parent::boot();
 
         static::creating(function ($model) {
-            $model->{$model->getKeyName()} = Uuid::generate()->string;
+            $model->{$model->getKeyName()} = (string) Str::orderedUuid();
         });
     }
 }
