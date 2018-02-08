@@ -57,7 +57,9 @@ class NewsSharpList extends SharpEntityList
      */
     function buildListConfig()
     {
-        $this->setEntityState("visibility", NewsVisibilityStateHandler::class);
+        $this
+            ->setEntityState("visibility", NewsVisibilityStateHandler::class)
+            ->addFilter("tags", NewsTagFilterHandler::class);
     }
 
     /**
@@ -68,11 +70,23 @@ class NewsSharpList extends SharpEntityList
      */
     function getListData(EntityListQueryParams $params)
     {
-        $news = News::with("visual", "tags")
+        $news = News::select("news.*")
+            ->with("visual", "tags")
             ->orderBy("published_at", "desc");
 
         if($params->specificIds()) {
             $news->whereIn("id", $params->specificIds());
+        }
+
+        if($tags = (array)$params->filterFor("tags")) {
+            foreach($tags as $tag) {
+                $news->whereExists(function ($query) use ($tag) {
+                    return $query->from("taggables")
+                        ->whereRaw("taggables.taggable_id = news.id")
+                        ->where("taggables.taggable_type", News::class)
+                        ->where("tag_id", $tag);
+                });
+            }
         }
 
         return $this
