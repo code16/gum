@@ -29,7 +29,7 @@ class NewsSharpList extends SharpEntityList
                 ->setLabel("Tags")
         )->addDataContainer(
             EntityListDataContainer::make("heading_text")
-                ->setLabel("Chapô")
+                ->setLabel("Chapeau")
         )->addDataContainer(
             EntityListDataContainer::make("published_at")
                 ->setLabel("Mise en ligne")
@@ -43,11 +43,11 @@ class NewsSharpList extends SharpEntityList
      */
     function buildListLayout()
     {
-        $this->addColumn("visual", 2, 3)
-            ->addColumn("title", 2, 5)
+        $this->addColumnLarge("visual", 1)
+            ->addColumn("title", 3, 7)
             ->addColumnLarge("tags", 2)
             ->addColumnLarge("heading_text", 3)
-            ->addColumn("published_at", 3, 4);
+            ->addColumn("published_at", 3, 5);
     }
 
     /**
@@ -58,6 +58,8 @@ class NewsSharpList extends SharpEntityList
     function buildListConfig()
     {
         $this
+            ->setSearchable()
+            ->setPaginated()
             ->setEntityState("visibility", NewsVisibilityStateHandler::class)
             ->addFilter("tags", NewsTagFilterHandler::class);
     }
@@ -89,11 +91,28 @@ class NewsSharpList extends SharpEntityList
             }
         }
 
+        if($params->hasSearch()) {
+            foreach ($params->searchWords() as $word) {
+                $news->where(function ($query) use ($word) {
+                    $query->orWhere("news.title", "like", $word)
+                        ->orWhere('news.heading_text', 'like', $word);
+                });
+            }
+        }
+
         return $this
             ->setCustomTransformer("visual", new SharpUploadModelAttributeTransformer(200))
+
+            ->setCustomTransformer("title", function($value, $news) {
+                return $news->surtitle
+                    ? sprintf("<small>%s</small><br>%s", $news->surtitle, $news->title)
+                    : $news->title;
+            })
+
             ->setCustomTransformer("tags", function($value, $news) {
                 return implode(", ", $news->tags->pluck("name")->all());
             })
+
             ->setCustomTransformer("published_at", function($value, $news) {
                 $date = $news->published_at->formatLocalized("%e %b %Y à %Hh%M");
 
@@ -103,6 +122,7 @@ class NewsSharpList extends SharpEntityList
 
                 return "<span style='color:gray'>Publié depuis le<br>$date</span>";
             })
-            ->transform($news->get());
+
+            ->transform($news->paginate(30));
     }
 }
