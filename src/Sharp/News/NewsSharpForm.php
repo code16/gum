@@ -199,6 +199,8 @@ class NewsSharpForm extends SharpForm
 
         $this->save($news, $data);
 
+        $this->deleteOrphanTags();
+
         return $news->id;
     }
 
@@ -254,5 +256,19 @@ class NewsSharpForm extends SharpForm
     private function hasField($field): bool
     {
         return in_array($field, $this->newsFields());
+    }
+
+    protected function deleteOrphanTags()
+    {
+        $tags = Tag::whereNotIn("id", function($query) {
+            return $query->select("tag_id")
+                ->from("taggables");
+        });
+
+        if(config('gum.domains')) {
+            $tags->whereNotIn("name", array_keys(config('gum.domains')));
+        }
+
+        $tags->delete();
     }
 }
