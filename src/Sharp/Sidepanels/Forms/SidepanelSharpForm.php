@@ -93,6 +93,10 @@ abstract class SidepanelSharpForm extends SharpForm
                     ->setLabel("Lien")
             );
         }
+
+        foreach($this->additionalFields() as $field) {
+            $this->addField($field);
+        }
     }
 
     /**
@@ -129,6 +133,10 @@ abstract class SidepanelSharpForm extends SharpForm
                 $column->withSingleField("downloadableFile")
                     ->withSingleField("downloadableFile:title");
             }
+
+            foreach ($this->additionalFields() as $key => $field) {
+                $column->withSingleField($key);
+            }
         });
     }
 
@@ -140,7 +148,7 @@ abstract class SidepanelSharpForm extends SharpForm
      */
     function find($id): array
     {
-        return $this
+        $this
             ->setCustomTransformer('visual', FormUploadModelTransformer::class)
             ->setCustomTransformer('downloadableFile', FormUploadModelTransformer::class)
             ->setCustomTransformer('container_label', function($value, $sidepanel) {
@@ -148,8 +156,13 @@ abstract class SidepanelSharpForm extends SharpForm
             })
             ->setCustomTransformer('layout_label', function() {
                 return $this->layoutLabel();
-            })
-            ->transform(Sidepanel::with("visual", "downloadableFile", "container")->findOrFail($id));
+            });
+
+        foreach($this->additionalTransformers() as $attribute => $transformer) {
+            $this->setCustomTransformer($attribute, $transformer);
+        }
+
+        return $this->transform(Sidepanel::with("visual", "downloadableFile", "container")->findOrFail($id));
     }
 
     /**
@@ -212,6 +225,22 @@ abstract class SidepanelSharpForm extends SharpForm
      * @return string
      */
     abstract protected function layoutLabel(): string;
+
+    /**
+     * @return array
+     */
+    protected function additionalFields(): array
+    {
+        return [];
+    }
+
+    /**
+     * @return array
+     */
+    protected function additionalTransformers(): array
+    {
+        return [];
+    }
 
     /**
      * @param $field

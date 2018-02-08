@@ -19,6 +19,7 @@ class CreateSidepanelsTable extends Migration
             $table->string('link')->nullable();
             $table->text('body_text')->nullable();
             $table->unsignedSmallInteger('order')->default(100);
+            $table->text('custom_properties')->nullable();
 
             $table->string("container_id");
             $table->string("container_type");
