@@ -19,6 +19,7 @@ class CreateNewsTable extends Migration
             $table->string('surtitle')->nullable();
             $table->text('heading_text')->nullable();
             $table->text('body_text')->nullable();
+            $table->string('category_label')->nullable();
             $table->dateTime('published_at');
             $table->string('visibility')->default('OFFLINE');
 

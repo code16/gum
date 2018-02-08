@@ -9,11 +9,12 @@ use Code16\Sharp\Form\Eloquent\Transformers\FormUploadModelTransformer;
 use Code16\Sharp\Form\Eloquent\WithSharpFormEloquentUpdater;
 use Code16\Sharp\Form\Fields\SharpFormDateField;
 use Code16\Sharp\Form\Fields\SharpFormListField;
-use Code16\Sharp\Form\Fields\SharpFormMarkdownField;
+use Code16\Sharp\Form\Fields\SharpFormSelectField;
 use Code16\Sharp\Form\Fields\SharpFormTagsField;
 use Code16\Sharp\Form\Fields\SharpFormTextareaField;
 use Code16\Sharp\Form\Fields\SharpFormTextField;
 use Code16\Sharp\Form\Fields\SharpFormUploadField;
+use Code16\Sharp\Form\Fields\SharpFormWysiwygField;
 use Code16\Sharp\Form\Layout\FormLayoutColumn;
 use Code16\Sharp\Form\Layout\FormLayoutFieldset;
 use Code16\Sharp\Form\SharpForm;
@@ -71,7 +72,7 @@ class NewsSharpForm extends SharpForm
 
         if($this->hasField("heading_text")) {
             $this->addField(
-                SharpFormMarkdownField::make("heading_text")
+                SharpFormWysiwygField::make("heading_text")
                     ->setLabel("Chapeau")
                     ->setHeight(200)
             );
@@ -79,9 +80,26 @@ class NewsSharpForm extends SharpForm
 
         if($this->hasField("body_text")) {
             $this->addField(
-                SharpFormMarkdownField::make("body_text")
+                SharpFormWysiwygField::make("body_text")
                     ->setLabel("Texte")
             );
+        }
+
+        if($this->hasField("category")) {
+            if($this->categoryLabels()) {
+                $this->addField(
+                    SharpFormSelectField::make("category_label", $this->categoryLabels())
+                        ->setLabel("Catégorie")
+                        ->setDisplayAsDropdown()
+                        ->setClearable()
+                );
+
+            } else {
+                $this->addField(
+                    SharpFormTextField::make("category_label")
+                        ->setLabel("Catégorie")
+                );
+            }
         }
 
         if($this->hasField("tags")) {
@@ -133,6 +151,10 @@ class NewsSharpForm extends SharpForm
                 $column->withSingleField("tags");
             }
 
+            if($this->hasField("category")) {
+                $column->withSingleField("category_label");
+            }
+
             if($this->hasField("title")) {
                 $column->withSingleField("title");
             }
@@ -152,11 +174,11 @@ class NewsSharpForm extends SharpForm
                 });
             }
 
+        })->addColumn(6, function (FormLayoutColumn $column) {
             if($this->hasField("heading_text")) {
                 $column->withSingleField("heading_text");
             }
 
-        })->addColumn(6, function (FormLayoutColumn $column) {
             if($this->hasField("body_text")) {
                 $column->withSingleField("body_text");
             }
@@ -245,6 +267,14 @@ class NewsSharpForm extends SharpForm
      * @return array
      */
     protected function additionalAttachmentItemFields(): array
+    {
+        return [];
+    }
+
+    /**
+     * @return array
+     */
+    protected function categoryLabels(): array
     {
         return [];
     }

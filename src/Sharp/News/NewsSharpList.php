@@ -46,8 +46,8 @@ class NewsSharpList extends SharpEntityList
         $this->addColumn("visual", 2, 3)
             ->addColumn("title", 2, 5)
             ->addColumnLarge("tags", 2)
-            ->addColumnLarge("heading_text", 4)
-            ->addColumn("published_at", 2, 4);
+            ->addColumnLarge("heading_text", 3)
+            ->addColumn("published_at", 3, 4);
     }
 
     /**
@@ -84,10 +84,10 @@ class NewsSharpList extends SharpEntityList
                 $date = $news->published_at->formatLocalized("%e %b %Y à %Hh%M");
 
                 if($news->published_at->isFuture()) {
-                    return "Publié à partir du $date";
+                    return "Publié à partir du<br>$date";
                 }
 
-                return "Publié depuis le $date";
+                return "<span style='color:gray'>Publié depuis le<br>$date</span>";
             })
             ->transform($news->get());
     }
