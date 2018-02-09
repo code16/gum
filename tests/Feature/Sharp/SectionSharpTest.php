@@ -51,8 +51,18 @@ class SectionSharpTest extends GumSharpTestCase
             "title" => ""
         ]))->assertStatus(422);
 
+        app()['config']->set([
+            "gum" => [
+                "styles" => ["style" => "Style"]
+            ]
+        ]);
+
         $this->storeSharpForm("sections", $this->getFormValues([
             "style_key" => ""
+        ]))->assertStatus(422);
+
+        $this->storeSharpForm("sections", $this->getFormValues([
+            "style_key" => "pp"
         ]))->assertStatus(422);
     }
 
@@ -116,7 +126,6 @@ class SectionSharpTest extends GumSharpTestCase
             "title" => "title",
             "short_title" => "short",
             "heading_text" => ["text" => "heading"],
-            "style_key" => "style",
             "slug" => "slug",
         ], $formValues);
     }

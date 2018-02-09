@@ -6,6 +6,7 @@ use Code16\Gum\Models\Page;
 use Code16\Gum\Models\Pagegroup;
 use Code16\Gum\Models\Section;
 use Code16\Gum\Models\Tileblock;
+use Code16\Gum\Sharp\Utils\SharpFormWithStyleKey;
 use Code16\Gum\Sharp\Utils\SharpGumSessionValue;
 use Code16\Sharp\Form\Eloquent\Transformers\FormUploadModelTransformer;
 use Code16\Sharp\Form\Eloquent\WithSharpFormEloquentUpdater;
@@ -24,7 +25,7 @@ use Code16\Sharp\Http\WithSharpFormContext;
 
 abstract class TileblockSharpForm extends SharpForm
 {
-    use WithSharpFormEloquentUpdater, WithSharpFormContext;
+    use WithSharpFormEloquentUpdater, WithSharpFormContext, SharpFormWithStyleKey;
 
     /**
      * Build form fields using ->addField()
@@ -42,10 +43,6 @@ abstract class TileblockSharpForm extends SharpForm
                 ->setReadOnly()
                 ->setLabel("Section")
         )->addField(
-            SharpFormTextField::make("style_key")
-                ->setLabel("Thème (TODO SELECT)")
-                ->setHelpMessage("Laisser vide à moins de ne pas vouloir reprendre le thème de la section dans laquelle se trouvent les tuiles")
-        )->addField(
             SharpFormDateField::make("published_at")
                 ->setMondayFirst()
                 ->setHasTime(true)
@@ -58,13 +55,6 @@ abstract class TileblockSharpForm extends SharpForm
                 ->setMondayFirst()
                 ->setHasTime(true)
                 ->setDisplayFormat("DD/MM/YYYY HH:mm")
-//        )->addField(
-//            SharpFormAutocompleteField::make("news_tag", "local")
-//                ->setLabel("Actualités concernées")
-//                ->setLocalValues(Tag::ofType(News::class)->get()->pluck("name", "id")->all())
-//                ->setResultItemInlineTemplate("{{label}}")
-//                ->setListItemInlineTemplate("{{label}}")
-//                ->addConditionalDisplay("layout", "news_banner")
         )->addField(
             $this->createTilesListField()
         );
@@ -75,6 +65,16 @@ abstract class TileblockSharpForm extends SharpForm
                     ->setDisplayAsDropdown()
                     ->setClearable()
                     ->setLabel("Variante")
+            );
+        }
+
+        if($this->hasStylesDefined()) {
+            $this->addField(
+                SharpFormSelectField::make("style_key", $this->stylesDefined())
+                    ->setLabel("Thème")
+                    ->setClearable()
+                    ->setDisplayAsDropdown()
+                    ->setHelpMessage("Laisser vide à moins de ne pas vouloir reprendre le thème de la section dans laquelle se trouvent les tuiles")
             );
         }
     }
@@ -94,7 +94,9 @@ abstract class TileblockSharpForm extends SharpForm
                 $column->withSingleField("layout_variant");
             }
 
-            $column->withSingleField("style_key");
+            if($this->hasStylesDefined()) {
+                $column->withSingleField("style_key");
+            }
 
             $column->withFieldset("Date de mise en ligne", function(FormLayoutFieldset $fieldset) {
                 $fieldset->withSingleField("published_at")

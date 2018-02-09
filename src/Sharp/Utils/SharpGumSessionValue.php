@@ -47,6 +47,11 @@ class SharpGumSessionValue
     public static function getDomain()
     {
         $domains = collect(config("gum.domains"));
+
+        if(!$domains) {
+            return null;
+        }
+
         $domain = self::get("domain");
 
         if(!$domain || !$domains->keys()->search($domain)) {

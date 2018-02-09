@@ -7,6 +7,17 @@ use Code16\Gum\Models\Section;
 class RootSectionSharpTest extends GumSharpTestCase
 {
 
+    protected function getEnvironmentSetUp($app)
+    {
+        parent::getEnvironmentSetUp($app);
+
+        $app['config']->set([
+            "gum" => [
+                "styles" => ["style" => "Style"]
+            ]
+        ]);
+    }
+
     /** @test */
     function we_can_update_a_root_section()
     {

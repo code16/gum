@@ -111,6 +111,17 @@ class News extends Model
     }
 
     /**
+     * @param string|null $domainTagName
+     * @return bool
+     */
+    public function hasDomainTag(string $domainTagName = null)
+    {
+        $domainTagName = $domainTagName ?: domain();
+
+        return $this->tags()->where("name", $domainTagName)->count() == 1;
+    }
+
+    /**
      * @return string
      */
     public function getUrlAttribute()
