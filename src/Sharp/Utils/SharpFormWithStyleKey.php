@@ -9,7 +9,7 @@ trait SharpFormWithStyleKey
      */
     protected function hasStylesDefined(): bool
     {
-        return !!sizeof($this->stylesDefined());
+        return $this->stylesDefined() && sizeof($this->stylesDefined());
     }
 
     /**
