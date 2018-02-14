@@ -2,15 +2,17 @@
 
 namespace Code16\Gum\Sharp\Sections;
 
+use Closure;
 use Code16\Gum\Models\Section;
 use Code16\Gum\Sharp\Utils\DomainFilter;
+use Code16\Gum\Sharp\Utils\GumSharpList;
 use Code16\Gum\Sharp\Utils\SharpGumSessionValue;
 use Code16\Gum\Sharp\Utils\UrlsCustomTransformer;
 use Code16\Sharp\EntityList\Containers\EntityListDataContainer;
 use Code16\Sharp\EntityList\EntityListQueryParams;
-use Code16\Sharp\EntityList\SharpEntityList;
+use Code16\Sharp\Utils\Transformers\SharpAttributeTransformer;
 
-class RootSectionSharpList extends SharpEntityList
+class RootSectionSharpList extends GumSharpList
 {
 
     /**
@@ -66,7 +68,7 @@ class RootSectionSharpList extends SharpEntityList
     function getListData(EntityListQueryParams $params)
     {
         $sections = Section::domain(SharpGumSessionValue::getDomain())
-            ->with("url")
+            ->with($this->requestWiths())
             ->orderBy('root_menu_order')
             ->where("is_root", true)
             ->where("slug", "!=", "");
@@ -75,11 +77,35 @@ class RootSectionSharpList extends SharpEntityList
             $sections->whereIn("id", $params->specificIds());
         }
 
-        return $this
-            ->setCustomTransformer("urls", UrlsCustomTransformer::class)
-            ->setCustomTransformer("visibility", function($value, Section $section) {
+        $this->applyCustomTransformers();
+
+        return $this->transform($sections->get());
+    }
+
+    /**
+     * @return array
+     */
+    protected function requestWiths(): array
+    {
+        return ["url"];
+    }
+
+    /**
+     * @param string $attribute
+     * @return SharpAttributeTransformer|string|Closure
+     */
+    protected function customTransformerFor(string $attribute)
+    {
+        if($attribute == "urls") {
+            return UrlsCustomTransformer::class;
+        }
+
+        if($attribute == "visibility") {
+            return function($value, Section $section) {
                 return $section->url->visibility;
-            })
-            ->transform($sections->get());
+            };
+        }
+
+        return null;
     }
 }

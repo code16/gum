@@ -2,18 +2,20 @@
 
 namespace Code16\Gum\Sharp\Pages;
 
+use Closure;
 use Code16\Gum\Models\Page;
 use Code16\Gum\Models\Section;
 use Code16\Gum\Sharp\Utils\DomainFilter;
+use Code16\Gum\Sharp\Utils\GumSharpList;
 use Code16\Gum\Sharp\Utils\SectionRootFilter;
 use Code16\Gum\Sharp\Utils\SharpGumSessionValue;
 use Code16\Gum\Sharp\Utils\UrlsCustomTransformer;
 use Code16\Sharp\EntityList\Containers\EntityListDataContainer;
 use Code16\Sharp\EntityList\Eloquent\Transformers\SharpUploadModelAttributeTransformer;
 use Code16\Sharp\EntityList\EntityListQueryParams;
-use Code16\Sharp\EntityList\SharpEntityList;
+use Code16\Sharp\Utils\Transformers\SharpAttributeTransformer;
 
-class PageSharpList extends SharpEntityList
+class PageSharpList extends GumSharpList
 {
 
     /**
@@ -78,7 +80,7 @@ class PageSharpList extends SharpEntityList
     function getListData(EntityListQueryParams $params)
     {
         $pages = Page::select("pages.*")
-            ->with("urls", "visual", "pagegroup");
+            ->with($this->requestWiths());
 
         $rootId = $params->filterFor("root");
 
@@ -109,9 +111,33 @@ class PageSharpList extends SharpEntityList
             ->flatten()
             ->values();
 
-        return $this
-            ->setCustomTransformer("visual", new SharpUploadModelAttributeTransformer(200))
-            ->setCustomTransformer("urls", UrlsCustomTransformer::class)
-            ->transform($pages);
+        $this->applyCustomTransformers();
+
+        return $this->transform($pages);
+    }
+
+    /**
+     * @return array
+     */
+    protected function requestWiths(): array
+    {
+        return ["urls", "visual", "pagegroup"];
+    }
+
+    /**
+     * @param string $attribute
+     * @return SharpAttributeTransformer|string|Closure
+     */
+    protected function customTransformerFor(string $attribute)
+    {
+        if($attribute == "visual") {
+            return new SharpUploadModelAttributeTransformer(200);
+        }
+
+        if($attribute == "urls") {
+            return UrlsCustomTransformer::class;
+        }
+
+        return null;
     }
 }

@@ -4,12 +4,12 @@ namespace Code16\Gum\Sharp\Sidepanels;
 
 use Code16\Gum\Models\Sidepanel;
 use Code16\Gum\Sharp\Utils\DomainFilter;
+use Code16\Gum\Sharp\Utils\GumSharpList;
 use Code16\Gum\Sharp\Utils\SharpGumSessionValue;
 use Code16\Sharp\EntityList\Containers\EntityListDataContainer;
 use Code16\Sharp\EntityList\EntityListQueryParams;
-use Code16\Sharp\EntityList\SharpEntityList;
 
-abstract class SidepanelSharpList extends SharpEntityList
+abstract class SidepanelSharpList extends GumSharpList
 {
 
     /**
@@ -72,36 +72,29 @@ abstract class SidepanelSharpList extends SharpEntityList
     {
         $sidepanels = Sidepanel::where("container_id", $params->filterFor("container"))
             ->where("container_type", $this->containerType())
+            ->with($this->requestWiths())
             ->orderBy("order");
 
-        return $this
-            ->setCustomTransformer("layout_label", function($value, $sidepanel) {
-                return $this->layoutCustomTransformer($sidepanel->layout, $sidepanel);
-            })
-            ->setCustomTransformer("content", function($value, $sidepanel) {
-                return $this->contentCustomTransformer($value, $sidepanel);
-            })
-            ->transform($sidepanels->get());
+        $this->applyCustomTransformers();
+
+        return $this->transform($sidepanels->get());
     }
 
     /**
-     * @param string $layout
-     * @param Sidepanel $sidepanel
-     * @return string
+     * @return array
      */
-    protected function layoutCustomTransformer(string $layout, Sidepanel $sidepanel)
+    protected function requestWiths(): array
     {
-        return $layout;
+        return [];
     }
 
     /**
-     * @param $content
-     * @param Sidepanel $sidepanel
-     * @return mixed
+     * @param string $attribute
+     * @return SharpAttributeTransformer|string|Closure
      */
-    protected function contentCustomTransformer($content, Sidepanel $sidepanel)
+    protected function customTransformerFor(string $attribute)
     {
-        return "";
+        return null;
     }
 
     /**

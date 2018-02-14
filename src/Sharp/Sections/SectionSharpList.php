@@ -2,16 +2,18 @@
 
 namespace Code16\Gum\Sharp\Sections;
 
+use Closure;
 use Code16\Gum\Models\Section;
 use Code16\Gum\Sharp\Utils\DomainFilter;
+use Code16\Gum\Sharp\Utils\GumSharpList;
 use Code16\Gum\Sharp\Utils\SectionRootFilter;
 use Code16\Gum\Sharp\Utils\SharpGumSessionValue;
 use Code16\Gum\Sharp\Utils\UrlsCustomTransformer;
 use Code16\Sharp\EntityList\Containers\EntityListDataContainer;
 use Code16\Sharp\EntityList\EntityListQueryParams;
-use Code16\Sharp\EntityList\SharpEntityList;
+use Code16\Sharp\Utils\Transformers\SharpAttributeTransformer;
 
-class SectionSharpList extends SharpEntityList
+class SectionSharpList extends GumSharpList
 {
 
     /**
@@ -68,6 +70,7 @@ class SectionSharpList extends SharpEntityList
     function getListData(EntityListQueryParams $params)
     {
         $sections = Section::domain(SharpGumSessionValue::getDomain())
+            ->with($this->requestWiths())
             ->orderBy('title')
             ->where("is_root", false);
 
@@ -93,8 +96,29 @@ class SectionSharpList extends SharpEntityList
             $sections->whereIn("id", $params->specificIds());
         }
 
-        return $this
-            ->setCustomTransformer("url", UrlsCustomTransformer::class)
-            ->transform($sections->get());
+        $this->applyCustomTransformers();
+
+        return $this->transform($sections->get());
+    }
+
+    /**
+     * @return array
+     */
+    protected function requestWiths(): array
+    {
+        return [];
+    }
+
+    /**
+     * @param string $attribute
+     * @return SharpAttributeTransformer|string|Closure
+     */
+    protected function customTransformerFor(string $attribute)
+    {
+        if($attribute == "url") {
+            return UrlsCustomTransformer::class;
+        }
+
+        return null;
     }
 }

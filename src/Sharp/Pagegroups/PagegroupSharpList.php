@@ -2,17 +2,19 @@
 
 namespace Code16\Gum\Sharp\Pagegroups;
 
+use Closure;
 use Code16\Gum\Models\Pagegroup;
 use Code16\Gum\Models\Section;
 use Code16\Gum\Sharp\Utils\DomainFilter;
+use Code16\Gum\Sharp\Utils\GumSharpList;
 use Code16\Gum\Sharp\Utils\SectionRootFilter;
 use Code16\Gum\Sharp\Utils\SharpGumSessionValue;
 use Code16\Gum\Sharp\Utils\UrlsCustomTransformer;
 use Code16\Sharp\EntityList\Containers\EntityListDataContainer;
 use Code16\Sharp\EntityList\EntityListQueryParams;
-use Code16\Sharp\EntityList\SharpEntityList;
+use Code16\Sharp\Utils\Transformers\SharpAttributeTransformer;
 
-class PagegroupSharpList extends SharpEntityList
+class PagegroupSharpList extends GumSharpList
 {
 
     /**
@@ -68,7 +70,8 @@ class PagegroupSharpList extends SharpEntityList
      */
     function getListData(EntityListQueryParams $params)
     {
-        $pagegroups = Pagegroup::orderBy('title');
+        $pagegroups = Pagegroup::orderBy('title')
+            ->with($this->requestWiths());
 
         $rootId = $params->filterFor("root");
 
@@ -88,8 +91,29 @@ class PagegroupSharpList extends SharpEntityList
             });
         }
 
-        return $this
-            ->setCustomTransformer("urls", UrlsCustomTransformer::class)
-            ->transform($pagegroups->get());
+        $this->applyCustomTransformers();
+
+        return $this->transform($pagegroups->get());
+    }
+
+    /**
+     * @return array
+     */
+    protected function requestWiths(): array
+    {
+        return [];
+    }
+
+    /**
+     * @param string $attribute
+     * @return SharpAttributeTransformer|string|Closure
+     */
+    protected function customTransformerFor(string $attribute)
+    {
+        if($attribute == "urls") {
+            return UrlsCustomTransformer::class;
+        }
+
+        return null;
     }
 }

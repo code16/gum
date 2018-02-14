@@ -2,17 +2,19 @@
 
 namespace Code16\Gum\Sharp\Tiles;
 
+use Closure;
 use Code16\Gum\Models\Tile;
 use Code16\Gum\Models\Tileblock;
 use Code16\Gum\Sharp\Utils\DomainFilter;
+use Code16\Gum\Sharp\Utils\GumSharpList;
 use Code16\Gum\Sharp\Utils\SectionFilter;
 use Code16\Gum\Sharp\Utils\SectionWithHomeFilter;
 use Code16\Gum\Sharp\Utils\SharpGumSessionValue;
 use Code16\Sharp\EntityList\Containers\EntityListDataContainer;
 use Code16\Sharp\EntityList\EntityListQueryParams;
-use Code16\Sharp\EntityList\SharpEntityList;
+use Code16\Sharp\Utils\Transformers\SharpAttributeTransformer;
 
-class TileblockSharpList extends SharpEntityList
+class TileblockSharpList extends GumSharpList
 {
 
     /**
@@ -77,7 +79,7 @@ class TileblockSharpList extends SharpEntityList
      */
     function getListData(EntityListQueryParams $params)
     {
-        $tileblocks = Tileblock::with("tiles", "tiles.contentUrl")
+        $tileblocks = Tileblock::with($this->requestWiths())
             ->orderBy("order");
 
         if($params->filterFor("section")) {
@@ -86,12 +88,27 @@ class TileblockSharpList extends SharpEntityList
             $tileblocks->whereNull("section_id");
         }
 
-        return $this
-            ->setCustomTransformer("layout_label", function($value, $tileblock) {
-                return $this->layoutCustomTransformer($tileblock->layout, $tileblock);
-            })
+        $this->applyCustomTransformers();
 
-            ->setCustomTransformer("published_at", function($value, $tileblock) {
+        return $this->transform($tileblocks->get());
+    }
+
+    /**
+     * @return array
+     */
+    protected function requestWiths(): array
+    {
+        return ["tiles", "tiles.contentUrl"];
+    }
+
+    /**
+     * @param string $attribute
+     * @return SharpAttributeTransformer|string|Closure
+     */
+    protected function customTransformerFor(string $attribute)
+    {
+        if($attribute == "published_at") {
+            return function($value, $tileblock) {
                 if(!$tileblock->published_at && !$tileblock->unpublished_at) {
                     return "";
                 }
@@ -117,9 +134,11 @@ class TileblockSharpList extends SharpEntityList
                     $tileblock->published_at->formatLocalized("%e %b %Y à %Hh%M"),
                     $tileblock->unpublished_at->formatLocalized("%e %b %Y à %Hh%M")
                 );
-            })
+            };
+        }
 
-            ->setCustomTransformer("tiles", function($value, $tileblock) {
+        if($attribute == "tiles") {
+            return function($value, $tileblock) {
                 return $tileblock->tiles->map(function(Tile $tile) {
                     return $tile->isFreeLink()
                         ? '<p class="mb-2" style="color:gray"><small>' . $tile->free_link_url . '</small></p>'
@@ -128,18 +147,9 @@ class TileblockSharpList extends SharpEntityList
                             : '<p class="mb-2" style="color:orange"><small>pas de lien</small></p>'
                         );
                 })->implode('');
-            })
+            };
+        }
 
-            ->transform($tileblocks->get());
-    }
-
-    /**
-     * @param string $layout
-     * @param Tileblock $tileblock
-     * @return string
-     */
-    protected function layoutCustomTransformer(string $layout, Tileblock $tileblock)
-    {
-        return $layout;
+        return null;
     }
 }

@@ -2,13 +2,15 @@
 
 namespace Code16\Gum\Sharp\News;
 
+use Closure;
 use Code16\Gum\Models\News;
+use Code16\Gum\Sharp\Utils\GumSharpList;
 use Code16\Sharp\EntityList\Containers\EntityListDataContainer;
 use Code16\Sharp\EntityList\Eloquent\Transformers\SharpUploadModelAttributeTransformer;
 use Code16\Sharp\EntityList\EntityListQueryParams;
-use Code16\Sharp\EntityList\SharpEntityList;
+use Code16\Sharp\Utils\Transformers\SharpAttributeTransformer;
 
-class NewsSharpList extends SharpEntityList
+class NewsSharpList extends GumSharpList
 {
 
     /**
@@ -73,7 +75,7 @@ class NewsSharpList extends SharpEntityList
     function getListData(EntityListQueryParams $params)
     {
         $news = News::select("news.*")
-            ->with("visual", "tags")
+            ->with($this->requestWiths())
             ->orderBy("published_at", "desc");
 
         if($params->specificIds()) {
@@ -100,20 +102,45 @@ class NewsSharpList extends SharpEntityList
             }
         }
 
-        return $this
-            ->setCustomTransformer("visual", new SharpUploadModelAttributeTransformer(200))
+        $this->applyCustomTransformers();
 
-            ->setCustomTransformer("title", function($value, $news) {
+        return $this->transform($news->paginate(30));
+    }
+
+    /**
+     * @return array
+     */
+    protected function requestWiths(): array
+    {
+        return ["visual", "tags"];
+    }
+
+    /**
+     * @param string $attribute
+     * @return SharpAttributeTransformer|string|Closure
+     */
+    protected function customTransformerFor(string $attribute)
+    {
+        if($attribute == "visual") {
+            return new SharpUploadModelAttributeTransformer(200);
+        }
+
+        if($attribute == "title") {
+            return function($value, $news) {
                 return $news->surtitle
                     ? sprintf("<small>%s</small><br>%s", $news->surtitle, $news->title)
                     : $news->title;
-            })
+            };
+        }
 
-            ->setCustomTransformer("tags", function($value, $news) {
+        if($attribute == "tags") {
+            return function($value, $news) {
                 return implode(", ", $news->tags->pluck("name")->all());
-            })
+            };
+        }
 
-            ->setCustomTransformer("published_at", function($value, $news) {
+        if($attribute == "published_at") {
+            return function($value, $news) {
                 $date = $news->published_at->formatLocalized("%e %b %Y à %Hh%M");
 
                 if($news->published_at->isFuture()) {
@@ -121,8 +148,9 @@ class NewsSharpList extends SharpEntityList
                 }
 
                 return "<span style='color:gray'>Publié depuis le<br>$date</span>";
-            })
+            };
+        }
 
-            ->transform($news->paginate(30));
+        return null;
     }
 }
