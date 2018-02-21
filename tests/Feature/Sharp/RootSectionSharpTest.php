@@ -21,6 +21,7 @@ class RootSectionSharpTest extends GumSharpTestCase
     /** @test */
     function we_can_update_a_root_section()
     {
+        $this->withoutExceptionHandling();
         $rootSection = factory(Section::class)->create(["is_root" => true]);
 
         $values = [

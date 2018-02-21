@@ -17,7 +17,9 @@ class DomainFilter implements EntityListRequiredFilter
      */
     public function values()
     {
-        return config("gum.domains");
+        return collect(config("gum.domains"))->filter(function($label, $domain) {
+            return gum_domain_allowed_to_user($domain);
+        })->all();
     }
 
     /**

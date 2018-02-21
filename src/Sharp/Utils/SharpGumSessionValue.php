@@ -38,7 +38,9 @@ class SharpGumSessionValue
      */
     public static function setDomain($value)
     {
-        self::set("domain", $value);
+        if(gum_domain_allowed_to_user($value)) {
+            self::set("domain", $value);
+        }
     }
 
     /**
@@ -46,7 +48,9 @@ class SharpGumSessionValue
      */
     public static function getDomain()
     {
-        $domains = collect(config("gum.domains"));
+        $domains = collect(config("gum.domains"))->filter(function($label, $domain) {
+            return gum_domain_allowed_to_user($domain);
+        });
 
         if(!$domains) {
             return null;

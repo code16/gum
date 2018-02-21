@@ -20,3 +20,19 @@ function append_suffix_to_slug(string $slug): string
 
     return "$slug-2";
 }
+
+/**
+ * @param string $domain
+ * @param null $user
+ * @return bool
+ */
+function gum_domain_allowed_to_user($domain, $user = null): bool
+{
+    $user = $user ?: auth()->user();
+
+    if($domain && method_exists($user, "isAdminForDomain")) {
+        return $user->isAdminforDomain($domain);
+    }
+
+    return true;
+}
