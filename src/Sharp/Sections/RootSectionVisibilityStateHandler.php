@@ -4,6 +4,7 @@ namespace Code16\Gum\Sharp\Sections;
 
 use Code16\Gum\Models\Section;
 use Code16\Sharp\EntityList\Commands\EntityState;
+use Code16\Sharp\Exceptions\EntityList\SharpInvalidEntityStateException;
 
 class RootSectionVisibilityStateHandler extends EntityState
 {
@@ -21,10 +22,17 @@ class RootSectionVisibilityStateHandler extends EntityState
      * @param string $instanceId
      * @param string $stateId
      * @return mixed
+     * @throws SharpInvalidEntityStateException
      */
     protected function updateState($instanceId, $stateId)
     {
-        Section::findOrFail($instanceId)->url->update([
+        $section = Section::findOrFail($instanceId);
+
+        if($section->isHome()) {
+            throw new SharpInvalidEntityStateException("La page d'accueil ne peut pas être masquée.");
+        }
+
+        $section->url->update([
             "visibility" => $stateId
         ]);
 

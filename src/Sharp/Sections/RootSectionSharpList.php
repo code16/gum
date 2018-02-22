@@ -70,8 +70,7 @@ class RootSectionSharpList extends GumSharpList
         $sections = Section::domain(SharpGumSessionValue::getDomain())
             ->with($this->requestWiths())
             ->orderBy('root_menu_order')
-            ->where("is_root", true)
-            ->where("slug", "!=", "");
+            ->where("is_root", true);
 
         if($params->specificIds()) {
             $sections->whereIn("id", $params->specificIds());

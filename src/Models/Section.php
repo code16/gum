@@ -87,4 +87,12 @@ class Section extends Model
     {
         return $this->morphToMany(Tag::class, "taggable");
     }
+
+    /**
+     * @return bool
+     */
+    public function isHome()
+    {
+        return $this->slug == "";
+    }
 }
