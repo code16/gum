@@ -49,7 +49,7 @@ class PageSharpForm extends SharpForm
                     SharpFormWysiwygField::SEPARATOR,
                     SharpFormWysiwygField::B, SharpFormWysiwygField::I,
                     SharpFormWysiwygField::SEPARATOR,
-                    SharpFormWysiwygField::UL
+                    SharpFormWysiwygField::UL, SharpFormWysiwygField::A
                 ])
         )->addField(
             SharpFormUploadField::make("visual")

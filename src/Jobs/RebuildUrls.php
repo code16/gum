@@ -54,8 +54,11 @@ class RebuildUrls
     protected function clearUrls()
     {
         ContentUrl::all()->each->delete();
-        \DB::statement('SET FOREIGN_KEY_CHECKS=0;');
-        ContentUrl::truncate();
-        \DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+
+        if(app()->environment() != "testing") {
+            \DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+            ContentUrl::truncate();
+            \DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+        }
     }
 }

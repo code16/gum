@@ -146,6 +146,7 @@ class ContentUrl extends Model
 
     /**
      * @param Page|Section|Pagegroup $subContent
+     * @param string|null $domain
      * @param string|null $subContentSlug
      * @return string
      */
