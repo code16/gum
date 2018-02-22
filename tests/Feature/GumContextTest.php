@@ -20,7 +20,7 @@ class GumContextTest extends TestCase
     {
         parent::setUp();
 
-        Route::get('/p/{path}', function() {})
+        Route::get('/{path}', function() {})
             ->where('path', '[A-Za-z0-9_/-]+')
             ->middleware("build_gum_context");
     }
@@ -32,18 +32,18 @@ class GumContextTest extends TestCase
 
         $section->update(["style_key" => "A"]);
 
-        $this->get('/p/section/page');
+        $this->get('/section/page');
         $this->assertEquals("A", GumContext::theme());
 
-        $this->get('/p/section');
+        $this->get('/section');
         $this->assertEquals("A", GumContext::theme());
 
         $section->update(["style_key" => "B"]);
 
-        $this->get('/p/section/page');
+        $this->get('/section/page');
         $this->assertEquals("B", GumContext::theme());
 
-        $this->get('/p/section');
+        $this->get('/section');
         $this->assertEquals("B", GumContext::theme());
     }
 
@@ -63,16 +63,16 @@ class GumContextTest extends TestCase
             "linkable_id" => $page->id, "linkable_type" => Page::class
         ])->toArray());
 
-        $this->get('/p/section/page')->assertStatus(200);
+        $this->get('/section/page')->assertStatus(200);
         $this->assertEquals($section->id, GumContext::section()->id);
 
-        $this->get('/p/section')->assertStatus(200);
+        $this->get('/section')->assertStatus(200);
         $this->assertEquals($section->id, GumContext::section()->id);
 
-        $this->get('/p/section/section2/page')->assertStatus(200);
+        $this->get('/section/section2/page')->assertStatus(200);
         $this->assertEquals($section2->id, GumContext::section()->id);
 
-        $this->get('/p/section/section2')->assertStatus(200);
+        $this->get('/section/section2')->assertStatus(200);
         $this->assertEquals($section2->id, GumContext::section()->id);
     }
 }
