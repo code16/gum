@@ -40,10 +40,10 @@ class GumContext
     }
 
     /**
-     * @param ContentUrl $contentUrl
+     * @param ContentUrl|null $contentUrl
      * @return Section|null
      */
-    protected static function findCurrentSection(ContentUrl $contentUrl)
+    protected static function findCurrentSection(ContentUrl $contentUrl = null)
     {
         if($contentUrl->content_type == Section::class) {
             self::$section = $contentUrl->content;
