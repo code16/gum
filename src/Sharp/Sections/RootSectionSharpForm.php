@@ -4,6 +4,7 @@ namespace Code16\Gum\Sharp\Sections;
 
 use Code16\Gum\Models\ContentUrl;
 use Code16\Gum\Models\Section;
+use Code16\Gum\Sharp\Utils\SharpGumSessionValue;
 
 class RootSectionSharpForm extends SectionSharpForm
 {
@@ -27,6 +28,7 @@ class RootSectionSharpForm extends SectionSharpForm
             $section = Section::find($id);
             $section->url()->create([
                 "uri" => (new ContentUrl())->findAvailableUriFor($section, $section->domain),
+                "domain" => SharpGumSessionValue::getDomain(),
                 "visibility" => "OFFLINE",
             ]);
         }

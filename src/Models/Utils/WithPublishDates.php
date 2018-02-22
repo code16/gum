@@ -10,11 +10,12 @@ trait WithPublishDates
 
     /**
      * @param Builder $query
+     * @param Carbon|null $date
      * @return Builder
      */
-    public function scopePublished($query)
+    public function scopePublished($query, Carbon $date = null)
     {
-        $now = Carbon::now();
+        $now = $date ?: Carbon::now();
 
         $query->where(function($query) use($now) {
             $query->orWhere("published_at", "<=", $now)

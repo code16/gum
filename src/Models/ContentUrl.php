@@ -30,22 +30,26 @@ class ContentUrl extends Model
     }
 
     /**
+     * @param bool $recursive
      * @return bool
      */
-    public function isVisible()
+    public function isVisible(bool $recursive = true)
     {
         return $this->visibility == "ONLINE"
-            && ($this->parent ? $this->parent->isVisible() : true);
+            && ($recursive && $this->parent ? $this->parent->isVisible() : true);
     }
 
     /**
+     * @param Carbon|null $date
      * @return bool
      */
-    public function isPublished()
+    public function isPublished(Carbon $date = null)
     {
-        return (is_null($this->published_at) || $this->published_at->isPast())
-            && (is_null($this->unpublished_at) || $this->unpublished_at->isFuture())
-            && ($this->parent ? $this->parent->isPublished() : true);
+        $now = $date ?? Carbon::now();
+
+        return (is_null($this->published_at) || $this->published_at <= $now)
+            && (is_null($this->unpublished_at) || $this->unpublished_at > $now)
+            && ($this->parent ? $this->parent->isPublished($date) : true);
     }
 
     /**

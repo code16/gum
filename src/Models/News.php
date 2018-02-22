@@ -44,11 +44,12 @@ class News extends Model
 
     /**
      * @param Builder $query
+     * @param Carbon|null $date
      * @return Builder
      */
-    public function scopePublished(Builder $query)
+    public function scopePublished(Builder $query, Carbon $date = null)
     {
-        return $query->where("published_at", "<=", Carbon::now());
+        return $query->where("published_at", "<=", $date ?: Carbon::now());
     }
 
     /**
