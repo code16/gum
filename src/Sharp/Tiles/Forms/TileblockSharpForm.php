@@ -106,7 +106,6 @@ abstract class TileblockSharpForm extends SharpForm
 
         })->addColumn(8, function (FormLayoutColumn $column) {
             $column
-//                ->withSingleField("news_tag")
                 ->withSingleField("tiles", function (FormLayoutColumn $item) {
                     if($this->tileHasField("visual")) {
                         $item->withSingleField("visual");
@@ -297,7 +296,6 @@ abstract class TileblockSharpForm extends SharpForm
     protected function createTilesListField()
     {
         $listField = SharpFormListField::make("tiles")
-//          ->addConditionalDisplay("layout", "!news_banner")
             ->setLabel("Tuiles")
             ->setAddable()
             ->setAddText("Ajouter une tuile")
@@ -377,9 +375,9 @@ abstract class TileblockSharpForm extends SharpForm
             SharpFormAutocompleteField::make("section", "local")
                 ->setLocalSearchKeys(["label"])
                 ->addConditionalDisplay("link_type", Section::class)
-                ->setResultItemInlineTemplate("{{label}}")
-                ->setListItemInlineTemplate("{{label}}")
-                ->setLocalValues(Section::domain(SharpGumSessionValue::getDomain())->orderBy("title")->get()->pluck("title", "id")->all())
+                ->setResultItemInlineTemplate("{{title}} <small>{{url ? url.uri : ''}}</small>")
+                ->setListItemInlineTemplate("{{title}}<br><small>{{url ? url.uri : ''}}</small>")
+                ->setLocalValues(Section::domain(SharpGumSessionValue::getDomain())->with("url")->orderBy("title")->get()->all())
                 ->setLabel("Section")
         )->addItemField(
             SharpFormAutocompleteField::make("page", "local")

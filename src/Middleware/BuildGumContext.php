@@ -16,10 +16,7 @@ class BuildGumContext
      */
     public function handle($request, Closure $next)
     {
-        $segments = $request->segments();
-        array_splice($segments, 0, 1);
-
-        GumContext::buildFor($segments);
+        GumContext::buildFor($request->segments());
 
         return $next($request);
     }
