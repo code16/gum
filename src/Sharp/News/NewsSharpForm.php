@@ -74,6 +74,13 @@ class NewsSharpForm extends SharpForm
             $this->addField(
                 SharpFormWysiwygField::make("heading_text")
                     ->setLabel("Chapeau")
+                    ->setToolbar([
+                        SharpFormWysiwygField::H1,
+                        SharpFormWysiwygField::SEPARATOR,
+                        SharpFormWysiwygField::B, SharpFormWysiwygField::I,
+                        SharpFormWysiwygField::SEPARATOR,
+                        SharpFormWysiwygField::UL, SharpFormWysiwygField::A
+                    ])
                     ->setHeight(200)
             );
         }
@@ -81,6 +88,13 @@ class NewsSharpForm extends SharpForm
         if($this->hasField("body_text")) {
             $this->addField(
                 SharpFormWysiwygField::make("body_text")
+                    ->setToolbar([
+                        SharpFormWysiwygField::H1,
+                        SharpFormWysiwygField::SEPARATOR,
+                        SharpFormWysiwygField::B, SharpFormWysiwygField::I,
+                        SharpFormWysiwygField::SEPARATOR,
+                        SharpFormWysiwygField::UL, SharpFormWysiwygField::A
+                    ])
                     ->setLabel("Texte")
             );
         }
