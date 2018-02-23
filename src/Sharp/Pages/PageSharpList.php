@@ -36,7 +36,7 @@ class PageSharpList extends GumSharpList
                 ->setLabel("Groupe")
         )->addDataContainer(
             EntityListDataContainer::make("urls")
-                ->setLabel("Url")
+                ->setLabel("Urls")
         );
     }
 
@@ -69,6 +69,8 @@ class PageSharpList extends GumSharpList
         $this->addFilter("root", SectionRootFilter::class, function($value, EntityListQueryParams $params) {
             SharpGumSessionValue::set("root_section", $value);
         });
+
+        $this->setSearchable();
     }
 
     /**
@@ -98,6 +100,12 @@ class PageSharpList extends GumSharpList
                     ->whereRaw("content_id = pages.id")
                     ->where("content_type", Page::class);
             });
+        }
+
+        if($params->hasSearch()) {
+            foreach ($params->searchWords() as $word) {
+                $pages->where("pages.title", "like", $word);
+            }
         }
 
         $pages = $pages->get()

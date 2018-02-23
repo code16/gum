@@ -33,7 +33,7 @@ abstract class SidepanelSharpForm extends SharpForm
         )->addField(
             SharpFormTextField::make("container_label")
                 ->setReadOnly()
-                ->setLabel("Conteneur")
+                ->setLabel("Page ou section")
         );
 
         if($this->hasField("visual")) {
