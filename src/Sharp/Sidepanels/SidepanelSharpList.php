@@ -35,8 +35,8 @@ abstract class SidepanelSharpList extends GumSharpList
      */
     function buildListLayout()
     {
-        $this->addColumn("layout_label", 3, 6)
-            ->addColumn("content", 9, 6);
+        $this->addColumn("layout_label", 2, 3)
+            ->addColumn("content", 10, 9);
     }
 
     /**

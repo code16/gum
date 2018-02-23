@@ -7,7 +7,6 @@ use Code16\Gum\Models\Sidepanel;
 use Code16\Gum\Sharp\Utils\SharpGumSessionValue;
 use Code16\Sharp\Form\Eloquent\Transformers\FormUploadModelTransformer;
 use Code16\Sharp\Form\Eloquent\WithSharpFormEloquentUpdater;
-use Code16\Sharp\Form\Fields\SharpFormCheckField;
 use Code16\Sharp\Form\Fields\SharpFormTextareaField;
 use Code16\Sharp\Form\Fields\SharpFormTextField;
 use Code16\Sharp\Form\Fields\SharpFormUploadField;
@@ -46,16 +45,17 @@ abstract class SidepanelSharpForm extends SharpForm
                     ->setStorageDisk("local")
                     ->setStorageBasePath("data/sidepanels/{id}")
             )->addField(
-                SharpFormCheckField::make("visual:is_video", "Vidéo")
-            )->addField(
-                SharpFormTextField::make("visual:video_url")
-                    ->addConditionalDisplay("visual:is_video")
-                    ->setLabel("URL de la vidéo")
-            )->addField(
                 SharpFormTextareaField::make("visual:legend")
                     ->setRowCount(3)
                     ->setLabel("Légende")
             );
+
+            if($this->hasField("video")) {
+                $this->addField(
+                    SharpFormTextField::make("visual:video_url")
+                        ->setLabel("URL de la vidéo")
+                );
+            }
         }
 
         if($this->hasField("download")) {
@@ -80,7 +80,7 @@ abstract class SidepanelSharpForm extends SharpForm
                     ->setToolbar([
                         SharpFormWysiwygField::H1,
                         SharpFormWysiwygField::SEPARATOR,
-                        SharpFormWysiwygField::B, SharpFormWysiwygField::I,
+                        SharpFormWysiwygField::B, SharpFormWysiwygField::I, SharpFormWysiwygField::A,
                         SharpFormWysiwygField::SEPARATOR,
                         SharpFormWysiwygField::UL
                     ])
@@ -120,13 +120,13 @@ abstract class SidepanelSharpForm extends SharpForm
 
         })->addColumn(6, function (FormLayoutColumn $column) {
             if($this->hasField("visual")) {
-                $column->withSingleField("visual")
-                    ->withSingleField("visual:legend");
+                $column->withSingleField("visual");
 
                 if($this->hasField("video")) {
-                    $column->withSingleField("visual:is_video")
-                        ->withSingleField("visual:video_url");
+                    $column->withSingleField("visual:video_url");
                 }
+
+                $column->withSingleField("visual:legend");
             }
 
             if($this->hasField("download")) {
