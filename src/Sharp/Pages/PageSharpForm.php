@@ -7,10 +7,10 @@ use Code16\Gum\Models\Pagegroup;
 use Code16\Sharp\Form\Eloquent\Transformers\FormUploadModelTransformer;
 use Code16\Sharp\Form\Eloquent\WithSharpFormEloquentUpdater;
 use Code16\Sharp\Form\Fields\SharpFormAutocompleteField;
+use Code16\Sharp\Form\Fields\SharpFormMarkdownField;
 use Code16\Sharp\Form\Fields\SharpFormTextareaField;
 use Code16\Sharp\Form\Fields\SharpFormTextField;
 use Code16\Sharp\Form\Fields\SharpFormUploadField;
-use Code16\Sharp\Form\Fields\SharpFormWysiwygField;
 use Code16\Sharp\Form\Layout\FormLayoutColumn;
 use Code16\Sharp\Form\SharpForm;
 use Code16\Sharp\Http\WithSharpFormContext;
@@ -42,16 +42,15 @@ class PageSharpForm extends SharpForm
                 ->setResultItemInlineTemplate("{{label}}")
                 ->setLocalValues(Pagegroup::all()->pluck("title", "id")->all())
         )->addField(
-            SharpFormWysiwygField::make("body_text")
+            SharpFormMarkdownField::make("body_text")
                 ->setLabel("Texte")
+                ->setHeight(600)
                 ->setToolbar([
-                    SharpFormWysiwygField::H1,
-                    SharpFormWysiwygField::SEPARATOR,
-                    SharpFormWysiwygField::B, SharpFormWysiwygField::I,
-                    SharpFormWysiwygField::SEPARATOR,
-                    SharpFormWysiwygField::UL, SharpFormWysiwygField::A,
-                    SharpFormWysiwygField::SEPARATOR,
-                    SharpFormWysiwygField::UNDO
+                    SharpFormMarkdownField::H1,
+                    SharpFormMarkdownField::SEPARATOR,
+                    SharpFormMarkdownField::B, SharpFormMarkdownField::I,
+                    SharpFormMarkdownField::SEPARATOR,
+                    SharpFormMarkdownField::UL, SharpFormMarkdownField::A,
                 ])
         )->addField(
             SharpFormUploadField::make("visual")

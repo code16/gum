@@ -7,10 +7,10 @@ use Code16\Gum\Models\Sidepanel;
 use Code16\Gum\Sharp\Utils\SharpGumSessionValue;
 use Code16\Sharp\Form\Eloquent\Transformers\FormUploadModelTransformer;
 use Code16\Sharp\Form\Eloquent\WithSharpFormEloquentUpdater;
+use Code16\Sharp\Form\Fields\SharpFormMarkdownField;
 use Code16\Sharp\Form\Fields\SharpFormTextareaField;
 use Code16\Sharp\Form\Fields\SharpFormTextField;
 use Code16\Sharp\Form\Fields\SharpFormUploadField;
-use Code16\Sharp\Form\Fields\SharpFormWysiwygField;
 use Code16\Sharp\Form\Layout\FormLayoutColumn;
 use Code16\Sharp\Form\SharpForm;
 use Code16\Sharp\Http\WithSharpFormContext;
@@ -75,16 +75,14 @@ abstract class SidepanelSharpForm extends SharpForm
 
         if($this->hasField("body_text")) {
             $this->addField(
-                SharpFormWysiwygField::make("body_text")
+                SharpFormMarkdownField::make("body_text")
                     ->setLabel("Texte")
                     ->setToolbar([
-                        SharpFormWysiwygField::H1,
-                        SharpFormWysiwygField::SEPARATOR,
-                        SharpFormWysiwygField::B, SharpFormWysiwygField::I, SharpFormWysiwygField::A,
-                        SharpFormWysiwygField::SEPARATOR,
-                        SharpFormWysiwygField::UL,
-                        SharpFormWysiwygField::SEPARATOR,
-                        SharpFormWysiwygField::UNDO
+                        SharpFormMarkdownField::H1,
+                        SharpFormMarkdownField::SEPARATOR,
+                        SharpFormMarkdownField::B, SharpFormMarkdownField::I, SharpFormMarkdownField::A,
+                        SharpFormMarkdownField::SEPARATOR,
+                        SharpFormMarkdownField::UL,
                     ])
             );
         }

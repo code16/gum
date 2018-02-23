@@ -9,12 +9,12 @@ use Code16\Sharp\Form\Eloquent\Transformers\FormUploadModelTransformer;
 use Code16\Sharp\Form\Eloquent\WithSharpFormEloquentUpdater;
 use Code16\Sharp\Form\Fields\SharpFormDateField;
 use Code16\Sharp\Form\Fields\SharpFormListField;
+use Code16\Sharp\Form\Fields\SharpFormMarkdownField;
 use Code16\Sharp\Form\Fields\SharpFormSelectField;
 use Code16\Sharp\Form\Fields\SharpFormTagsField;
 use Code16\Sharp\Form\Fields\SharpFormTextareaField;
 use Code16\Sharp\Form\Fields\SharpFormTextField;
 use Code16\Sharp\Form\Fields\SharpFormUploadField;
-use Code16\Sharp\Form\Fields\SharpFormWysiwygField;
 use Code16\Sharp\Form\Layout\FormLayoutColumn;
 use Code16\Sharp\Form\Layout\FormLayoutFieldset;
 use Code16\Sharp\Form\SharpForm;
@@ -72,16 +72,12 @@ class NewsSharpForm extends SharpForm
 
         if($this->hasField("heading_text")) {
             $this->addField(
-                SharpFormWysiwygField::make("heading_text")
+                SharpFormMarkdownField::make("heading_text")
                     ->setLabel("Chapeau")
                     ->setToolbar([
-                        SharpFormWysiwygField::H1,
-                        SharpFormWysiwygField::SEPARATOR,
-                        SharpFormWysiwygField::B, SharpFormWysiwygField::I,
-                        SharpFormWysiwygField::SEPARATOR,
-                        SharpFormWysiwygField::UL, SharpFormWysiwygField::A,
-                        SharpFormWysiwygField::SEPARATOR,
-                        SharpFormWysiwygField::UNDO
+                        SharpFormMarkdownField::B, SharpFormMarkdownField::I,
+                        SharpFormMarkdownField::SEPARATOR,
+                        SharpFormMarkdownField::A,
                     ])
                     ->setHeight(200)
             );
@@ -89,15 +85,14 @@ class NewsSharpForm extends SharpForm
 
         if($this->hasField("body_text")) {
             $this->addField(
-                SharpFormWysiwygField::make("body_text")
+                SharpFormMarkdownField::make("body_text")
+                    ->setHeight(600)
                     ->setToolbar([
-                        SharpFormWysiwygField::H1,
-                        SharpFormWysiwygField::SEPARATOR,
-                        SharpFormWysiwygField::B, SharpFormWysiwygField::I,
-                        SharpFormWysiwygField::SEPARATOR,
-                        SharpFormWysiwygField::UL, SharpFormWysiwygField::A,
-                        SharpFormWysiwygField::SEPARATOR,
-                        SharpFormWysiwygField::UNDO
+                        SharpFormMarkdownField::H1,
+                        SharpFormMarkdownField::SEPARATOR,
+                        SharpFormMarkdownField::B, SharpFormMarkdownField::I,
+                        SharpFormMarkdownField::SEPARATOR,
+                        SharpFormMarkdownField::UL, SharpFormMarkdownField::A
                     ])
                     ->setLabel("Texte")
             );
@@ -192,15 +187,6 @@ class NewsSharpForm extends SharpForm
                 });
             }
 
-        })->addColumn(6, function (FormLayoutColumn $column) {
-            if($this->hasField("heading_text")) {
-                $column->withSingleField("heading_text");
-            }
-
-            if($this->hasField("body_text")) {
-                $column->withSingleField("body_text");
-            }
-
             if($this->hasField("attachments")) {
                 $column->withSingleField("attachments", function (FormLayoutColumn $item) {
                     $item->withSingleField("file")
@@ -210,6 +196,15 @@ class NewsSharpForm extends SharpForm
                         $item->withSingleField($key);
                     }
                 });
+            }
+
+        })->addColumn(6, function (FormLayoutColumn $column) {
+            if($this->hasField("heading_text")) {
+                $column->withSingleField("heading_text");
+            }
+
+            if($this->hasField("body_text")) {
+                $column->withSingleField("body_text");
             }
         });
     }

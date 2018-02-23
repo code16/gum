@@ -8,11 +8,11 @@ use Code16\Gum\Sharp\Utils\SharpFormWithStyleKey;
 use Code16\Gum\Sharp\Utils\SharpGumSessionValue;
 use Code16\Sharp\Form\Eloquent\WithSharpFormEloquentUpdater;
 use Code16\Sharp\Form\Fields\SharpFormCheckField;
+use Code16\Sharp\Form\Fields\SharpFormMarkdownField;
 use Code16\Sharp\Form\Fields\SharpFormSelectField;
 use Code16\Sharp\Form\Fields\SharpFormTagsField;
 use Code16\Sharp\Form\Fields\SharpFormTextareaField;
 use Code16\Sharp\Form\Fields\SharpFormTextField;
-use Code16\Sharp\Form\Fields\SharpFormWysiwygField;
 use Code16\Sharp\Form\Layout\FormLayoutColumn;
 use Code16\Sharp\Form\SharpForm;
 use Code16\Sharp\Http\WithSharpFormContext;
@@ -37,16 +37,12 @@ class SectionSharpForm extends SharpForm
                 ->setLabel("Titre court")
                 ->setHelpMessage("Utilisé dans les menus / fils d'ariane. Facultatif.")
         )->addField(
-            SharpFormWysiwygField::make("heading_text")
+            SharpFormMarkdownField::make("heading_text")
                 ->setLabel("Chapeau")
                 ->setToolbar([
-                    SharpFormWysiwygField::H1,
-                    SharpFormWysiwygField::SEPARATOR,
-                    SharpFormWysiwygField::B, SharpFormWysiwygField::I,
-                    SharpFormWysiwygField::SEPARATOR,
-                    SharpFormWysiwygField::UL,
-                    SharpFormWysiwygField::SEPARATOR,
-                    SharpFormWysiwygField::UNDO
+                    SharpFormMarkdownField::B, SharpFormMarkdownField::I,
+                    SharpFormMarkdownField::SEPARATOR,
+                    SharpFormMarkdownField::A,
                 ])
         )->addField(
             SharpFormTextField::make("slug")
