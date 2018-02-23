@@ -4,6 +4,7 @@ namespace Code16\Gum\Sharp\Pagegroups;
 
 use Code16\Gum\Models\Pagegroup;
 use Code16\Sharp\Form\Eloquent\WithSharpFormEloquentUpdater;
+use Code16\Sharp\Form\Fields\SharpFormListField;
 use Code16\Sharp\Form\Fields\SharpFormTextareaField;
 use Code16\Sharp\Form\Fields\SharpFormTextField;
 use Code16\Sharp\Form\Layout\FormLayoutColumn;
@@ -33,6 +34,17 @@ class PagegroupSharpForm extends SharpForm
             SharpFormTextField::make("slug")
                 ->setLabel("URL")
                 ->setHelpMessage("Il s'agit de l'URL (slug) du groupe de pages ; laissez ce champ vide pour remplissage automatique à partir du titre. Ne peut contenir que des lettres, des chiffres et des tirets.Attention, si vous modifiez cette valeur, les URLs du site seront modifiées.")
+        )->addField(
+            SharpFormListField::make("pages")
+                ->setLabel("Pages")
+                ->setSortable(true)
+                ->setOrderAttribute("pagegroup_order")
+                ->setAddable(false)
+                ->setRemovable(false)
+                ->addItemField(
+                    SharpFormTextField::make("title")
+                        ->setReadOnly(true)
+                )
         );
     }
 
@@ -48,6 +60,12 @@ class PagegroupSharpForm extends SharpForm
                 ->withSingleField("title")
                 ->withSingleField("short_title")
                 ->withSingleField("slug");
+
+        })->addColumn(6, function (FormLayoutColumn $column) {
+            $column
+                ->withSingleField("pages", function(FormLayoutColumn $item) {
+                    $item->withSingleField("title");
+                });
         });
     }
 
@@ -60,7 +78,7 @@ class PagegroupSharpForm extends SharpForm
     function find($id): array
     {
         return $this
-            ->transform(Pagegroup::findOrFail($id));
+            ->transform(Pagegroup::with("pages")->findOrFail($id));
     }
 
     /**

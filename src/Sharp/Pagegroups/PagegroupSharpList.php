@@ -29,7 +29,10 @@ class PagegroupSharpList extends GumSharpList
                 ->setLabel("Titre")
         )->addDataContainer(
             EntityListDataContainer::make("urls")
-                ->setLabel("Url")
+                ->setLabel("Url groupe")
+        )->addDataContainer(
+            EntityListDataContainer::make("pages")
+                ->setLabel("Pages")
         );
     }
 
@@ -41,7 +44,8 @@ class PagegroupSharpList extends GumSharpList
     function buildListLayout()
     {
         $this->addColumn("title", 4, 6)
-            ->addColumn("urls", 4, 6);
+            ->addColumn("pages", 4, 6)
+            ->addColumnLarge("urls", 4);
     }
 
     /**
@@ -101,7 +105,7 @@ class PagegroupSharpList extends GumSharpList
      */
     protected function requestWiths(): array
     {
-        return [];
+        return ["pages"];
     }
 
     /**
@@ -112,6 +116,14 @@ class PagegroupSharpList extends GumSharpList
     {
         if($attribute == "urls") {
             return UrlsCustomTransformer::class;
+        }
+
+        if($attribute == "pages") {
+            return function($value, $pagegroup) {
+                return '<p class="mb-2"><small>'
+                    . $pagegroup->pages->pluck("title")->implode('</small></p><p class="mb-2"><small>')
+                    . '</small></p>';
+            };
         }
 
         return null;
