@@ -44,7 +44,9 @@ class SectionSharpForm extends SharpForm
                     SharpFormWysiwygField::SEPARATOR,
                     SharpFormWysiwygField::B, SharpFormWysiwygField::I,
                     SharpFormWysiwygField::SEPARATOR,
-                    SharpFormWysiwygField::UL
+                    SharpFormWysiwygField::UL,
+                    SharpFormWysiwygField::SEPARATOR,
+                    SharpFormWysiwygField::UNDO
                 ])
         )->addField(
             SharpFormTextField::make("slug")

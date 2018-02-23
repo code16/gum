@@ -79,7 +79,9 @@ class NewsSharpForm extends SharpForm
                         SharpFormWysiwygField::SEPARATOR,
                         SharpFormWysiwygField::B, SharpFormWysiwygField::I,
                         SharpFormWysiwygField::SEPARATOR,
-                        SharpFormWysiwygField::UL, SharpFormWysiwygField::A
+                        SharpFormWysiwygField::UL, SharpFormWysiwygField::A,
+                        SharpFormWysiwygField::SEPARATOR,
+                        SharpFormWysiwygField::UNDO
                     ])
                     ->setHeight(200)
             );
@@ -93,7 +95,9 @@ class NewsSharpForm extends SharpForm
                         SharpFormWysiwygField::SEPARATOR,
                         SharpFormWysiwygField::B, SharpFormWysiwygField::I,
                         SharpFormWysiwygField::SEPARATOR,
-                        SharpFormWysiwygField::UL, SharpFormWysiwygField::A
+                        SharpFormWysiwygField::UL, SharpFormWysiwygField::A,
+                        SharpFormWysiwygField::SEPARATOR,
+                        SharpFormWysiwygField::UNDO
                     ])
                     ->setLabel("Texte")
             );
