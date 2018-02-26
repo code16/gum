@@ -373,7 +373,7 @@ abstract class TileblockSharpForm extends SharpForm
                 ->setLabel("Lien")
         )->addItemField(
             SharpFormAutocompleteField::make("section", "local")
-                ->setLocalSearchKeys(["label"])
+                ->setLocalSearchKeys(["title"])
                 ->addConditionalDisplay("link_type", Section::class)
                 ->setResultItemInlineTemplate("{{title}} <small>{{url ? url.uri : ''}}</small>")
                 ->setListItemInlineTemplate("{{title}}<br><small>{{url ? url.uri : ''}}</small>")
