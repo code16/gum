@@ -44,7 +44,7 @@ class TileblockSharpList extends GumSharpList
     function buildListLayout()
     {
         $this
-            ->addColumn("layout_label", 2, 4)
+            ->addColumn("layout_label", 2, 6)
             ->addColumnLarge("tiles", 6)
             ->addColumn("published_at", 4, 6);
     }

@@ -40,7 +40,7 @@ class SectionSharpList extends GumSharpList
     function buildListLayout()
     {
         $this->addColumn("title", 4, 6)
-            ->addColumnLarge("url", 4);
+            ->addColumn("url", 8, 6);
     }
 
     /**

@@ -39,9 +39,24 @@ class SectionFilter implements EntityListRequiredFilter
                     ->all();
             });
 
-        array_sort($sections);
+        return tap($sections, function(&$sections) {
+            array_sort($sections);
 
-        return $sections;
+            $sections += Section::domain(SharpGumSessionValue::getDomain())
+                ->where("is_root", false)
+                ->orderBy("title")
+                ->whereNotExists(function($query) {
+                    return $query->from("content_urls")
+                        ->where("domain", SharpGumSessionValue::getDomain())
+                        ->whereRaw("content_id = sections.id")
+                        ->where("content_type", Section::class);
+                })
+                ->pluck("title", "id")
+                ->map(function($title) {
+                    return "~$title";
+                })
+                ->all();
+        });
     }
 
     /**
