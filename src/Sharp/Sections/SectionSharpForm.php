@@ -34,7 +34,7 @@ class SectionSharpForm extends SharpForm
                 ->setRowCount(2)
         )->addField(
             SharpFormTextField::make("short_title")
-                ->setLabel("Titre court")
+                ->setLabel("Titre menu")
                 ->setHelpMessage("Utilisé dans les menus / fils d'ariane. Facultatif.")
         )->addField(
             SharpFormMarkdownField::make("heading_text")
