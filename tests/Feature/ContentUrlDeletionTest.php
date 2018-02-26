@@ -254,7 +254,7 @@ class ContentUrlDeletionTest extends TestCase
             "content_type" => Pagegroup::class,
         ]);
 
-        $this->assertDatabaseMissing("pages", [
+        $this->assertDatabaseHas("pages", [
             "id" => $page->id
         ]);
     }

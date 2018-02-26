@@ -25,7 +25,7 @@ class CreatePagesTable extends Migration
             $table->foreign('pagegroup_id')
                 ->references('id')
                 ->on('pagegroups')
-                ->onDelete('cascade');
+                ->onDelete('set null');
 
             $table->primary('id');
             $table->timestamps();
