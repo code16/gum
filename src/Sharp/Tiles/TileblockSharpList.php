@@ -8,7 +8,6 @@ use Code16\Gum\Models\Tileblock;
 use Code16\Gum\Sharp\Utils\DomainFilter;
 use Code16\Gum\Sharp\Utils\GumSharpList;
 use Code16\Gum\Sharp\Utils\SectionFilter;
-use Code16\Gum\Sharp\Utils\SectionWithHomeFilter;
 use Code16\Gum\Sharp\Utils\SharpGumSessionValue;
 use Code16\Sharp\EntityList\Containers\EntityListDataContainer;
 use Code16\Sharp\EntityList\EntityListQueryParams;
@@ -28,9 +27,6 @@ class TileblockSharpList extends GumSharpList
             EntityListDataContainer::make("layout_label")
                 ->setLabel("Type")
         )->addDataContainer(
-            EntityListDataContainer::make("published_at")
-                ->setLabel("Dates")
-        )->addDataContainer(
             EntityListDataContainer::make("tiles")
                 ->setLabel("Tuiles")
         );
@@ -45,8 +41,7 @@ class TileblockSharpList extends GumSharpList
     {
         $this
             ->addColumn("layout_label", 2, 6)
-            ->addColumnLarge("tiles", 6)
-            ->addColumn("published_at", 4, 6);
+            ->addColumn("tiles", 10, 6);
     }
 
     /**
@@ -107,36 +102,6 @@ class TileblockSharpList extends GumSharpList
      */
     protected function customTransformerFor(string $attribute)
     {
-        if($attribute == "published_at") {
-            return function($value, $tileblock) {
-                if(!$tileblock->published_at && !$tileblock->unpublished_at) {
-                    return "";
-                }
-
-                if(!$tileblock->published_at) {
-                    return "jusqu'au " . $tileblock->unpublished_at->formatLocalized("%e %b %Y à %Hh%M");
-                }
-
-                if(!$tileblock->unpublished_at) {
-                    return "à partir du " . $tileblock->published_at->formatLocalized("%e %b %Y à %Hh%M");
-                }
-
-                if($tileblock->published_at->isSameYear($tileblock->unpublished_at)) {
-                    return sprintf(
-                        "du %s au %s",
-                        $tileblock->published_at->formatLocalized("%e %b à %Hh%M"),
-                        $tileblock->unpublished_at->formatLocalized("%e %b %Y à %Hh%M")
-                    );
-                }
-
-                return sprintf(
-                    "du %s au %s",
-                    $tileblock->published_at->formatLocalized("%e %b %Y à %Hh%M"),
-                    $tileblock->unpublished_at->formatLocalized("%e %b %Y à %Hh%M")
-                );
-            };
-        }
-
         if($attribute == "tiles") {
             return function($value, $tileblock) {
                 return $tileblock->tiles->map(function(Tile $tile) {

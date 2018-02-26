@@ -19,7 +19,6 @@ use Code16\Sharp\Form\Fields\SharpFormTextareaField;
 use Code16\Sharp\Form\Fields\SharpFormTextField;
 use Code16\Sharp\Form\Fields\SharpFormUploadField;
 use Code16\Sharp\Form\Layout\FormLayoutColumn;
-use Code16\Sharp\Form\Layout\FormLayoutFieldset;
 use Code16\Sharp\Form\SharpForm;
 use Code16\Sharp\Http\WithSharpFormContext;
 
@@ -42,19 +41,6 @@ abstract class TileblockSharpForm extends SharpForm
             SharpFormTextField::make("section_label")
                 ->setReadOnly()
                 ->setLabel("Section")
-        )->addField(
-            SharpFormDateField::make("published_at")
-                ->setMondayFirst()
-                ->setHasTime(true)
-                ->setDisplayFormat("DD/MM/YYYY HH:mm")
-        )->addField(
-            SharpFormCheckField::make("has_unpublished_date", "Indiquer une date de fin de publication")
-        )->addField(
-            SharpFormDateField::make("unpublished_at")
-                ->addConditionalDisplay("has_unpublished_date")
-                ->setMondayFirst()
-                ->setHasTime(true)
-                ->setDisplayFormat("DD/MM/YYYY HH:mm")
         )->addField(
             $this->createTilesListField()
         );
@@ -97,12 +83,6 @@ abstract class TileblockSharpForm extends SharpForm
             if($this->hasStylesDefined()) {
                 $column->withSingleField("style_key");
             }
-
-            $column->withFieldset("Date de mise en ligne", function(FormLayoutFieldset $fieldset) {
-                $fieldset->withSingleField("published_at")
-                    ->withSingleField("has_unpublished_date")
-                    ->withSingleField("unpublished_at");
-            });
 
         })->addColumn(8, function (FormLayoutColumn $column) {
             $column

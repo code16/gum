@@ -58,8 +58,8 @@ class Section extends Model
 
     public function getOnlineTileblocksAttribute()
     {
-        return $this->tileblocks()
-            ->published()
+        return $this
+            ->tileblocks()
             ->with("tiles", "tiles.contentUrl")
             ->get()
             ->filter(function(Tileblock $tileblock) {

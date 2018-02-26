@@ -18,8 +18,6 @@ class CreateTileblocksTable extends Migration
             $table->string('layout');
             $table->string('layout_variant')->nullable();
             $table->string("style_key")->nullable();
-            $table->dateTime('published_at')->nullable();
-            $table->dateTime('unpublished_at')->nullable();
 
             $table->unsignedSmallInteger('order')->default(100);
             $table->string('section_id')->nullable();

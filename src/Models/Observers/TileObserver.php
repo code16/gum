@@ -58,9 +58,12 @@ class TileObserver
         }
 
         if($url->content_type == Section::class) {
-            // Visibility IS NOT cascade down for Sections,
-            // since they have only ONE url.
-            return;
+            if($url->content->is_root || $url->parent->content_id != $tile->tileblock->section_id) {
+                // Visibility IS NOT cascade down for this Section since
+                // we aren't in its main path (this tile is a "second link"
+                // toward its main URL)
+                return;
+            }
         }
 
         $url->update([

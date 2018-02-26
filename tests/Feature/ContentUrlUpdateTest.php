@@ -97,30 +97,63 @@ class ContentUrlUpdateTest extends TestCase
     }
 
     /** @test */
-    function section_url_visibility_is_not_updated_with_tile_visibility()
+    function section_url_visibility_is_updated_with_tile_visibility()
     {
-        list($section, $page, $pagetile) = $this->createSectionWithTileToPage();
+        list($section, $page, $tile) = $this->createSectionWithTileToPage();
 
-        // Create a "back to section" link on the page
-        $tile = $pagetile->tileblock->tiles()->create(factory(Tile::class)->make([
-            "linkable_id" => $section->id, "linkable_type" => Section::class,
-            "visibility" => "OFFLINE"
+        $section2 = factory(Section::class)->create(["slug" => "section2"]);
+        $sectionTile = $tile->tileblock->tiles()->create(factory(Tile::class)->make([
+            "linkable_id" => $section2->id, "linkable_type" => Section::class
         ])->toArray());
 
-        $this->assertEquals("ONLINE", $section->fresh()->url->visibility);
+        $sectionTile->update(["visibility" => "OFFLINE"]);
 
-        $tile->update([
-            "visibility" => "OFFLINE",
-        ]);
+        $this->assertEquals("OFFLINE", $sectionTile->contentUrl->fresh()->visibility);
 
-        $this->assertEquals("ONLINE", $section->fresh()->url->visibility);
-
-        $tile->update([
+        $sectionTile->update([
+            "visibility" => "ONLINE",
             "published_at" => Carbon::tomorrow(),
             "unpublished_at" => Carbon::tomorrow()->addDay(),
         ]);
 
-        $this->assertNull($section->fresh()->url->published_at);
-        $this->assertNull($section->fresh()->url->unpublished_at);
+        $this->assertEquals("ONLINE", $sectionTile->refresh()->contentUrl->visibility);
+        $this->assertEquals(Carbon::tomorrow()->timestamp, $sectionTile->contentUrl->published_at->timestamp);
+        $this->assertEquals(Carbon::tomorrow()->addDay()->timestamp, $sectionTile->contentUrl->unpublished_at->timestamp);
+    }
+
+    /** @test */
+    function section_url_visibility_is_not_updated_with_tile_visibility_if_this_is_not_its_main_url()
+    {
+        list($section1, $page, $tile) = $this->createSectionWithTileToPage();
+
+        $section2 = factory(Section::class)->create(["slug" => "section2"]);
+        $section3 = factory(Section::class)->create(["slug" => "section3"]);
+        $tileblock = $section2->tileblocks()->create(factory(Tileblock::class)->make()->toArray());
+        $tileblock->tiles()->create(factory(Tile::class)->make([
+            "linkable_id" => $section3->id, "linkable_type" => Section::class
+        ])->toArray());
+
+        // Create a link from section1 to section3
+        $tile = $tile->tileblock->tiles()->create(factory(Tile::class)->make([
+            "linkable_id" => $section3->id, "linkable_type" => Section::class,
+            "visibility" => "ONLINE"
+        ])->toArray());
+
+        // Set it to OFFLINE
+        $tile->update(["visibility" => "OFFLINE"]);
+
+        // Section3 should still be online since this link wasn't its main one
+        $this->assertEquals("ONLINE", $section3->fresh()->url->visibility);
+
+        // Change tile's publish dates
+        $tile->update([
+            "visibility" => "ONLINE",
+            "published_at" => Carbon::tomorrow(),
+            "unpublished_at" => Carbon::tomorrow()->addDay(),
+        ]);
+
+        // Section3 should still be published
+        $this->assertNull($section3->fresh()->url->published_at);
+        $this->assertNull($section3->fresh()->url->unpublished_at);
     }
 }
