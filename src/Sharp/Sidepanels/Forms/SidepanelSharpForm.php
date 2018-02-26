@@ -63,7 +63,7 @@ abstract class SidepanelSharpForm extends SharpForm
                 SharpFormUploadField::make("downloadableFile")
                     ->setLabel("Fichier")
                     ->setFileFilter($this->getDownloadableFileFilter())
-                    ->setMaxFileSize(10)
+                    ->setMaxFileSize(12)
                     ->setStorageDisk("local")
                     ->setStorageBasePath("data/sidepanels/{id}")
             )->addField(

@@ -133,6 +133,12 @@ class NewsSharpList extends GumSharpList
             };
         }
 
+        if($attribute == "heading_text") {
+            return function($value, $news) {
+                return str_limit(strip_tags($news->heading_text), 100);
+            };
+        }
+
         if($attribute == "tags") {
             return function($value, $news) {
                 return implode(", ", $news->tags->pluck("name")->all());

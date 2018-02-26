@@ -40,8 +40,8 @@ class TileblockSharpList extends GumSharpList
     function buildListLayout()
     {
         $this
-            ->addColumn("layout_label", 2, 6)
-            ->addColumn("tiles", 10, 6);
+            ->addColumn("layout_label", 2, 4)
+            ->addColumn("tiles", 10, 8);
     }
 
     /**
@@ -105,16 +105,55 @@ class TileblockSharpList extends GumSharpList
         if($attribute == "tiles") {
             return function($value, $tileblock) {
                 return $tileblock->tiles->map(function(Tile $tile) {
-                    return $tile->isFreeLink()
-                        ? '<p class="mb-2" style="color:gray"><small>' . $tile->free_link_url . '</small></p>'
-                        :  ($tile->contentUrl
-                            ? '<p class="mb-2"><small>' . $tile->contentUrl->uri . '</small></p>'
-                            : '<p class="mb-2" style="color:orange"><small>pas de lien</small></p>'
-                        );
+                    $style = "background-color:#eee; padding:5px; display:inline; ";
+                    if($tile->isFreeLink()) {
+                        $link = $tile->free_link_url;
+                        $style .= "color:gray";
+                    } elseif($tile->contentUrl) {
+                        $link = $tile->contentUrl->uri;
+                    } else {
+                        $link = 'pas de lien';
+                        $style .= 'color:orange';
+                    }
+
+                    return sprintf(
+                        '<div style="%s"><small>%s</small> <span style="color:gray; font-style:italic"><small>%s</small></span></div><div class="mb-2"></div>',
+                        $style, $link, $this->formatPublishDates($tile)
+                    );
+
                 })->implode('');
             };
         }
 
         return null;
+    }
+
+    protected function formatPublishDates(Tile $tile)
+    {
+        if(!$tile->published_at && !$tile->unpublished_at) {
+            return "";
+        }
+
+        if(!$tile->published_at) {
+            return "jusqu'au " . $tile->unpublished_at->formatLocalized("%e %b %Y à %Hh%M");
+        }
+
+        if(!$tile->unpublished_at) {
+            return "à partir du " . $tile->published_at->formatLocalized("%e %b %Y à %Hh%M");
+        }
+
+        if($tile->published_at->isSameYear($tile->unpublished_at)) {
+            return sprintf(
+                "du %s au %s",
+                $tile->published_at->formatLocalized("%e %b à %Hh%M"),
+                $tile->unpublished_at->formatLocalized("%e %b %Y à %Hh%M")
+            );
+        }
+
+        return sprintf(
+            "du %s au %s",
+            $tile->published_at->formatLocalized("%e %b %Y à %Hh%M"),
+            $tile->unpublished_at->formatLocalized("%e %b %Y à %Hh%M")
+        );
     }
 }
