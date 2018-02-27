@@ -124,9 +124,6 @@ abstract class TileblockSharpForm extends SharpForm
     {
         return $this
             ->setCustomTransformer('tiles[visual]', FormUploadModelTransformer::class)
-            ->setCustomTransformer('has_unpublished_date', function($value, $tileblock) {
-                return !is_null($tileblock->unpublished_at);
-            })
             ->setCustomTransformer('section_label', function($value, $tileblock) {
                 return $tileblock->section->title;
             })
@@ -243,11 +240,6 @@ abstract class TileblockSharpForm extends SharpForm
      */
     protected function cleanUpData($data): array
     {
-        if(! ($data['has_unpublished_date'] ?? false)) {
-            $data['unpublished_at'] = null;
-        }
-        unset($data["has_unpublished_date"]);
-
         if(isset($data["tiles"])) {
             foreach ($data["tiles"] as &$dataTile) {
                 if ($dataTile["link_type"] != "free") {
