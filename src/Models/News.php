@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 class News extends Model
 {
@@ -58,7 +59,7 @@ class News extends Model
      */
     public function scopeNewest(Builder $query)
     {
-        return $query->orderByRaw(\DB::raw("(ABS(DATEDIFF(NOW(), news.published_at))+1) * news.importance ASC"));
+        return $query->orderByRaw(DB::raw("(ABS(DATEDIFF(NOW(), news.published_at))+1) * news.importance ASC"));
     }
 
     /**
