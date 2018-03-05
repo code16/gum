@@ -74,9 +74,9 @@ class NewsSharpList extends GumSharpList
      */
     function getListData(EntityListQueryParams $params)
     {
-        $news = News::select("news.*")
+        $news = News::select($this->requestSelect())
             ->with($this->requestWiths())
-            ->orderBy("published_at", "desc");
+            ->orderByRaw($this->requestOrderBy());
 
         if($params->specificIds()) {
             $news->whereIn("id", $params->specificIds());
@@ -108,11 +108,27 @@ class NewsSharpList extends GumSharpList
     }
 
     /**
+     * @return string|array
+     */
+    protected function requestSelect()
+    {
+        return "news.*";
+    }
+
+    /**
      * @return array
      */
     protected function requestWiths(): array
     {
         return ["visual", "tags"];
+    }
+
+    /**
+     * @return string
+     */
+    protected function requestOrderBy(): string
+    {
+        return "published_at DESC";
     }
 
     /**
@@ -128,7 +144,7 @@ class NewsSharpList extends GumSharpList
         if($attribute == "title") {
             return function($value, $news) {
                 return $news->surtitle
-                    ? sprintf("<small>%s</small><br>%s", $news->surtitle, $news->title)
+                    ? sprintf("<small>%s</small><br>%s", e($news->surtitle), e($news->title))
                     : $news->title;
             };
         }

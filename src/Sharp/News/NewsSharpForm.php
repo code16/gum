@@ -102,7 +102,7 @@ class NewsSharpForm extends SharpForm
             if($this->categoryLabels()) {
                 $this->addField(
                     SharpFormSelectField::make("category_label", $this->categoryLabels())
-                        ->setLabel("Catégorie")
+                        ->setLabel("Variante")
                         ->setDisplayAsDropdown()
                         ->setClearable()
                 );
@@ -110,9 +110,17 @@ class NewsSharpForm extends SharpForm
             } else {
                 $this->addField(
                     SharpFormTextField::make("category_label")
-                        ->setLabel("Catégorie")
+                        ->setLabel("Variante")
                 );
             }
+        }
+
+        if($this->hasField("importance")) {
+            $this->addField(
+                SharpFormSelectField::make("importance", $this->importanceLevels())
+                    ->setLabel("Niveau d'importance")
+                    ->setDisplayAsDropdown()
+            );
         }
 
         if($this->hasField("tags")) {
@@ -166,6 +174,10 @@ class NewsSharpForm extends SharpForm
 
             if($this->hasField("category")) {
                 $column->withSingleField("category_label");
+            }
+
+            if($this->hasField("importance")) {
+                $column->withSingleField("importance");
             }
 
             if($this->hasField("title")) {
@@ -288,6 +300,14 @@ class NewsSharpForm extends SharpForm
      * @return array
      */
     protected function categoryLabels(): array
+    {
+        return [];
+    }
+
+    /**
+     * @return array
+     */
+    protected function importanceLevels(): array
     {
         return [];
     }
