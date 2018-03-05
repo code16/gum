@@ -65,8 +65,11 @@ class Section extends Model
             ->filter(function(Tileblock $tileblock) {
                 $tileblock->tiles = $tileblock->tiles
                     ->filter(function(Tile $tile) {
-                        return !$tile->contentUrl
-                            || ($tile->contentUrl->isVisible() && $tile->contentUrl->isPublished());
+                        if(!$tile->contentUrl) {
+                            return $tile->isVisible() && $tile->isPublished();
+                        }
+
+                        return $tile->contentUrl->isVisible() && $tile->contentUrl->isPublished();
                     });
 
                 return count($tileblock->tiles);

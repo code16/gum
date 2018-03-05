@@ -2,6 +2,7 @@
 
 namespace Code16\Gum\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
 class Tile extends Model
@@ -80,6 +81,26 @@ class Tile extends Model
     public function isFreeLink(): bool
     {
         return is_null($this->linkable_id) && strlen($this->free_link_url) > 0;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isVisible()
+    {
+        return $this->visibility == "ONLINE";
+    }
+
+    /**
+     * @param Carbon|null $date
+     * @return bool
+     */
+    public function isPublished(Carbon $date = null)
+    {
+        $now = $date ?? Carbon::now();
+
+        return (is_null($this->published_at) || $this->published_at <= $now)
+            && (is_null($this->unpublished_at) || $this->unpublished_at > $now);
     }
 
     public function getDefaultAttributesFor($attribute)
