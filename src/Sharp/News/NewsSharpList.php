@@ -112,7 +112,7 @@ class NewsSharpList extends GumSharpList
      */
     protected function requestSelect()
     {
-        return "news.*";
+        return ["news.*", DB::raw("(ABS(DATEDIFF(NOW(), published_at))+1) * importance as diff")];
     }
 
     /**
@@ -128,7 +128,7 @@ class NewsSharpList extends GumSharpList
      */
     protected function requestOrderBy(): string
     {
-        return "published_at DESC";
+        return "diff ASC";
     }
 
     /**
@@ -165,11 +165,13 @@ class NewsSharpList extends GumSharpList
             return function($value, $news) {
                 $date = $news->published_at->formatLocalized("%e %b %Y à %Hh%M");
 
-                if($news->published_at->isFuture()) {
-                    return "Publié à partir du<br>$date";
-                }
+                $date = $news->published_at->isFuture()
+                    ? "<em>Publié à partir du<br>$date</em>"
+                    : "<span style='color:gray'>Publié depuis le<br>$date</span>";
 
-                return "<span style='color:gray'>Publié depuis le<br>$date</span>";
+                $score = ($news->published_at->diffInDays()+1) * $news->importance;
+
+                return sprintf('%s<br><span style="background: orange; border-radius: 3px; padding: 2px 3px; color:#fff;"><small>%s</small></span>', $date, $score);
             };
         }
 

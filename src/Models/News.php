@@ -58,7 +58,7 @@ class News extends Model
      */
     public function scopeNewest(Builder $query)
     {
-        return $query->orderBy("published_at", "desc");
+        return $query->orderByRaw(\DB::raw("(ABS(DATEDIFF(NOW(), news.published_at))+1) * news.importance ASC"));
     }
 
     /**

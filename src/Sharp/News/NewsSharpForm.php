@@ -257,7 +257,8 @@ class NewsSharpForm extends SharpForm
         $date = Carbon::createFromTimestamp(ceil(time() / (15 * 60)) * (15 * 60));
 
         return $this->transform(new News([
-            "published_at" => $date
+            "published_at" => $date,
+            "importance" => 3
         ]));
     }
 
@@ -309,7 +310,13 @@ class NewsSharpForm extends SharpForm
      */
     protected function importanceLevels(): array
     {
-        return [];
+        return [
+            "1" => "Actualité majeure",
+            "2" => "Actualité importante",
+            "3" => "Actualité normale",
+            "4" => "Actualité peu importante",
+            "5" => "Actualité mineure",
+        ];
     }
 
     /**
