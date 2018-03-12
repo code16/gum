@@ -29,6 +29,13 @@ class RootSectionSharpList extends GumSharpList
             EntityListDataContainer::make("urls")
                 ->setLabel("Url")
         );
+
+        if($this->hasMultipleMenus()) {
+            $this->addDataContainer(
+                EntityListDataContainer::make("menu_key")
+                    ->setLabel("Menu")
+            );
+        }
     }
 
     /**
@@ -39,7 +46,11 @@ class RootSectionSharpList extends GumSharpList
     function buildListLayout()
     {
         $this->addColumn("title", 4, 6)
-            ->addColumnLarge("urls", 4);
+            ->addColumn("urls", 4, 6);
+
+        if($this->hasMultipleMenus()) {
+            $this->addColumnLarge("menu_key", 4);
+        }
     }
 
     /**
@@ -105,6 +116,29 @@ class RootSectionSharpList extends GumSharpList
             };
         }
 
+        if($attribute == "menu_key") {
+            return function($value, Section $section) {
+                if(!$this->hasMultipleMenus()) {
+                    return "";
+                }
+
+                $values = config("gum.menus". (SharpGumSessionValue::getDomain() ? "." . SharpGumSessionValue::getDomain() :  ""));
+
+                return $values[$value] ?? "";
+            };
+        }
+
         return null;
+    }
+
+    /**
+     * @return bool
+     */
+    protected function hasMultipleMenus()
+    {
+        $configKey = "gum.menus"
+            . (SharpGumSessionValue::getDomain() ? "." . SharpGumSessionValue::getDomain() :  "");
+
+        return config($configKey) && sizeof(config($configKey)) > 1;
     }
 }
