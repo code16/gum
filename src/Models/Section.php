@@ -6,10 +6,11 @@ use Code16\Gum\Models\Utils\WithMenuTitle;
 use Code16\Gum\Models\Utils\WithUuid;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Laravel\Scout\Searchable;
 
 class Section extends Model
 {
-    use WithUuid, WithMenuTitle;
+    use WithUuid, WithMenuTitle, Searchable;
 
     public $incrementing = false;
 
@@ -98,5 +99,41 @@ class Section extends Model
     public function isHome()
     {
         return $this->slug == "";
+    }
+
+    /**
+     * Get the index name for the model.
+     *
+     * @return string
+     */
+    public function searchableAs()
+    {
+        return env('SCOUT_PREFIX') . 'content';
+    }
+
+    /**
+     * Get the indexable data array for the model.
+     *
+     * @return array
+     */
+    public function toSearchableArray()
+    {
+        return [
+            "type" => "section",
+            "depth" => $this->url->depth,
+            "title" => $this->title,
+            "group" => "",
+            "text" => $this->heading_text,
+            "_tags" => $this->domain,
+        ];
+    }
+
+    /**
+     * @return bool
+     */
+    public function shouldBeSearchable()
+    {
+        return ($this->is_root && $this->visibility === "ONLINE")
+            || (!$this->is_root && $this->url && $this->url->isVisible() && $this->url->isPublished());
     }
 }

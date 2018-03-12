@@ -5,10 +5,11 @@ namespace Code16\Gum\Models;
 use Code16\Gum\Models\Utils\WithMenuTitle;
 use Code16\Gum\Models\Utils\WithUuid;
 use Illuminate\Database\Eloquent\Model;
+use Laravel\Scout\Searchable;
 
 class Page extends Model
 {
-    use WithUuid, WithMenuTitle;
+    use WithUuid, WithMenuTitle, Searchable;
 
     public $incrementing = false;
 
@@ -41,5 +42,48 @@ class Page extends Model
         return in_array($attribute, ["visual"])
             ? ["model_key" => $attribute]
             : [];
+    }
+
+    /**
+     * Get the index name for the model.
+     *
+     * @return string
+     */
+    public function searchableAs()
+    {
+        return env('SCOUT_PREFIX') . 'content';
+    }
+
+    /**
+     * Get the indexable data array for the model.
+     *
+     * @return array
+     */
+    public function toSearchableArray()
+    {
+        return [
+            "type" => "page",
+            "depth" => 5,
+            "title" => $this->title,
+            "group" => $this->pagegroup ? $this->pagegroup->title : "",
+            "text" => $this->body_text,
+            "_tags" => $this->urls()->visible()->published()
+                ->select("domain")->distinct()
+                ->pluck("domain")
+        ];
+    }
+
+    /**
+     * @return bool
+     */
+    public function shouldBeSearchable()
+    {
+        foreach($this->urls()->visible()->published()->get() as $url) {
+            if($url->isVisible() && $url->isPublished()) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

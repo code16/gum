@@ -17,6 +17,8 @@ class ContentUrl extends Model
 
     protected $dates = ['created_at', 'updated_at', 'published_at', 'unpublished_at'];
 
+    protected $touches = ['content', 'children'];
+
     public function scopeByPath(Builder $query, string $path)
     {
         $path = !starts_with($path, "/") ? "/$path" : $path;
@@ -146,6 +148,11 @@ class ContentUrl extends Model
     public function getRelativeUriAttribute()
     {
         return substr($this->attributes["uri"], 1);
+    }
+
+    public function getDepthAttribute()
+    {
+        return count(explode("/", $this->relative_uri));
     }
 
     /**
