@@ -105,10 +105,9 @@ class TileblockSharpList extends GumSharpList
         if($attribute == "tiles") {
             return function($value, $tileblock) {
                 return $tileblock->tiles->map(function(Tile $tile) {
-                    $style = "background-color:#eee; padding:5px; display:inline; ";
+                    $style = "background-color:#eee; padding:5px; display:inline; color:gray;";
                     if($tile->isFreeLink()) {
                         $link = $tile->free_link_url;
-                        $style .= "color:gray";
                     } elseif($tile->contentUrl) {
                         $link = $tile->contentUrl->uri;
                     } else {
@@ -117,8 +116,8 @@ class TileblockSharpList extends GumSharpList
                     }
 
                     return sprintf(
-                        '<div style="%s"><small>%s</small> <span style="color:gray; font-style:italic"><small>%s</small></span></div><div class="mb-2"></div>',
-                        $style, $link, $this->formatPublishDates($tile)
+                        '%s <div style="%s"><small>%s</small> <span style="color:gray; font-style:italic"><small>%s</small></span></div><div class="mb-2"></div>',
+                        $tile->title, $style, $link, $this->formatPublishDates($tile)
                     );
 
                 })->implode('');
