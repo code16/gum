@@ -113,14 +113,12 @@ class News extends Model
     }
 
     /**
-     * @param string|null $domainTagName
+     * @param string $tagName
      * @return bool
      */
-    public function hasDomainTag(string $domainTagName = null)
+    public function hasTag(string $tagName)
     {
-        $domainTagName = $domainTagName ?: domain();
-
-        return $this->tags()->where("name", $domainTagName)->count() == 1;
+        return $this->tags()->where("name", $tagName)->count() == 1;
     }
 
     /**
