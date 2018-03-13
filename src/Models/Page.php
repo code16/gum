@@ -6,6 +6,7 @@ use Code16\Gum\Models\Utils\WithMenuTitle;
 use Code16\Gum\Models\Utils\WithUuid;
 use Illuminate\Database\Eloquent\Model;
 use Laravel\Scout\Searchable;
+use Parsedown;
 
 class Page extends Model
 {
@@ -71,7 +72,7 @@ class Page extends Model
             "depth" => 5,
             "title" => $this->title,
             "group" => $this->pagegroup ? $this->pagegroup->title : "",
-            "text" => $this->body_text,
+            "text" => (new Parsedown)->text(($this->heading_text ? $this->heading_text . "\n\n" : "") . $this->body_text),
             "_tags" => $urls->pluck("domain")->unique()->all(),
             "url" => $urls->groupBy("domain")->map(function($urlGroup) {
                 return $urlGroup->pluck("uri")->all();

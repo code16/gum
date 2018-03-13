@@ -7,6 +7,7 @@ use Code16\Gum\Models\Utils\WithUuid;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Laravel\Scout\Searchable;
+use Parsedown;
 
 class Section extends Model
 {
@@ -123,7 +124,7 @@ class Section extends Model
             "depth" => $this->url->depth,
             "title" => $this->title,
             "group" => "",
-            "text" => $this->heading_text,
+            "text" => (new Parsedown)->text($this->heading_text),
             "_tags" => $this->domain,
             "url" => $this->url->uri
         ];
