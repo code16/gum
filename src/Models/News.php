@@ -7,11 +7,17 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Laravel\Scout\Searchable;
+use Parsedown;
 
 class News extends Model
 {
+    use Searchable;
+
     protected $guarded = [];
+
     protected $table = "news";
+
     protected $dates = ["created_at", "updated_at", "published_at"];
 
     /**
@@ -126,10 +132,38 @@ class News extends Model
     }
 
     /**
+     * Get the index name for the model.
+     *
      * @return string
      */
-    public function getUrlAttribute()
+    public function searchableAs()
     {
-        return route("news.article", ["news" => $this->id, "slug" => str_slug($this->title)]);
+        return env('SCOUT_PREFIX') . 'news';
+    }
+
+    /**
+     * Get the indexable data array for the model.
+     *
+     * @return array
+     */
+    public function toSearchableArray()
+    {
+        return [
+            "type" => "news",
+            "importance" => $this->importance,
+            "published_at" => $this->published_at->timestamp,
+            "surtitle" => $this->surtitle,
+            "title" => $this->title,
+            "text" => (new Parsedown)->text(($this->heading_text ? $this->heading_text . "\n\n" : "") . $this->body_text),
+            "_tags" => $this->tags->pluck("name"),
+        ];
+    }
+
+    /**
+     * @return bool
+     */
+    public function shouldBeSearchable()
+    {
+        return $this->isVisible() && $this->isPublished();
     }
 }
