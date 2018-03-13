@@ -53,6 +53,15 @@ class PageSharpForm extends SharpForm
                     SharpFormMarkdownField::UL, SharpFormMarkdownField::A,
                 ])
         )->addField(
+            SharpFormMarkdownField::make("heading_text")
+                ->setLabel("Chapeau")
+                ->setHeight(250)
+                ->setToolbar([
+                    SharpFormMarkdownField::B, SharpFormMarkdownField::I,
+                    SharpFormMarkdownField::SEPARATOR,
+                    SharpFormMarkdownField::A,
+                ])
+        )->addField(
             SharpFormUploadField::make("visual")
                 ->setCropRatio("16:9")
                 ->setFileFilterImages()
@@ -89,7 +98,8 @@ class PageSharpForm extends SharpForm
                 });
 
         })->addColumn(6, function (FormLayoutColumn $column) {
-            $column->withSingleField("body_text");
+            $column->withSingleField("heading_text")
+                ->withSingleField("body_text");
         });
     }
 

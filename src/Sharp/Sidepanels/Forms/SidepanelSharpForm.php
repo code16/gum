@@ -44,11 +44,15 @@ abstract class SidepanelSharpForm extends SharpForm
                     ->setMaxFileSize(5)
                     ->setStorageDisk("local")
                     ->setStorageBasePath("data/sidepanels/{id}")
-            )->addField(
-                SharpFormTextareaField::make("visual:legend")
-                    ->setRowCount(3)
-                    ->setLabel("Légende")
             );
+
+            if($this->hasField("visual_legend")) {
+                $this->addField(
+                    SharpFormTextareaField::make("visual:legend")
+                        ->setRowCount(3)
+                        ->setLabel("Légende")
+                );
+            }
 
             if($this->hasField("video")) {
                 $this->addField(
@@ -126,7 +130,9 @@ abstract class SidepanelSharpForm extends SharpForm
                     $column->withSingleField("visual:video_url");
                 }
 
-                $column->withSingleField("visual:legend");
+                if($this->hasField("visual_legend")) {
+                    $column->withSingleField("visual:legend");
+                }
             }
 
             if($this->hasField("download")) {
