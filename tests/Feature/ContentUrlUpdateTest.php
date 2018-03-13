@@ -42,7 +42,7 @@ class ContentUrlUpdateTest extends TestCase
             "slug" => "new-section-slug"
         ]);
 
-        $this->assertEquals(url("new-section-slug"), url($section->url->uri));
+        $this->assertEquals(url("new-section-slug"), url($section->fresh()->url->uri));
         $this->assertEquals(url("new-section-slug/page"), url($tile->fresh()->uri));
         $this->assertEquals(url("new-section-slug/page2"), url($tile2->fresh()->uri));
     }

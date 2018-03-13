@@ -61,15 +61,21 @@ class Page extends Model
      */
     public function toSearchableArray()
     {
+        $urls = $this->urls()->visible()->published()->get()
+            ->filter(function(ContentUrl $url) {
+                return $url->isVisible() && $url->isPublished();
+            });
+
         return [
             "type" => "page",
             "depth" => 5,
             "title" => $this->title,
             "group" => $this->pagegroup ? $this->pagegroup->title : "",
             "text" => $this->body_text,
-            "_tags" => $this->urls()->visible()->published()
-                ->select("domain")->distinct()
-                ->pluck("domain")
+            "_tags" => $urls->pluck("domain")->unique()->all(),
+            "url" => $urls->groupBy("domain")->map(function($urlGroup) {
+                return $urlGroup->pluck("uri")->all();
+            })->all(),
         ];
     }
 

@@ -4,6 +4,7 @@ namespace Code16\Gum\Tests;
 
 use Code16\Gum\GumServiceProvider;
 use Illuminate\Support\Facades\DB;
+use Laravel\Scout\ScoutServiceProvider;
 use Orchestra\Testbench\TestCase as BaseTestCase;
 
 abstract class TestCase extends BaseTestCase
@@ -32,6 +33,6 @@ abstract class TestCase extends BaseTestCase
 
     protected function getPackageProviders($app)
     {
-        return [GumServiceProvider::class];
+        return [GumServiceProvider::class, ScoutServiceProvider::class];
     }
 }

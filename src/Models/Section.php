@@ -125,6 +125,7 @@ class Section extends Model
             "group" => "",
             "text" => $this->heading_text,
             "_tags" => $this->domain,
+            "url" => $this->url->uri
         ];
     }
 
