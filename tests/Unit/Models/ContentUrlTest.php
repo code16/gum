@@ -18,24 +18,24 @@ class ContentUrlTest extends TestCase
     function is_visible_works_recursively()
     {
         $sectionUrl = ContentUrl::create([
-            "uri" => "/section", "content_id" => 1, "content_type" => "section",
+            "uri" => "/section", "content_id" => factory(Section::class)->create()->id, "content_type" => Section::class,
             "visibility" => "ONLINE"
         ]);
 
         $pagegroupUrl = ContentUrl::create([
-            "uri" => "/section/pagegroup", "content_id" => 1, "content_type" => "pagegroup",
+            "uri" => "/section/pagegroup", "content_id" => factory(Pagegroup::class)->create()->id, "content_type" => Pagegroup::class,
             "visibility" => "ONLINE",
             "parent_id" => $sectionUrl->id
         ]);
 
         $pageUrl = ContentUrl::create([
-            "uri" => "/section/pagegroup/page", "content_id" => 1, "content_type" => "page",
+            "uri" => "/section/pagegroup/page", "content_id" => factory(Page::class)->create()->id, "content_type" => Page::class,
             "visibility" => "ONLINE",
             "parent_id" => $pagegroupUrl->id
         ]);
 
         $page2Url = ContentUrl::create([
-            "uri" => "/section/pagegroup/page2", "content_id" => 2, "content_type" => "page",
+            "uri" => "/section/pagegroup/page2", "content_id" => factory(Page::class)->create()->id, "content_type" => Page::class,
             "visibility" => "OFFLINE",
             "parent_id" => $pagegroupUrl->id
         ]);
@@ -46,13 +46,13 @@ class ContentUrlTest extends TestCase
         $this->assertFalse($page2Url->isVisible());
 
         $pagegroup2Url = ContentUrl::create([
-            "uri" => "/section/pagegroup2", "content_id" => 2, "content_type" => "pagegroup",
+            "uri" => "/section/pagegroup2", "content_id" => factory(Pagegroup::class)->create()->id, "content_type" => Pagegroup::class,
             "visibility" => "OFFLINE",
             "parent_id" => $sectionUrl->id
         ]);
 
         $page3Url = ContentUrl::create([
-            "uri" => "/section/pagegroup2/page", "content_id" => 3, "content_type" => "page",
+            "uri" => "/section/pagegroup2/page", "content_id" => factory(Page::class)->create()->id, "content_type" => Page::class,
             "visibility" => "ONLINE",
             "parent_id" => $pagegroup2Url->id
         ]);
@@ -65,23 +65,23 @@ class ContentUrlTest extends TestCase
     function is_published_works_recursively()
     {
         $sectionUrl = ContentUrl::create([
-            "uri" => "/section", "content_id" => 1, "content_type" => "section"
+            "uri" => "/section", "content_id" => factory(Section::class)->create()->id, "content_type" => Section::class
         ]);
 
         $pagegroupUrl = ContentUrl::create([
-            "uri" => "/section/pagegroup", "content_id" => 1, "content_type" => "pagegroup",
+            "uri" => "/section/pagegroup", "content_id" => factory(Pagegroup::class)->create()->id, "content_type" => Pagegroup::class,
             "published_at" => Carbon::yesterday(), "unpublished_at" => Carbon::tomorrow(),
             "parent_id" => $sectionUrl->id
         ]);
 
         $pageUrl = ContentUrl::create([
-            "uri" => "/section/pagegroup/page", "content_id" => 1, "content_type" => "page",
+            "uri" => "/section/pagegroup/page", "content_id" => factory(Page::class)->create()->id, "content_type" => Page::class,
             "published_at" => Carbon::yesterday(), "unpublished_at" => Carbon::tomorrow(),
             "parent_id" => $pagegroupUrl->id
         ]);
 
         $page2Url = ContentUrl::create([
-            "uri" => "/section/pagegroup/page2", "content_id" => 2, "content_type" => "page",
+            "uri" => "/section/pagegroup/page2", "content_id" => factory(Page::class)->create()->id, "content_type" => Page::class,
             "published_at" => Carbon::yesterday()->subDay(), "unpublished_at" => Carbon::yesterday(),
             "parent_id" => $pagegroupUrl->id
         ]);
@@ -92,13 +92,13 @@ class ContentUrlTest extends TestCase
         $this->assertFalse($page2Url->isPublished());
 
         $pagegroup2Url = ContentUrl::create([
-            "uri" => "/section/pagegroup2", "content_id" => 2, "content_type" => "pagegroup",
+            "uri" => "/section/pagegroup2", "content_id" => factory(Pagegroup::class)->create()->id, "content_type" => Pagegroup::class,
             "published_at" => Carbon::tomorrow(),
             "parent_id" => $sectionUrl->id
         ]);
 
         $page3Url = ContentUrl::create([
-            "uri" => "/section/pagegroup2/page", "content_id" => 3, "content_type" => "page",
+            "uri" => "/section/pagegroup2/page", "content_id" => factory(Page::class)->create()->id, "content_type" => Page::class,
             "published_at" => Carbon::yesterday(),
             "parent_id" => $pagegroup2Url->id
         ]);

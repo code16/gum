@@ -205,7 +205,7 @@ class ContentUrl extends Model
             "uri" => $newUri
         ]);
 
-        $this->children->each(function(ContentUrl $child) use($newUri) {
+        $this->fresh()->children->each(function(ContentUrl $child) use($newUri) {
             $child->updateUri($newUri);
         });
     }
