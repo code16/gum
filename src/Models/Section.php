@@ -135,7 +135,7 @@ class Section extends Model
      */
     public function shouldBeSearchable()
     {
-        return ($this->is_root && $this->visibility === "ONLINE")
-            || (!$this->is_root && $this->url && $this->url->isVisible() && $this->url->isPublished());
+        return $this->url && $this->url->isVisible()
+            && ($this->is_root || $this->url->isPublished());
     }
 }
