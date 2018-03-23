@@ -95,6 +95,6 @@ class TileObserver
     {
         return $tile->contentUrl
             && $tile->contentUrl->content instanceof Section
-            && $tile->contentUrl->content->isHome();
+            && $tile->contentUrl->content->is_root;
     }
 }

@@ -224,8 +224,27 @@ class ContentUrlDeletionTest extends TestCase
     /** @test */
     function home_section_url_is_not_deleted_on_tile_deletion()
     {
-        $rootSection = factory(Section::class)->create(["slug" => ""]);
-        $rootSection->url()->create(["uri" => "/"]);
+        $homeSection = factory(Section::class)->create(["is_root" => 1, "slug" => ""]);
+        $homeSection->url()->create(["uri" => "/"]);
+        $section = factory(Section::class)->create(["slug" => "section"]);
+        $tileblock = $section->tileblocks()->create(factory(Tileblock::class)->make()->toArray());
+        $tile = $tileblock->tiles()->create(factory(Tile::class)->make([
+            "linkable_id" => $homeSection->id, "linkable_type" => Section::class
+        ])->toArray());
+
+        $tile->delete();
+
+        $this->assertDatabaseHas("content_urls", [
+            "uri" => "/",
+            "content_id" => $homeSection->id,
+            "content_type" => Section::class,
+        ]);
+    }
+
+    /** @test */
+    function root_section_url_is_not_deleted_on_tile_deletion()
+    {
+        $rootSection = factory(Section::class)->create(["is_root" => 1, "slug"=>"root"]);
         $section = factory(Section::class)->create(["slug" => "section"]);
         $tileblock = $section->tileblocks()->create(factory(Tileblock::class)->make()->toArray());
         $tile = $tileblock->tiles()->create(factory(Tile::class)->make([
@@ -235,7 +254,6 @@ class ContentUrlDeletionTest extends TestCase
         $tile->delete();
 
         $this->assertDatabaseHas("content_urls", [
-            "uri" => "/",
             "content_id" => $rootSection->id,
             "content_type" => Section::class,
         ]);
