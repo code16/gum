@@ -222,6 +222,26 @@ class ContentUrlDeletionTest extends TestCase
     }
 
     /** @test */
+    function home_section_url_is_not_deleted_on_tile_deletion()
+    {
+        $rootSection = factory(Section::class)->create(["slug" => ""]);
+        $rootSection->url()->create(["uri" => "/"]);
+        $section = factory(Section::class)->create(["slug" => "section"]);
+        $tileblock = $section->tileblocks()->create(factory(Tileblock::class)->make()->toArray());
+        $tile = $tileblock->tiles()->create(factory(Tile::class)->make([
+            "linkable_id" => $rootSection->id, "linkable_type" => Section::class
+        ])->toArray());
+
+        $tile->delete();
+
+        $this->assertDatabaseHas("content_urls", [
+            "uri" => "/",
+            "content_id" => $rootSection->id,
+            "content_type" => Section::class,
+        ]);
+    }
+
+    /** @test */
     function urls_are_deleted_on_pagegroup_deletion()
     {
         $section = factory(Section::class)->create(["slug" => "section"]);

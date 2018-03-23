@@ -42,7 +42,9 @@ class TileObserver
      */
     public function deleted(Tile $tile)
     {
-        if($tile->contentUrl && !$this->tileUrlIsUsedElsewhere($tile)) {
+        if($tile->contentUrl
+            && !$this->tileUrlIsUsedElsewhere($tile)
+            && !$this->tileIsLinkedToNonDeletableContent($tile)) {
             // There is no other Tile linked to this content, remove URL
             $tile->contentUrl->delete();
         }
@@ -58,7 +60,7 @@ class TileObserver
         }
 
         if($url->content_type == Section::class) {
-            if($url->content->is_root || $url->parent->content_id != $tile->tileblock->section_id) {
+            if($url->content->is_root || ($url->parent && $url->parent->content_id != $tile->tileblock->section_id)) {
                 // Visibility IS NOT cascade down for this Section since
                 // we aren't in its main path (this tile is a "second link"
                 // toward its main URL)
@@ -73,11 +75,26 @@ class TileObserver
         ]);
     }
 
+    /**
+     * @param Tile $tile
+     * @return bool
+     */
     protected function tileUrlIsUsedElsewhere(Tile $tile): bool
     {
         return $tile->contentUrl
             && Tile::where("content_url_id", $tile->content_url_id)
                 ->where("id", "!=", $tile->id)
                 ->count() != 0;
+    }
+
+    /**
+     * @param Tile $tile
+     * @return bool
+     */
+    protected function tileIsLinkedToNonDeletableContent(Tile $tile): bool
+    {
+        return $tile->contentUrl
+            && $tile->contentUrl->content instanceof Section
+            && $tile->contentUrl->content->isHome();
     }
 }
