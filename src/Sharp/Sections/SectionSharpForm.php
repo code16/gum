@@ -40,9 +40,12 @@ class SectionSharpForm extends SharpForm
             SharpFormMarkdownField::make("heading_text")
                 ->setLabel("Chapeau")
                 ->setToolbar([
-                    SharpFormMarkdownField::B, SharpFormMarkdownField::I,
+                    SharpFormMarkdownField::H2,
                     SharpFormMarkdownField::SEPARATOR,
+                    SharpFormMarkdownField::B, SharpFormMarkdownField::I,
                     SharpFormMarkdownField::A,
+                    SharpFormMarkdownField::SEPARATOR,
+                    SharpFormMarkdownField::HR,
                 ])
         )->addField(
             SharpFormTextField::make("slug")
