@@ -25,7 +25,8 @@ class TileObserver
         if($mustRemove && $tile->contentUrl) {
             if($this->tileUrlIsUsedElsewhere($tile)) {
                 $tile->contentUrl()->dissociate()->save();
-            } else {
+
+            } elseif(!$this->tileIsLinkedToNonDeletableContent($tile)) {
                 $tile->contentUrl->delete();
             }
         }

@@ -65,6 +65,40 @@ class ContentUrlDeletionTest extends TestCase
     }
 
     /** @test */
+    function old_section_url_is_not_removed_on_tile_update_if_its_a_root()
+    {
+        $homeSection = factory(Section::class)->create(["is_root" => 1, "slug" => ""]);
+        $homeSection->url()->create(["uri" => "/"]);
+        $section = factory(Section::class)->create(["slug" => "section"]);
+        $rootSection = factory(Section::class)->create(["slug" => "section", "is_root" => 1]);
+        $tileblock = $homeSection->tileblocks()->create(factory(Tileblock::class)->make()->toArray());
+        $tile = $tileblock->tiles()->create(factory(Tile::class)->make([
+            "linkable_id" => $section->id, "linkable_type" => Section::class
+        ])->toArray());
+        $tileToRoot = $tileblock->tiles()->create(factory(Tile::class)->make([
+            "linkable_id" => $rootSection->id, "linkable_type" => Section::class
+        ])->toArray());
+
+        $tile->update([
+            "free_link_url" => "some/link", "linkable_id" => null, "linkable_type" => null
+        ]);
+
+        $tileToRoot->update([
+            "free_link_url" => "some/link", "linkable_id" => null, "linkable_type" => null
+        ]);
+
+        $this->assertDatabaseHas("content_urls", [
+            "content_id" => $rootSection->id,
+            "content_type" => Section::class,
+        ]);
+
+        $this->assertDatabaseMissing("content_urls", [
+            "content_id" => $section->id,
+            "content_type" => Section::class,
+        ]);
+    }
+
+    /** @test */
     function old_page_url_is_removed_and_new_one_is_created_on_tile_update()
     {
         list($section, $page, $tile) = $this->createSectionWithTileToPage();
