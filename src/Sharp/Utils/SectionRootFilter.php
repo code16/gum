@@ -7,6 +7,18 @@ use Code16\Sharp\EntityList\EntityListRequiredFilter;
 
 class SectionRootFilter implements EntityListRequiredFilter
 {
+    /**
+     * @var bool
+     */
+    protected $withHome;
+
+    /**
+     * @param bool $withHome
+     */
+    public function __construct($withHome = false)
+    {
+        $this->withHome = $withHome;
+    }
 
     public function label()
     {
@@ -22,7 +34,9 @@ class SectionRootFilter implements EntityListRequiredFilter
             ["-" => "- Aucune -"] +
             Section::domain(SharpGumSessionValue::getDomain())
                 ->where("is_root", true)
-                ->where("slug", "!=", "")
+                ->when(!$this->withHome, function($query) {
+                    $query->where("slug", "!=", "");
+                })
                 ->orderBy("root_menu_order")
                 ->get()
                 ->pluck("url.uri", "id")

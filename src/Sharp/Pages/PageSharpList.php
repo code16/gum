@@ -66,7 +66,7 @@ class PageSharpList extends GumSharpList
             });
         }
 
-        $this->addFilter("root", SectionRootFilter::class, function($value, EntityListQueryParams $params) {
+        $this->addFilter("root", new SectionRootFilter(true), function($value, EntityListQueryParams $params) {
             SharpGumSessionValue::set("root_section", $value);
         });
 
@@ -88,10 +88,30 @@ class PageSharpList extends GumSharpList
 
         if($rootId && ($root = Section::where("is_root", true)->find($rootId))) {
             $pages->whereExists(function($query) use($root) {
-                return $query->from("content_urls")
+                $subquery = $query->from("content_urls")
                     ->whereRaw("content_id = pages.id")
-                    ->where("content_type", Page::class)
-                    ->where("uri", "like", "{$root->url->uri}%");
+                    ->where("content_type", Page::class);
+
+                if($root->isHome()) {
+                    $subquery->where("parent_id", function($query) {
+                        return $query->select("id")
+                            ->from("content_urls")
+                            ->when(SharpGumSessionValue::getDomain(), function($query) {
+                                $query->where("domain", SharpGumSessionValue::getDomain());
+                            })
+                            ->where("uri", "/")
+                            ->limit(1);
+                    });
+
+                } else {
+                    $subquery
+                        ->where("uri", "like", "{$root->url->uri}/%")
+                        ->when(SharpGumSessionValue::getDomain(), function($query) {
+                            $query->where("domain", SharpGumSessionValue::getDomain());
+                        });
+                }
+
+                return $subquery;
             });
 
         } else {

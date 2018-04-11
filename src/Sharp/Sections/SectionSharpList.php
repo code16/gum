@@ -81,6 +81,9 @@ class SectionSharpList extends GumSharpList
                 return $query->from("content_urls")
                     ->whereRaw("content_id = sections.id")
                     ->where("content_type", Section::class)
+                    ->when(SharpGumSessionValue::getDomain(), function($query) {
+                        $query->where("domain", SharpGumSessionValue::getDomain());
+                    })
                     ->where("uri", "like", "{$root->url->uri}%");
             });
 
