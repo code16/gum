@@ -33,7 +33,7 @@ class GumAlgoliaSearchEngine
 
         return [
             new Paginator(
-                collect($result["hits"])
+                collect($result["hits"] ?? [])
                     ->map(function($hit) use($domain) {
                         return (object)[
                             "title" => $hit["_highlightResult"]["title"]["value"],
@@ -45,7 +45,7 @@ class GumAlgoliaSearchEngine
                 $perPage-1,
                 $page
             ),
-            $result["nbHits"]
+            $result["nbHits"] ?? 0
         ];
     }
 
@@ -73,7 +73,7 @@ class GumAlgoliaSearchEngine
 
         return [
             new Paginator(
-                collect($result["hits"])
+                collect($result["hits"] ?? [])
                     ->map(function($hit) use($domain) {
                         return (object)[
                             "id" => $hit["objectID"],
@@ -86,7 +86,7 @@ class GumAlgoliaSearchEngine
                 $perPage-1,
                 $page
             ),
-            $result["nbHits"]
+            $result["nbHits"] ?? 0
         ];
     }
 }

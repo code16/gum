@@ -122,7 +122,7 @@ class Section extends Model
         return [
             "type" => "section",
             "depth" => $this->url->depth,
-            "title" => (new Parsedown)->text($this->title),
+            "title" => strip_tags((new Parsedown)->text($this->title)),
             "group" => "",
             "text" => (new Parsedown)->text($this->heading_text),
             "_tags" => $this->domain,

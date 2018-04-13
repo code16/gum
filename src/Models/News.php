@@ -152,8 +152,8 @@ class News extends Model
             "type" => "news",
             "importance" => $this->importance,
             "published_at" => $this->published_at->timestamp,
-            "surtitle" => $this->surtitle,
-            "title" => $this->title,
+            "surtitle" => strip_tags((new Parsedown)->text($this->surtitle)),
+            "title" => strip_tags((new Parsedown)->text($this->title)),
             "text" => (new Parsedown)->text(($this->heading_text ? $this->heading_text . "\n\n" : "") . $this->body_text),
             "_tags" => $this->tags->pluck("name"),
         ];
