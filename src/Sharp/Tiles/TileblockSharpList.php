@@ -104,6 +104,12 @@ class TileblockSharpList extends GumSharpList
     {
         if($attribute == "tiles") {
             return function($value, $tileblock) {
+
+                $customTransformer = camel_case($tileblock->layout) . "TileCustomTransformer";
+                if(method_exists($this, $customTransformer)) {
+                    return $this->$customTransformer($tileblock);
+                }
+
                 return $tileblock->tiles->map(function(Tile $tile) {
                     $style = "background-color:#eee; padding:5px; display:inline; color:gray;";
                     if($tile->isFreeLink()) {

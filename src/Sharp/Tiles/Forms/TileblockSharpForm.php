@@ -107,7 +107,9 @@ abstract class TileblockSharpForm extends SharpForm
                         $item->withSingleField("body_text");
                     }
 
-                    $item->withFields("link_type|4", "free_link_url|8", "section|8", "pagegroup|8", "page|8");
+                    if($this->tileHasLink()) {
+                        $item->withFields("link_type|4", "free_link_url|8", "section|8", "pagegroup|8", "page|8");
+                    }
 
                     $item->withFields("visibility|4", "published_at|4", "unpublished_at|4");
                 });
@@ -226,6 +228,14 @@ abstract class TileblockSharpForm extends SharpForm
     }
 
     /**
+     * @return bool
+     */
+    protected function tileHasLink(): bool
+    {
+        return true;
+    }
+
+    /**
      * @param $field
      * @return bool
      */
@@ -241,16 +251,18 @@ abstract class TileblockSharpForm extends SharpForm
     protected function cleanUpData($data): array
     {
         if(isset($data["tiles"])) {
-            foreach ($data["tiles"] as &$dataTile) {
-                if ($dataTile["link_type"] != "free") {
-                    $dataTile["linkable_type"] = $dataTile["link_type"];
-                    $dataTile["linkable_id"] = $dataTile[strtolower(basename(str_replace('\\', '/', $dataTile["link_type"])))];
-                } else {
-                    $dataTile["linkable_type"] = null;
-                    $dataTile["linkable_id"] = null;
-                }
+            if($this->tileHasLink()) {
+                foreach ($data["tiles"] as &$dataTile) {
+                    if ($dataTile["link_type"] != "free") {
+                        $dataTile["linkable_type"] = $dataTile["link_type"];
+                        $dataTile["linkable_id"] = $dataTile[strtolower(basename(str_replace('\\', '/', $dataTile["link_type"])))];
+                    } else {
+                        $dataTile["linkable_type"] = null;
+                        $dataTile["linkable_id"] = null;
+                    }
 
-                unset($dataTile["link_type"], $dataTile["page"], $dataTile["section"], $dataTile["pagegroup"]);
+                    unset($dataTile["link_type"], $dataTile["page"], $dataTile["section"], $dataTile["pagegroup"]);
+                }
             }
         }
 
@@ -334,44 +346,48 @@ abstract class TileblockSharpForm extends SharpForm
                 ->setMondayFirst()
                 ->setHasTime(true)
                 ->setDisplayFormat("DD/MM/YYYY HH:mm")
-        )->addItemField(
-            SharpFormSelectField::make("link_type", [
-                "free" => "Lien libre",
-                Page::class => "Page",
-                Pagegroup::class => "Groupe de pages",
-                Section::class => "Section",
-            ])
-                ->setDisplayAsDropdown()
-                ->setLabel("Lien")
-        )->addItemField(
-            SharpFormAutocompleteField::make("section", "local")
-                ->setLocalSearchKeys(["title"])
-                ->addConditionalDisplay("link_type", Section::class)
-                ->setResultItemInlineTemplate("{{title}} <small>{{url ? url.uri : ''}}</small>")
-                ->setListItemInlineTemplate("{{title}}<br><small>{{url ? url.uri : ''}}</small>")
-                ->setLocalValues(Section::domain(SharpGumSessionValue::getDomain())->with("url")->orderBy("title")->get()->all())
-                ->setLabel("Section")
-        )->addItemField(
-            SharpFormAutocompleteField::make("page", "local")
-                ->setLocalSearchKeys(["label"])
-                ->addConditionalDisplay("link_type", Page::class)
-                ->setResultItemInlineTemplate("{{label}}")
-                ->setListItemInlineTemplate("{{label}}")
-                ->setLocalValues(Page::whereNull("pagegroup_id")->orderBy("title")->get()->pluck("title", "id")->all())
-                ->setLabel("Page")
-        )->addItemField(
-            SharpFormAutocompleteField::make("pagegroup", "local")
-                ->setLocalSearchKeys(["label"])
-                ->addConditionalDisplay("link_type", Pagegroup::class)
-                ->setResultItemInlineTemplate("{{label}}")
-                ->setListItemInlineTemplate("{{label}}")
-                ->setLocalValues(Pagegroup::orderBy("title")->get()->pluck("title", "id")->all())
-                ->setLabel("Groupe de pages")
-        )->addItemField(
-            SharpFormTextField::make("free_link_url")
-                ->addConditionalDisplay("link_type", "free")
-                ->setLabel("Lien")
         );
+
+        if($this->tileHasLink()) {
+            $listField->addItemField(
+                SharpFormSelectField::make("link_type", [
+                    "free" => "Lien libre",
+                    Page::class => "Page",
+                    Pagegroup::class => "Groupe de pages",
+                    Section::class => "Section",
+                ])
+                    ->setDisplayAsDropdown()
+                    ->setLabel("Lien")
+            )->addItemField(
+                SharpFormAutocompleteField::make("section", "local")
+                    ->setLocalSearchKeys(["title"])
+                    ->addConditionalDisplay("link_type", Section::class)
+                    ->setResultItemInlineTemplate("{{title}} <small>{{url ? url.uri : ''}}</small>")
+                    ->setListItemInlineTemplate("{{title}}<br><small>{{url ? url.uri : ''}}</small>")
+                    ->setLocalValues(Section::domain(SharpGumSessionValue::getDomain())->with("url")->orderBy("title")->get()->all())
+                    ->setLabel("Section")
+            )->addItemField(
+                SharpFormAutocompleteField::make("page", "local")
+                    ->setLocalSearchKeys(["label"])
+                    ->addConditionalDisplay("link_type", Page::class)
+                    ->setResultItemInlineTemplate("{{label}}")
+                    ->setListItemInlineTemplate("{{label}}")
+                    ->setLocalValues(Page::whereNull("pagegroup_id")->orderBy("title")->get()->pluck("title", "id")->all())
+                    ->setLabel("Page")
+            )->addItemField(
+                SharpFormAutocompleteField::make("pagegroup", "local")
+                    ->setLocalSearchKeys(["label"])
+                    ->addConditionalDisplay("link_type", Pagegroup::class)
+                    ->setResultItemInlineTemplate("{{label}}")
+                    ->setListItemInlineTemplate("{{label}}")
+                    ->setLocalValues(Pagegroup::orderBy("title")->get()->pluck("title", "id")->all())
+                    ->setLabel("Groupe de pages")
+            )->addItemField(
+                SharpFormTextField::make("free_link_url")
+                    ->addConditionalDisplay("link_type", "free")
+                    ->setLabel("Lien")
+            );
+        }
 
         return $listField;
     }
