@@ -42,25 +42,9 @@ class PageSharpForm extends SharpForm
                 ->setResultItemInlineTemplate("{{label}}")
                 ->setLocalValues(Pagegroup::all()->pluck("title", "id")->all())
         )->addField(
-            SharpFormMarkdownField::make("body_text")
-                ->setLabel("Texte")
-                ->setHeight(600)
-                ->setToolbar([
-                    SharpFormMarkdownField::H1,
-                    SharpFormMarkdownField::SEPARATOR,
-                    SharpFormMarkdownField::B, SharpFormMarkdownField::I,
-                    SharpFormMarkdownField::SEPARATOR,
-                    SharpFormMarkdownField::UL, SharpFormMarkdownField::A,
-                ])
+            $this->bodyField()
         )->addField(
-            SharpFormMarkdownField::make("heading_text")
-                ->setLabel("Chapeau")
-                ->setHeight(250)
-                ->setToolbar([
-                    SharpFormMarkdownField::B, SharpFormMarkdownField::I,
-                    SharpFormMarkdownField::SEPARATOR,
-                    SharpFormMarkdownField::A,
-                ])
+            $this->headingField()
         )->addField(
             SharpFormUploadField::make("visual")
                 ->setCropRatio("16:9")
@@ -75,7 +59,7 @@ class PageSharpForm extends SharpForm
         )->addField(
             SharpFormTextField::make("slug")
                 ->setLabel("URL")
-                ->setHelpMessage("Il s'agit de l'URL (slug) de la page ; laissez ce champ vide pour remplissage automatique à partir du titre. Ne peut contenir que des lettres, des chiffres et des tirets.Attention, si vous modifiez cette valeur, les URLs du site seront modifiées.")
+                ->setHelpMessage("Il s'agit de l'URL (slug) de la page ; laissez ce champ vide pour remplissage automatique à partir du titre. Ne peut contenir que des lettres, des chiffres et des tirets. Attention, si vous modifiez cette valeur, les URLs du site seront modifiées.")
         );
     }
 
@@ -142,4 +126,35 @@ class PageSharpForm extends SharpForm
         Page::findOrFail($id)->delete();
     }
 
+    /**
+     * @return SharpFormMarkdownField
+     */
+    protected function bodyField()
+    {
+        return SharpFormMarkdownField::make("body_text")
+            ->setLabel("Texte")
+            ->setHeight(600)
+            ->setToolbar([
+                SharpFormMarkdownField::H1,
+                SharpFormMarkdownField::SEPARATOR,
+                SharpFormMarkdownField::B, SharpFormMarkdownField::I,
+                SharpFormMarkdownField::SEPARATOR,
+                SharpFormMarkdownField::UL, SharpFormMarkdownField::A,
+            ]);
+    }
+
+    /**
+     * @return SharpFormMarkdownField
+     */
+    protected function headingField()
+    {
+        return SharpFormMarkdownField::make("heading_text")
+            ->setLabel("Chapeau")
+            ->setHeight(250)
+            ->setToolbar([
+                SharpFormMarkdownField::B, SharpFormMarkdownField::I,
+                SharpFormMarkdownField::SEPARATOR,
+                SharpFormMarkdownField::A,
+            ]);
+    }
 }
