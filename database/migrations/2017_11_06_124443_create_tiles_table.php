@@ -15,7 +15,7 @@ class CreateTilesTable extends Migration
     {
         Schema::create('tiles', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('title');
+            $table->string('title')->nullable();
             $table->string('surtitle')->nullable();
             $table->text('body_text')->nullable();
 

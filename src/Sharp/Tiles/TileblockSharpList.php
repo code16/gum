@@ -133,6 +133,10 @@ class TileblockSharpList extends GumSharpList
         return null;
     }
 
+    /**
+     * @param Tile $tile
+     * @return string
+     */
     protected function formatPublishDates(Tile $tile)
     {
         if(!$tile->published_at && !$tile->unpublished_at) {
