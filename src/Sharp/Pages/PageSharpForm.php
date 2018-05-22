@@ -46,13 +46,7 @@ class PageSharpForm extends SharpForm
         )->addField(
             $this->headingField()
         )->addField(
-            SharpFormUploadField::make("visual")
-                ->setCropRatio("16:9")
-                ->setFileFilterImages()
-                ->setMaxFileSize(5)
-                ->setStorageDisk("local")
-                ->setStorageBasePath("data/pages/{id}")
-                ->setHelpMessage("Sera retaillé en 16/9")
+            $this->visualField()
         )->addField(
             SharpFormTextField::make("visual:legend")
                 ->setPlaceholder("Légende")
@@ -156,5 +150,17 @@ class PageSharpForm extends SharpForm
                 SharpFormMarkdownField::SEPARATOR,
                 SharpFormMarkdownField::A,
             ]);
+    }
+
+    /**
+     * @return SharpFormUploadField
+     */
+    protected function visualField()
+    {
+        return SharpFormUploadField::make("visual")
+            ->setFileFilterImages()
+            ->setMaxFileSize(5)
+            ->setStorageDisk("local")
+            ->setStorageBasePath("data/pages/{id}");
     }
 }
