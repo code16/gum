@@ -94,28 +94,36 @@ class PageSharpList extends GumSharpList
                     ->where("content_type", Page::class);
 
                 if($root->isHome()) {
-                    $subquery
-                        ->where(function($subsubquery) {
-                            return $subsubquery->
-                            where("parent_id", function ($query) {
+                    // Root case
+                    $subquery->where(function($subsubquery) {
+                        return $subsubquery->
+                            whereIn("parent_id", function ($query) {
+                                // Pages of Pagegroups linked to the root...
                                 return $query->select("id")
                                     ->from("content_urls")
                                     ->where("content_type", Pagegroup::class)
                                     ->when(SharpGumSessionValue::getDomain(), function ($query) {
                                         $query->where("domain", SharpGumSessionValue::getDomain());
                                     })
-                                    ->where("uri", "like", "/%")
-                                    ->limit(1);
+                                    ->where("parent_id", function($query) {
+                                        return $query->select("id")
+                                            ->from("content_urls")
+                                            ->when(SharpGumSessionValue::getDomain(), function ($query) {
+                                                $query->where("domain", SharpGumSessionValue::getDomain());
+                                            })
+                                            ->where("uri", "/")
+                                            ->limit(1);
+                                    });
                             })
-                                ->orWhere("parent_id", function ($query) {
-                                    return $query->select("id")
-                                        ->from("content_urls")
-                                        ->when(SharpGumSessionValue::getDomain(), function ($query) {
-                                            $query->where("domain", SharpGumSessionValue::getDomain());
-                                        })
-                                        ->where("uri", "/")
-                                        ->limit(1);
-                                });
+                            ->orWhere("parent_id", function ($query) {
+                                // Pages of Sections linked to the root...
+                                return $query->select("id")
+                                    ->from("content_urls")
+                                    ->when(SharpGumSessionValue::getDomain(), function ($query) {
+                                        $query->where("domain", SharpGumSessionValue::getDomain());
+                                    })
+                                    ->where("uri", "/");
+                            });
                         });
 
                 } else {
