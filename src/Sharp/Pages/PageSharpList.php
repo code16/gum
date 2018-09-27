@@ -4,6 +4,7 @@ namespace Code16\Gum\Sharp\Pages;
 
 use Closure;
 use Code16\Gum\Models\Page;
+use Code16\Gum\Models\Pagegroup;
 use Code16\Gum\Models\Section;
 use Code16\Gum\Sharp\Utils\DomainFilter;
 use Code16\Gum\Sharp\Utils\GumSharpList;
@@ -93,15 +94,29 @@ class PageSharpList extends GumSharpList
                     ->where("content_type", Page::class);
 
                 if($root->isHome()) {
-                    $subquery->where("parent_id", function($query) {
-                        return $query->select("id")
-                            ->from("content_urls")
-                            ->when(SharpGumSessionValue::getDomain(), function($query) {
-                                $query->where("domain", SharpGumSessionValue::getDomain());
+                    $subquery
+                        ->where(function($subsubquery) {
+                            return $subsubquery->
+                            where("parent_id", function ($query) {
+                                return $query->select("id")
+                                    ->from("content_urls")
+                                    ->where("content_type", Pagegroup::class)
+                                    ->when(SharpGumSessionValue::getDomain(), function ($query) {
+                                        $query->where("domain", SharpGumSessionValue::getDomain());
+                                    })
+                                    ->where("uri", "like", "/%")
+                                    ->limit(1);
                             })
-                            ->where("uri", "/")
-                            ->limit(1);
-                    });
+                                ->orWhere("parent_id", function ($query) {
+                                    return $query->select("id")
+                                        ->from("content_urls")
+                                        ->when(SharpGumSessionValue::getDomain(), function ($query) {
+                                            $query->where("domain", SharpGumSessionValue::getDomain());
+                                        })
+                                        ->where("uri", "/")
+                                        ->limit(1);
+                                });
+                        });
 
                 } else {
                     $subquery
