@@ -37,16 +37,7 @@ class SectionSharpForm extends SharpForm
                 ->setLabel("Titre menu")
                 ->setHelpMessage("Utilisé dans les menus / fils d'ariane. Facultatif.")
         )->addField(
-            SharpFormMarkdownField::make("heading_text")
-                ->setLabel("Chapeau")
-                ->setToolbar([
-                    SharpFormMarkdownField::H2,
-                    SharpFormMarkdownField::SEPARATOR,
-                    SharpFormMarkdownField::B, SharpFormMarkdownField::I,
-                    SharpFormMarkdownField::A,
-                    SharpFormMarkdownField::SEPARATOR,
-                    SharpFormMarkdownField::HR,
-                ])
+            $this->headingField()
         )->addField(
             SharpFormTextField::make("slug")
                 ->setLabel("URL")
@@ -130,5 +121,19 @@ class SectionSharpForm extends SharpForm
     function delete($id)
     {
         Section::findOrFail($id)->delete();
+    }
+
+    protected function headingField()
+    {
+        return SharpFormMarkdownField::make("heading_text")
+            ->setLabel("Chapeau")
+            ->setToolbar([
+                SharpFormMarkdownField::H2,
+                SharpFormMarkdownField::SEPARATOR,
+                SharpFormMarkdownField::B, SharpFormMarkdownField::I,
+                SharpFormMarkdownField::A,
+                SharpFormMarkdownField::SEPARATOR,
+                SharpFormMarkdownField::HR,
+            ]);
     }
 }
