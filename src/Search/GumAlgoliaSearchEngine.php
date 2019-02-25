@@ -39,7 +39,7 @@ class GumAlgoliaSearchEngine
                             "title" => $hit["_highlightResult"]["title"]["value"],
                             "text" => $hit["_snippetResult"]["text"]["value"],
                             "group" => $hit["_highlightResult"]["group"]["value"],
-                            "url" => $hit["type"] == "section" ? $hit["url"] : $hit["url"][$domain][0]
+                            "url" => $hit["type"] == "page" ? $hit["url"][$domain][0] : $hit["url"]
                         ];
                     }),
                 $perPage-1,
