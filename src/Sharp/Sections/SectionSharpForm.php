@@ -15,11 +15,11 @@ use Code16\Sharp\Form\Fields\SharpFormTextareaField;
 use Code16\Sharp\Form\Fields\SharpFormTextField;
 use Code16\Sharp\Form\Layout\FormLayoutColumn;
 use Code16\Sharp\Form\SharpForm;
-use Code16\Sharp\Http\WithSharpFormContext;
+use Code16\Sharp\Http\WithSharpContext;
 
 class SectionSharpForm extends SharpForm
 {
-    use WithSharpFormEloquentUpdater, WithSharpFormContext, SharpFormWithStyleKey;
+    use WithSharpFormEloquentUpdater, WithSharpContext, SharpFormWithStyleKey;
 
     /**
      * Build form fields using ->addField()

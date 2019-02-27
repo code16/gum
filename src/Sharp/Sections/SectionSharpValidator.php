@@ -4,12 +4,12 @@ namespace Code16\Gum\Sharp\Sections;
 
 use Code16\Gum\Sharp\Utils\SharpGumSessionValue;
 use Code16\Gum\Sharp\Utils\SlugRule;
-use Code16\Sharp\Http\WithSharpFormContext;
+use Code16\Sharp\Http\WithSharpContext;
 use Illuminate\Foundation\Http\FormRequest;
 
 class SectionSharpValidator extends FormRequest
 {
-    use WithSharpFormContext;
+    use WithSharpContext;
 
     /**
      * Determine if the user is authorized to make this request.

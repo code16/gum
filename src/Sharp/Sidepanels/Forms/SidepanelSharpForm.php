@@ -13,11 +13,11 @@ use Code16\Sharp\Form\Fields\SharpFormTextField;
 use Code16\Sharp\Form\Fields\SharpFormUploadField;
 use Code16\Sharp\Form\Layout\FormLayoutColumn;
 use Code16\Sharp\Form\SharpForm;
-use Code16\Sharp\Http\WithSharpFormContext;
+use Code16\Sharp\Http\WithSharpContext;
 
 abstract class SidepanelSharpForm extends SharpForm
 {
-    use WithSharpFormEloquentUpdater, WithSharpFormContext;
+    use WithSharpFormEloquentUpdater, WithSharpContext;
 
     /**
      * Build form fields using ->addField()
