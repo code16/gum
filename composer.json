@@ -10,7 +10,7 @@
     "algolia/algoliasearch-client-php": "^1.25",
     "laravel/framework": "5.6.*|5.7.*",
     "laravel/scout": "^4.0",
-    "code16/sharp": "4.*",
+    "code16/sharp": "4.1.*",
     "moontoast/math": "^1.1"
   },
   "require-dev": {
