@@ -364,7 +364,7 @@ abstract class TileblockSharpForm extends SharpForm
                     ->addConditionalDisplay("link_type", Section::class)
                     ->setResultItemInlineTemplate("{{title}} <small>{{url ? url.uri : ''}}</small>")
                     ->setListItemInlineTemplate("{{title}}<br><small>{{url ? url.uri : ''}}</small>")
-                    ->setLocalValues(Section::domain(SharpGumSessionValue::getDomain())->with("url")->orderBy("title")->get()->all())
+                    ->setLocalValues(Section::domain(SharpGumSessionValue::getDomain())->with("url")->orderBy("title")->get()->toArray())
                     ->setLabel("Section")
             )->addItemField(
                 SharpFormAutocompleteField::make("page", "local")
