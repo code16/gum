@@ -11,7 +11,7 @@ class GumSharpTestCase extends TestCase
 {
     use RefreshDatabase, SharpAssertions;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
 

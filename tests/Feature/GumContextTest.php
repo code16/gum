@@ -16,7 +16,7 @@ class GumContextTest extends TestCase
 {
     use RefreshDatabase, ContentUrlTestHelpers;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
 
