@@ -95,6 +95,10 @@ abstract class TileblockSharpForm extends SharpForm
                         }
                     }
 
+                    foreach ($this->additionalVisualFields() as $key => $field) {
+                        $item->withSingleField($key);
+                    }
+
                     if($this->tileHasField("surtitle")) {
                         $item->withSingleField("surtitle");
                     }
@@ -236,6 +240,14 @@ abstract class TileblockSharpForm extends SharpForm
     }
 
     /**
+     * @return array
+     */
+    protected function additionalVisualFields(): array
+    {
+        return [];
+    }
+
+    /**
      * @param $field
      * @return bool
      */
@@ -303,6 +315,10 @@ abstract class TileblockSharpForm extends SharpForm
             )->addItemField(
                 SharpFormCheckField::make("visual:is_video", "Tuile vidéo")
             );
+
+            foreach($this->additionalVisualFields() as $field) {
+                $listField->addItemField($field);
+            }
         }
 
         if($this->tileHasField("title")) {
