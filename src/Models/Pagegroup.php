@@ -12,6 +12,9 @@ class Pagegroup extends Model
 {
     use WithUuid, WithMenuTitle;
 
+    /** @var string */
+    protected $keyType = 'string';
+
     public $incrementing = false;
 
     protected $guarded = [];
