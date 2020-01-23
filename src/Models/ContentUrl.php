@@ -8,6 +8,7 @@ use Code16\Gum\Models\Utils\WithVisibility;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Str;
 
 class ContentUrl extends Model
 {
@@ -19,14 +20,14 @@ class ContentUrl extends Model
 
     protected $touches = ['content', 'children'];
 
-    public function scopeByPath(Builder $query, string $path)
+    public static function scopeByPath(Builder $query, string $path)
     {
-        $path = !starts_with($path, "/") ? "/$path" : $path;
+        $path = !Str::startsWith($path, "/") ? "/$path" : $path;
 
         return $query->where("uri", $path);
     }
 
-    public function scopeForDomain(Builder $query, string $domain = null)
+    public static function scopeForDomain(Builder $query, string $domain = null)
     {
         return $query->where("domain", $domain);
     }
