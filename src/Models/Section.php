@@ -12,9 +12,14 @@ use Parsedown;
 class Section extends Model
 {
     use WithUuid, WithMenuTitle, Searchable;
+    
+    /** @var string */
+    protected $keyType = 'string';
 
+    /** @var bool */
     public $incrementing = false;
 
+    /** @var array */
     protected $guarded = [];
 
     /**

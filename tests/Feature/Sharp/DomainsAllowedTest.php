@@ -4,6 +4,7 @@ namespace Code16\Gum\Tests\Feature\Sharp;
 
 use Code16\Gum\Sharp\Utils\SharpGumSessionValue;
 use Code16\Gum\Tests\Feature\Utils\UserModel;
+use Illuminate\Support\Str;
 
 class DomainsAllowedTest extends GumSharpTestCase
 {
@@ -16,7 +17,7 @@ class DomainsAllowedTest extends GumSharpTestCase
                 'email' => $faker->unique()->safeEmail,
                 'name' => $faker->name,
                 'password' => bcrypt('secret'),
-                'remember_token' => str_random(10),
+                'remember_token' => Str::random(10),
             ];
         });
     }

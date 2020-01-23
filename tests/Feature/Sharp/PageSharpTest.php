@@ -7,6 +7,7 @@ use Code16\Gum\Models\Pagegroup;
 use Code16\Gum\Models\Section;
 use Code16\Gum\Models\Tile;
 use Code16\Gum\Models\Tileblock;
+use Illuminate\Support\Arr;
 
 class PageSharpTest extends GumSharpTestCase
 {
@@ -21,7 +22,7 @@ class PageSharpTest extends GumSharpTestCase
         $this->updateSharpForm("pages", $page->id, $values)
             ->assertStatus(200);
 
-        $this->assertDatabaseHas("pages", array_except($values, ["visual", "visual:legend"]));
+        $this->assertDatabaseHas("pages", Arr::except($values, ["visual", "visual:legend"]));
     }
 
     /** @test */
@@ -31,7 +32,7 @@ class PageSharpTest extends GumSharpTestCase
 
         $this->storeSharpForm("pages", $values)->assertStatus(200);
 
-        $this->assertDatabaseHas("pages", array_except($values, ["visual", "visual:legend"]));
+        $this->assertDatabaseHas("pages", Arr::except($values, ["visual", "visual:legend"]));
     }
 
     /** @test */

@@ -12,6 +12,9 @@ class Page extends Model
 {
     use WithUuid, WithMenuTitle, Searchable;
 
+    /** @var string */
+    protected $keyType = 'string';
+
     public $incrementing = false;
 
     protected $guarded = [];
