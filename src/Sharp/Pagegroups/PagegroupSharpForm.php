@@ -10,6 +10,7 @@ use Code16\Sharp\Form\Fields\SharpFormTextField;
 use Code16\Sharp\Form\Layout\FormLayoutColumn;
 use Code16\Sharp\Form\SharpForm;
 use Code16\Sharp\Http\WithSharpContext;
+use Illuminate\Support\Str;
 
 class PagegroupSharpForm extends SharpForm
 {
@@ -91,7 +92,7 @@ class PagegroupSharpForm extends SharpForm
         $pagegroup = $id ? Pagegroup::findOrFail($id) : new Pagegroup();
 
         if(!trim($data["slug"])) {
-            $data["slug"] = str_slug($data["title"]);
+            $data["slug"] = Str::slug($data["title"]);
         }
 
         $this->save($pagegroup, $data);

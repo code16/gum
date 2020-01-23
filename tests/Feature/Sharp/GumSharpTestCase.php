@@ -6,6 +6,7 @@ use Code16\Gum\Tests\Feature\Utils\UserModel;
 use Code16\Gum\Tests\TestCase;
 use Code16\Sharp\Utils\Testing\SharpAssertions;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Str;
 
 class GumSharpTestCase extends TestCase
 {
@@ -71,7 +72,7 @@ class GumSharpTestCase extends TestCase
                 'email' => $faker->unique()->safeEmail,
                 'name' => $faker->name,
                 'password' => bcrypt('secret'),
-                'remember_token' => str_random(10),
+                'remember_token' => Str::random(10),
             ];
         });
     }

@@ -14,6 +14,7 @@ use Code16\Sharp\Form\Fields\SharpFormUploadField;
 use Code16\Sharp\Form\Layout\FormLayoutColumn;
 use Code16\Sharp\Form\SharpForm;
 use Code16\Sharp\Http\WithSharpContext;
+use Illuminate\Support\Str;
 
 class PageSharpForm extends SharpForm
 {
@@ -104,7 +105,7 @@ class PageSharpForm extends SharpForm
         $page = $id ? Page::findOrFail($id) : new Page();
 
         if(array_key_exists("slug", $data) && !trim($data["slug"])) {
-            $data["slug"] = str_slug($data["title"]);
+            $data["slug"] = Str::slug($data["title"]);
         }
 
         $this->save($page, $data);

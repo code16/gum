@@ -16,6 +16,7 @@ use Code16\Sharp\Form\Fields\SharpFormTextField;
 use Code16\Sharp\Form\Layout\FormLayoutColumn;
 use Code16\Sharp\Form\SharpForm;
 use Code16\Sharp\Http\WithSharpContext;
+use Illuminate\Support\Str;
 
 class SectionSharpForm extends SharpForm
 {
@@ -107,7 +108,7 @@ class SectionSharpForm extends SharpForm
             : new Section(["domain" => SharpGumSessionValue::getDomain()]);
 
         if(!trim($data["slug"])) {
-            $data["slug"] = str_slug($data["title"]);
+            $data["slug"] = Str::slug($data["title"]);
         }
 
         $this->save($section, $data);

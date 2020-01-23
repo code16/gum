@@ -10,6 +10,7 @@ use Code16\Sharp\EntityList\Eloquent\Transformers\SharpUploadModelAttributeTrans
 use Code16\Sharp\EntityList\EntityListQueryParams;
 use Code16\Sharp\Utils\Transformers\SharpAttributeTransformer;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class NewsSharpList extends GumSharpList
 {
@@ -152,7 +153,7 @@ class NewsSharpList extends GumSharpList
 
         if($attribute == "heading_text") {
             return function($value, $news) {
-                return str_limit(strip_tags($news->heading_text), 100);
+                return Str::limit(strip_tags($news->heading_text), 100);
             };
         }
 
