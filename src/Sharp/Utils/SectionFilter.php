@@ -4,6 +4,7 @@ namespace Code16\Gum\Sharp\Utils;
 
 use Code16\Gum\Models\Section;
 use Code16\Sharp\EntityList\EntityListRequiredFilter;
+use Illuminate\Support\Arr;
 
 class SectionFilter implements EntityListRequiredFilter
 {
@@ -40,7 +41,7 @@ class SectionFilter implements EntityListRequiredFilter
             });
 
         return tap($sections, function(&$sections) {
-            array_sort($sections);
+            $sections = Arr::sort($sections);
 
             $sections += Section::domain(SharpGumSessionValue::getDomain())
                 ->where("is_root", false)

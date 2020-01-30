@@ -12,6 +12,7 @@ use Code16\Gum\Sharp\Utils\SharpGumSessionValue;
 use Code16\Sharp\EntityList\Containers\EntityListDataContainer;
 use Code16\Sharp\EntityList\EntityListQueryParams;
 use Code16\Sharp\Utils\Transformers\SharpAttributeTransformer;
+use Illuminate\Support\Str;
 
 class TileblockSharpList extends GumSharpList
 {
@@ -105,7 +106,7 @@ class TileblockSharpList extends GumSharpList
         if($attribute == "tiles") {
             return function($value, $tileblock) {
 
-                $customTransformer = camel_case($tileblock->layout) . "TileCustomTransformer";
+                $customTransformer = Str::camel($tileblock->layout) . "TileCustomTransformer";
                 if(method_exists($this, $customTransformer)) {
                     return $this->$customTransformer($tileblock);
                 }
