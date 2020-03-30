@@ -26,6 +26,8 @@ class DomainsAllowedTest extends GumSharpTestCase
     /** @test */
     function we_can_limit_domain_access_for_a_user()
     {
+        $this->withoutExceptionHandling();
+        
         config()->set([
             "gum" => [
                 "domains" => [
