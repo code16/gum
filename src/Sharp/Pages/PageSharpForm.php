@@ -4,7 +4,7 @@ namespace Code16\Gum\Sharp\Pages;
 
 use Code16\Gum\Models\Page;
 use Code16\Gum\Models\Pagegroup;
-use Code16\Sharp\Form\Eloquent\Transformers\FormUploadModelTransformer;
+use Code16\Sharp\Form\Eloquent\Uploads\Transformers\SharpUploadModelFormAttributeTransformer;
 use Code16\Sharp\Form\Eloquent\WithSharpFormEloquentUpdater;
 use Code16\Sharp\Form\Fields\SharpFormAutocompleteField;
 use Code16\Sharp\Form\Fields\SharpFormMarkdownField;
@@ -91,7 +91,7 @@ class PageSharpForm extends SharpForm
     function find($id): array
     {
         return $this
-            ->setCustomTransformer('visual', FormUploadModelTransformer::class)
+            ->setCustomTransformer('visual', SharpUploadModelFormAttributeTransformer::class)
             ->transform(Page::with("pagegroup")->findOrFail($id));
     }
 

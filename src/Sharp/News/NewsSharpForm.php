@@ -5,7 +5,7 @@ namespace Code16\Gum\Sharp\News;
 use Carbon\Carbon;
 use Code16\Gum\Models\News;
 use Code16\Gum\Models\Tag;
-use Code16\Sharp\Form\Eloquent\Transformers\FormUploadModelTransformer;
+use Code16\Sharp\Form\Eloquent\Uploads\Transformers\SharpUploadModelFormAttributeTransformer;
 use Code16\Sharp\Form\Eloquent\WithSharpFormEloquentUpdater;
 use Code16\Sharp\Form\Fields\SharpFormDateField;
 use Code16\Sharp\Form\Fields\SharpFormListField;
@@ -230,8 +230,8 @@ class NewsSharpForm extends SharpForm
     function find($id): array
     {
         return $this
-            ->setCustomTransformer('visual', FormUploadModelTransformer::class)
-            ->setCustomTransformer('attachments', FormUploadModelTransformer::class)
+            ->setCustomTransformer('visual', SharpUploadModelFormAttributeTransformer::class)
+            ->setCustomTransformer('attachments', SharpUploadModelFormAttributeTransformer::class)
             ->transform(News::with("visual", "attachments", "tags")->findOrFail($id));
     }
 

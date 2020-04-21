@@ -5,7 +5,7 @@ namespace Code16\Gum\Sharp\Sidepanels\Forms;
 use Code16\Gum\Models\Page;
 use Code16\Gum\Models\Sidepanel;
 use Code16\Gum\Sharp\Utils\SharpGumSessionValue;
-use Code16\Sharp\Form\Eloquent\Transformers\FormUploadModelTransformer;
+use Code16\Sharp\Form\Eloquent\Uploads\Transformers\SharpUploadModelFormAttributeTransformer;
 use Code16\Sharp\Form\Eloquent\WithSharpFormEloquentUpdater;
 use Code16\Sharp\Form\Fields\SharpFormMarkdownField;
 use Code16\Sharp\Form\Fields\SharpFormTextareaField;
@@ -155,8 +155,8 @@ abstract class SidepanelSharpForm extends SharpForm
     function find($id): array
     {
         $this
-            ->setCustomTransformer('visual', FormUploadModelTransformer::class)
-            ->setCustomTransformer('downloadableFile', FormUploadModelTransformer::class)
+            ->setCustomTransformer('visual', SharpUploadModelFormAttributeTransformer::class)
+            ->setCustomTransformer('downloadableFile', SharpUploadModelFormAttributeTransformer::class)
             ->setCustomTransformer('container_label', function($value, $sidepanel) {
                 return $sidepanel->container->title;
             })

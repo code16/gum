@@ -8,7 +8,7 @@ use Code16\Gum\Models\Section;
 use Code16\Gum\Models\Tileblock;
 use Code16\Gum\Sharp\Utils\SharpFormWithStyleKey;
 use Code16\Gum\Sharp\Utils\SharpGumSessionValue;
-use Code16\Sharp\Form\Eloquent\Transformers\FormUploadModelTransformer;
+use Code16\Sharp\Form\Eloquent\Uploads\Transformers\SharpUploadModelFormAttributeTransformer;
 use Code16\Sharp\Form\Eloquent\WithSharpFormEloquentUpdater;
 use Code16\Sharp\Form\Fields\SharpFormAutocompleteField;
 use Code16\Sharp\Form\Fields\SharpFormCheckField;
@@ -129,7 +129,7 @@ abstract class TileblockSharpForm extends SharpForm
     function find($id): array
     {
         return $this
-            ->setCustomTransformer('tiles[visual]', FormUploadModelTransformer::class)
+            ->setCustomTransformer('tiles[visual]', SharpUploadModelFormAttributeTransformer::class)
             ->setCustomTransformer('section_label', function($value, $tileblock) {
                 return $tileblock->section->title;
             })
