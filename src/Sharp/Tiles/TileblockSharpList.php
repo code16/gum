@@ -76,13 +76,8 @@ class TileblockSharpList extends GumSharpList
     function getListData(EntityListQueryParams $params)
     {
         $tileblocks = Tileblock::with($this->requestWiths())
-            ->orderBy("order");
-
-        if($params->filterFor("section")) {
-            $tileblocks->where("section_id", $params->filterFor("section"));
-        } else {
-            $tileblocks->whereNull("section_id");
-        }
+            ->orderBy("order")
+            ->where("section_id", $params->filterFor("section") ?: (new SectionFilter())->defaultValue());
 
         $this->applyCustomTransformers();
 
