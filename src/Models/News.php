@@ -32,6 +32,7 @@ class News extends Model
         }
 
         return $query->select("news.*")
+            ->distinct()
             ->join('taggables', function ($join) {
                 $join->on('news.id', '=', 'taggables.taggable_id')
                     ->where('taggables.taggable_type', News::class);
