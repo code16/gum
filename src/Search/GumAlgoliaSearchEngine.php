@@ -79,7 +79,7 @@ class GumAlgoliaSearchEngine
                             "id" => $hit["objectID"],
                             "title" => $hit["_highlightResult"]["title"]["value"],
                             "surtitle" => $hit["_highlightResult"]["surtitle"]["value"],
-                            "published_at" => $hit["published_at"]["value"],
+                            "published_at" => $hit["published_at"],
                             "text" => $hit["_snippetResult"]["text"]["value"],
                         ];
                     }),
