@@ -22,6 +22,8 @@ use Illuminate\Support\Str;
 class PageSharpForm extends SharpForm
 {
     use WithSharpFormEloquentUpdater, WithSharpContext;
+    
+    protected $allowNews = false;
 
     /**
      * Build form fields using ->addField()
@@ -58,13 +60,17 @@ class PageSharpForm extends SharpForm
             SharpFormTextField::make("slug")
                 ->setLabel("URL")
                 ->setHelpMessage("Il s'agit de l'URL (slug) de la page ; laissez ce champ vide pour remplissage automatique à partir du titre. Ne peut contenir que des lettres, des chiffres et des tirets. Attention, si vous modifiez cette valeur, les URLs du site seront modifiées.")
-        )->addField(
-            SharpFormCheckField::make("has_news", "Propose des actualités")
-        )->addField(
-            SharpFormTagsField::make("tags", Tag::orderBy("name")->pluck("name", "id")->toArray())
-                ->addConditionalDisplay("has_news")
-                ->setLabel("Tags concernés")
         );
+        
+        if($this->allowNews) {
+            $this->addField(
+                SharpFormCheckField::make("has_news", "Propose des actualités")
+            )->addField(
+                SharpFormTagsField::make("tags", Tag::orderBy("name")->pluck("name", "id")->toArray())
+                    ->addConditionalDisplay("has_news")
+                    ->setLabel("Tags concernés")
+            );
+        }
     }
 
     /**
@@ -87,9 +93,12 @@ class PageSharpForm extends SharpForm
 
         })->addColumn(6, function (FormLayoutColumn $column) {
             $column->withSingleField("heading_text")
-                ->withSingleField("body_text")
-                ->withSingleField("has_news")
-                ->withSingleField("tags");
+                ->withSingleField("body_text");
+
+            if($this->allowNews) {
+                $column->withSingleField("has_news")
+                    ->withSingleField("tags");
+            }
         });
     }
 
