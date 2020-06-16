@@ -4,10 +4,13 @@ namespace Code16\Gum\Sharp\Pages;
 
 use Code16\Gum\Models\Page;
 use Code16\Gum\Models\Pagegroup;
+use Code16\Gum\Models\Tag;
 use Code16\Sharp\Form\Eloquent\Uploads\Transformers\SharpUploadModelFormAttributeTransformer;
 use Code16\Sharp\Form\Eloquent\WithSharpFormEloquentUpdater;
 use Code16\Sharp\Form\Fields\SharpFormAutocompleteField;
+use Code16\Sharp\Form\Fields\SharpFormCheckField;
 use Code16\Sharp\Form\Fields\SharpFormMarkdownField;
+use Code16\Sharp\Form\Fields\SharpFormTagsField;
 use Code16\Sharp\Form\Fields\SharpFormTextareaField;
 use Code16\Sharp\Form\Fields\SharpFormTextField;
 use Code16\Sharp\Form\Fields\SharpFormUploadField;
@@ -55,6 +58,12 @@ class PageSharpForm extends SharpForm
             SharpFormTextField::make("slug")
                 ->setLabel("URL")
                 ->setHelpMessage("Il s'agit de l'URL (slug) de la page ; laissez ce champ vide pour remplissage automatique à partir du titre. Ne peut contenir que des lettres, des chiffres et des tirets. Attention, si vous modifiez cette valeur, les URLs du site seront modifiées.")
+        )->addField(
+            SharpFormCheckField::make("has_news", "Propose des actualités")
+        )->addField(
+            SharpFormTagsField::make("tags", Tag::orderBy("name")->pluck("name", "id")->toArray())
+                ->addConditionalDisplay("has_news")
+                ->setLabel("Tags concernés")
         );
     }
 
@@ -78,7 +87,9 @@ class PageSharpForm extends SharpForm
 
         })->addColumn(6, function (FormLayoutColumn $column) {
             $column->withSingleField("heading_text")
-                ->withSingleField("body_text");
+                ->withSingleField("body_text")
+                ->withSingleField("has_news")
+                ->withSingleField("tags");
         });
     }
 
@@ -92,7 +103,7 @@ class PageSharpForm extends SharpForm
     {
         return $this
             ->setCustomTransformer('visual', SharpUploadModelFormAttributeTransformer::class)
-            ->transform(Page::with("pagegroup")->findOrFail($id));
+            ->transform(Page::with("pagegroup", "tags")->findOrFail($id));
     }
 
     /**

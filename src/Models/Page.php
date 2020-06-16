@@ -41,6 +41,11 @@ class Page extends Model
             ->orderBy("order");
     }
 
+    public function tags()
+    {
+        return $this->morphToMany(Tag::class, "taggable");
+    }
+
     public function getDefaultAttributesFor($attribute)
     {
         return in_array($attribute, ["visual"])
