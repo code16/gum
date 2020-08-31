@@ -16,8 +16,8 @@ class FreeLinkRule implements Rule
     public function passes($attribute, $value)
     {
         return !trim($value)
-            || preg_match('/^(\/([\&\=\#\?\da-z\.-]+))*$/', $value)
-            || preg_match('/^(https?:\/\/)([\da-z\.-]+)\.([a-z\.]{2,6})(\/[\da-z\.-]*)*\/?([\&\=\#\?\da-z\.-]*)*\/?$/', $value);
+            || preg_match('/^(\/([\&\=\#\?\da-zA-Z_\.-]+))*$/', $value)
+            || preg_match('/^(https?:\/\/)([\da-zA-Z_\.-]+)\.([a-z\.]{2,6})(\/[\da-zA-Z_\.-]*)*\/?([\&\=\#\?\da-zA-Z_\.-]*)*\/?$/', $value);
     }
 
     /**
