@@ -27,17 +27,25 @@ class News extends Model
      */
     public function scopeForTags(Builder $query, Collection $tags = null)
     {
-        if(!$tags) {
-            return $query;
-        }
+        return $query->whereHas("tags", function ($query) use ($tags) {
+            return $query->whereIn("tags.id", $tags->pluck('id'));
+        });
+    }
 
-        return $query->select("news.*")
-            ->distinct()
-            ->join('taggables', function ($join) {
-                $join->on('news.id', '=', 'taggables.taggable_id')
-                    ->where('taggables.taggable_type', News::class);
-            })
-            ->whereIn("taggables.tag_id", $tags->pluck("id"));
+    /**
+     * @param Builder $query
+     * @param Collection|null $tags
+     * @return Builder
+     */
+    public function scopeForAllTags(Builder $query, Collection $tags = null)
+    {
+        $tags->each(function($tag) use ($query) {
+            return $query->whereHas("tags", function ($query) use ($tag) {
+                return $query->where("tags.id", $tag->id);
+            });
+        });
+
+        return $query;
     }
 
     /**
