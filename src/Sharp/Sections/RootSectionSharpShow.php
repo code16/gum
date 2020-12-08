@@ -22,6 +22,10 @@ class RootSectionSharpShow extends SharpShow
                 ->setLabel("URL"))
             ->addField(SharpShowTextField::make("menu_key")
                 ->setLabel("Emplacement"))
+            ->addField(SharpShowTextField::make("style_key")
+                ->setLabel("Thème"))
+            ->addField(SharpShowTextField::make("has_news")
+                ->setLabel("Actualités"))
             ->addField(
                 SharpShowEntityListField::make("tileblocks", "tileblocks")
                     ->showCreateButton(true)
@@ -44,14 +48,17 @@ class RootSectionSharpShow extends SharpShow
     {
         $this->addSection("Structure", function(ShowLayoutSection $section) {
             $section
-                ->addColumn(7, function(ShowLayoutColumn $column) {
+                ->addColumn(12, function(ShowLayoutColumn $column) {
                     $column->withSingleField("title");
                 })
-                ->addColumn(7, function(ShowLayoutColumn $column) {
+                ->addColumn(12, function(ShowLayoutColumn $column) {
                     $column->withSingleField("heading_text");
                 })
-                ->addColumn(7, function(ShowLayoutColumn $column) {
-                    $column->withFields("slug|3", "menu_key|3");
+                ->addColumn(12, function(ShowLayoutColumn $column) {
+                    $column->withFields("menu_key|2", "style_key|2", "slug|2");
+                })
+                ->addColumn(12, function(ShowLayoutColumn $column) {
+                    $column->withSingleField("has_news");
                 });
             })
             ->addEntityListSection("tileblocks")
@@ -60,6 +67,20 @@ class RootSectionSharpShow extends SharpShow
 
     function find($id): array
     {
-        return $this->transform(Section::find($id));
+        $section = Section::find($id);
+
+        return $this
+            ->setCustomTransformer("menu_key", function($value, $instance) {
+                return $value === "main" ? "Menu principal" : "Pied de page";
+            })
+            ->setCustomTransformer("style_key", function($value, $instance) {
+                return $value === "aquamarine" ? "Vert d'eau" : "Indigo";
+            })
+            ->setCustomTransformer("has_news", function($value, $instance) use ($section) {
+                return $section->tags->map(function ($value) {
+                    return $value->name;
+                })->implode(', ');
+            })
+            ->transform($section);
     }
 }
