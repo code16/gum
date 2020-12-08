@@ -3,6 +3,7 @@
 namespace Code16\Gum\Sharp\Sections;
 
 use Code16\Gum\Models\Section;
+use Code16\Gum\Sharp\Utils\SharpGumSessionValue;
 use Code16\Sharp\Show\Fields\SharpShowEntityListField;
 use Code16\Sharp\Show\Fields\SharpShowTextField;
 use Code16\Sharp\Show\Layout\ShowLayoutColumn;
@@ -71,10 +72,14 @@ class RootSectionSharpShow extends SharpShow
 
         return $this
             ->setCustomTransformer("menu_key", function($value, $instance) {
-                return $value === "main" ? "Menu principal" : "Pied de page";
+                $configKey = "gum.menus"
+                    . (SharpGumSessionValue::getDomain() ? "." . SharpGumSessionValue::getDomain() :  "");
+                return config($configKey)[$value];
             })
             ->setCustomTransformer("style_key", function($value, $instance) {
-                return $value === "aquamarine" ? "Vert d'eau" : "Indigo";
+                $configKey = "gum.styles"
+                    . (SharpGumSessionValue::getDomain() ? "." . SharpGumSessionValue::getDomain() :  "");
+                return config($configKey)[$value];
             })
             ->setCustomTransformer("has_news", function($value, $instance) use ($section) {
                 return $section->tags->map(function ($value) {
