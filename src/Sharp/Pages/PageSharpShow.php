@@ -26,6 +26,7 @@ class PageSharpShow extends SharpShow
                 SharpShowEntityListField::make("page_sidepanels", "page_sidepanels")
                     ->showCreateButton(true)
                     ->setLabel("Panneaux pages")
+                    ->hideFilterWithValue('domain',null)
                     ->hideFilterWithValue("container", function($instanceId) {
                         return $instanceId;
                     })
@@ -36,7 +37,7 @@ class PageSharpShow extends SharpShow
     {
         $this->addSection("Structure", function(ShowLayoutSection $section) {
             $section
-                ->addColumn(7, function(ShowLayoutColumn $column) {
+                ->addColumn(12, function(ShowLayoutColumn $column) {
                     $column->withSingleField("title");
                 })
                 ->addColumn(12, function(ShowLayoutColumn $column) {

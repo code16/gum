@@ -31,6 +31,7 @@ class RootSectionSharpShow extends SharpShow
                 SharpShowEntityListField::make("tileblocks", "tileblocks")
                     ->showCreateButton(true)
                     ->setLabel("Tuiles")
+                    ->hideFilterWithValue('domain',null)
                     ->hideFilterWithValue("section", function($instanceId) {
                         return $instanceId;
                     })
@@ -39,6 +40,7 @@ class RootSectionSharpShow extends SharpShow
                 SharpShowEntityListField::make("section_sidepanels", "section_sidepanels")
                     ->showCreateButton(true)
                     ->setLabel("Panneaux sections")
+                    ->hideFilterWithValue('domain',null)
                     ->hideFilterWithValue("container", function($instanceId) {
                         return $instanceId;
                     })
