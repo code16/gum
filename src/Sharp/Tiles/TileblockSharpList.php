@@ -3,6 +3,8 @@
 namespace Code16\Gum\Sharp\Tiles;
 
 use Closure;
+use Code16\Gum\Models\Page;
+use Code16\Gum\Models\Pagegroup;
 use Code16\Gum\Models\Tile;
 use Code16\Gum\Models\Tileblock;
 use Code16\Gum\Sharp\Utils\DomainFilter;
@@ -11,6 +13,7 @@ use Code16\Gum\Sharp\Utils\SectionFilter;
 use Code16\Gum\Sharp\Utils\SharpGumSessionValue;
 use Code16\Sharp\EntityList\Containers\EntityListDataContainer;
 use Code16\Sharp\EntityList\EntityListQueryParams;
+use Code16\Sharp\Utils\LinkToEntity;
 use Code16\Sharp\Utils\Transformers\SharpAttributeTransformer;
 use Illuminate\Support\Str;
 
@@ -119,7 +122,10 @@ class TileblockSharpList extends GumSharpList
 
                     return sprintf(
                         '%s <div style="%s"><small>%s</small> <span style="color:gray; font-style:italic"><small>%s</small></span></div><div class="mb-2"></div>',
-                        $tile->title, $style, $link, $this->formatPublishDates($tile)
+                        $this->linkEntityTile($tile),
+                        $style,
+                        $link,
+                        $this->formatPublishDates($tile)
                     );
 
                 })->implode('');
@@ -160,5 +166,23 @@ class TileblockSharpList extends GumSharpList
             $tile->published_at->formatLocalized("%e %b %Y à %Hh%M"),
             $tile->unpublished_at->formatLocalized("%e %b %Y à %Hh%M")
         );
+    }
+
+    protected function linkEntityTile(Tile $tile)
+    {
+        if($tile->linkable_type === null) {
+            return $tile->title;
+        }
+        else if($tile->linkable_type === Page::class) {
+            $entityKey = "pages";
+        } elseif ($tile->linkable_type === Pagegroup::class) {
+            $entityKey = "pagegroups";
+        } else {
+            $entityKey = "sections";
+        }
+
+        return (new LinkToEntity($tile->title, $entityKey))
+            ->setInstanceId($tile->linkable_id)
+            ->render();
     }
 }
