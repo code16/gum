@@ -49,7 +49,7 @@ class RootSectionSharpShow extends SharpShow
 
     function buildShowLayout()
     {
-        $this->addSection("Structure", function(ShowLayoutSection $section) {
+        $this->addSection("Section racine", function(ShowLayoutSection $section) {
             $section
                 ->addColumn(12, function(ShowLayoutColumn $column) {
                     $column->withSingleField("title");
@@ -58,7 +58,7 @@ class RootSectionSharpShow extends SharpShow
                     $column->withSingleField("heading_text");
                 })
                 ->addColumn(12, function(ShowLayoutColumn $column) {
-                    $column->withFields("menu_key|2", "style_key|2", "slug|2");
+                    $column->withFields("slug|2", "style_key|2", "menu_key|2");
                 })
                 ->addColumn(12, function(ShowLayoutColumn $column) {
                     $column->withSingleField("has_news");
@@ -76,7 +76,7 @@ class RootSectionSharpShow extends SharpShow
             ->setCustomTransformer("menu_key", function($value, $instance) {
                 $configKey = "gum.menus"
                     . (SharpGumSessionValue::getDomain() ? "." . SharpGumSessionValue::getDomain() :  "");
-                return config($configKey)[$value];
+                return $value ? config($configKey)[$value] : null;
             })
             ->setCustomTransformer("style_key", function($value, $instance) {
                 $configKey = "gum.styles"

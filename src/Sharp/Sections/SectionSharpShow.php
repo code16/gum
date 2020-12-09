@@ -47,7 +47,7 @@ class SectionSharpShow extends SharpShow
 
     function buildShowLayout()
     {
-        $this->addSection("Structure", function(ShowLayoutSection $section) {
+        $this->addSection("Sous-section", function(ShowLayoutSection $section) {
             $section
                 ->addColumn(12, function(ShowLayoutColumn $column) {
                     $column->withSingleField("title");

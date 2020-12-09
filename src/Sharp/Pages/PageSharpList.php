@@ -87,6 +87,10 @@ class PageSharpList extends GumSharpList
 
         $rootId = $params->filterFor("root");
 
+        if($pagegroupId = $params->filterFor("pagegroup")) {
+            $pages->where('pagegroup_id', $pagegroupId);
+        }
+
         if($rootId && ($root = Section::where("is_root", true)->find($rootId))) {
             $pages->whereExists(function($query) use($root) {
                 $subquery = $query->from("content_urls")
