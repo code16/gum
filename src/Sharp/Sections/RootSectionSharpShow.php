@@ -4,47 +4,19 @@ namespace Code16\Gum\Sharp\Sections;
 
 use Code16\Gum\Models\Section;
 use Code16\Gum\Sharp\Utils\SharpGumSessionValue;
-use Code16\Sharp\Show\Fields\SharpShowEntityListField;
 use Code16\Sharp\Show\Fields\SharpShowTextField;
 use Code16\Sharp\Show\Layout\ShowLayoutColumn;
 use Code16\Sharp\Show\Layout\ShowLayoutSection;
-use Code16\Sharp\Show\SharpShow;
 
-class RootSectionSharpShow extends SharpShow
+class RootSectionSharpShow extends SectionSharpShow
 {
 
     function buildShowFields()
     {
-        $this->addField(SharpShowTextField::make("title")
-            ->setLabel("Titre"))
-            ->addField(SharpShowTextField::make("heading_text")
-                ->setLabel("Chapeau"))
-            ->addField(SharpShowTextField::make("slug")
-                ->setLabel("URL"))
-            ->addField(SharpShowTextField::make("menu_key")
-                ->setLabel("Emplacement"))
-            ->addField(SharpShowTextField::make("style_key")
-                ->setLabel("Thème"))
-            ->addField(SharpShowTextField::make("has_news")
-                ->setLabel("Actualités"))
-            ->addField(
-                SharpShowEntityListField::make("tileblocks", "tileblocks")
-                    ->showCreateButton(true)
-                    ->setLabel("Tuiles")
-                    ->hideFilterWithValue('domain',null)
-                    ->hideFilterWithValue("section", function($instanceId) {
-                        return $instanceId;
-                    })
-            )
-            ->addField(
-                SharpShowEntityListField::make("section_sidepanels", "section_sidepanels")
-                    ->showCreateButton(true)
-                    ->setLabel("Panneaux sections")
-                    ->hideFilterWithValue('domain',null)
-                    ->hideFilterWithValue("container", function($instanceId) {
-                        return $instanceId;
-                    })
-            );
+        parent::buildShowFields();
+
+        $this->addField(SharpShowTextField::make("menu_key")
+            ->setLabel("Emplacement"));
     }
 
     function buildShowLayout()
