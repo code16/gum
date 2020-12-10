@@ -100,7 +100,7 @@ class PagegroupSharpShow extends SharpShow
                 return $value->uri;
             })
                 ->flatten()
-                ->implode('<br>');;
+                ->implode('<br>');
 
             return sprintf("<small>".$page->title."</small> <br>%s",$urls);
         })

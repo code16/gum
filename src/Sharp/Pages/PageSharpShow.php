@@ -2,6 +2,7 @@
 
 namespace Code16\Gum\Sharp\Pages;
 
+use Code16\Gum\Models\ContentUrl;
 use Code16\Gum\Models\Page;
 use Code16\Gum\Sharp\Utils\SharpGumSessionValue;
 use Code16\Sharp\Show\Fields\SharpShowEntityListField;
@@ -20,8 +21,8 @@ class PageSharpShow extends SharpShow
             ->addField(SharpShowTextField::make("heading_text")
                 ->setLabel("Chapeau")
                 ->collapseToWordCount(25))
-            ->addField(SharpShowTextField::make("slug")
-                ->setLabel("URL"))
+            ->addField(SharpShowTextField::make("urls")
+                ->setLabel("URLs"))
             ->addField(
                 SharpShowEntityListField::make("page_sidepanels", "page_sidepanels")
                     ->showCreateButton(true)
@@ -45,7 +46,7 @@ class PageSharpShow extends SharpShow
                     $column->withSingleField("heading_text");
                 })
                 ->addColumn(12, function(ShowLayoutColumn $column) {
-                    $column->withFields("slug|3");
+                    $column->withSingleField("urls");
                 });
         })
             ->addEntityListSection("page_sidepanels");
@@ -53,6 +54,22 @@ class PageSharpShow extends SharpShow
 
     function find($id): array
     {
-        return $this->transform(Page::find($id));
+        $page = Page::find($id);
+
+        return $this
+            ->setCustomTransformer("urls", function () use($page) {
+                $contentUrls = ContentUrl::where('content_id', $page->id)
+                    ->where('content_type', Page::class)
+                    ->get();
+
+                $urls = $contentUrls->map(function ($value) {
+                    return $value->uri;
+                })
+                    ->flatten()
+                    ->implode('<br>');
+
+                return sprintf("%s",$urls);
+            })
+            ->transform($page);
     }
 }
