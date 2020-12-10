@@ -58,18 +58,23 @@ class PageSharpShow extends SharpShow
 
         return $this
             ->setCustomTransformer("urls", function () use($page) {
-                $contentUrls = ContentUrl::where('content_id', $page->id)
-                    ->where('content_type', Page::class)
-                    ->get();
-
-                $urls = $contentUrls->map(function ($value) {
-                    return $value->uri;
-                })
-                    ->flatten()
-                    ->implode('<br>');
-
-                return sprintf("%s",$urls);
+                return self::getUrlsFromPage($page);
             })
             ->transform($page);
+    }
+
+    public static function getUrlsFromPage($page)
+    {
+        $contentUrls = ContentUrl::where('content_id', $page->id)
+            ->where('content_type', Page::class)
+            ->get();
+
+        $urls = $contentUrls->map(function ($value) {
+            return $value->uri;
+        })
+            ->flatten()
+            ->implode('<br>');
+
+        return sprintf("%s",$urls);
     }
 }

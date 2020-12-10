@@ -3,8 +3,8 @@
 namespace Code16\Gum\Sharp\Pagegroups;
 
 use Code16\Gum\Models\ContentUrl;
-use Code16\Gum\Models\Page;
 use Code16\Gum\Models\Pagegroup;
+use Code16\Gum\Sharp\Pages\PageSharpShow;
 use Code16\Sharp\Http\WithSharpContext;
 use Code16\Sharp\Show\Fields\SharpShowEntityListField;
 use Code16\Sharp\Show\Fields\SharpShowTextField;
@@ -92,17 +92,9 @@ class PagegroupSharpShow extends SharpShow
         $pages = $pagegroup->pages;
 
         return $pages->map(function ($page) {
-            $contentUrls = ContentUrl::where('content_id', $page->id)
-                ->where('content_type', Page::class)
-                ->get();
-
-            $urls = $contentUrls->map(function ($value) {
-                return $value->uri;
-            })
-                ->flatten()
-                ->implode('<br>');
-
-            return sprintf("<small>".$page->title."</small> <br>%s",$urls);
+            return sprintf(
+                "<small>".$page->title."</small> <br>%s",
+                PageSharpShow::getUrlsFromPage($page));
         })
             ->flatten()
             ->implode('<br><br>');
