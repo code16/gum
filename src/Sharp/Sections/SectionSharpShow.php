@@ -43,6 +43,7 @@ class SectionSharpShow extends SharpShow
                     ->setLabel("Panneaux sections")
                     ->hideFilterWithValue('domain',null)
                     ->hideFilterWithValue("container", function($instanceId) {
+                        SharpGumSessionValue::set("sidepanel_container_type", Section::class);
                         return $instanceId;
                     })
             );

@@ -3,6 +3,7 @@
 namespace Code16\Gum\Sharp\Pages;
 
 use Code16\Gum\Models\Page;
+use Code16\Gum\Sharp\Utils\SharpGumSessionValue;
 use Code16\Sharp\Show\Fields\SharpShowEntityListField;
 use Code16\Sharp\Show\Fields\SharpShowTextField;
 use Code16\Sharp\Show\Layout\ShowLayoutColumn;
@@ -27,6 +28,7 @@ class PageSharpShow extends SharpShow
                     ->setLabel("Panneaux pages")
                     ->hideFilterWithValue('domain',null)
                     ->hideFilterWithValue("container", function($instanceId) {
+                        SharpGumSessionValue::set("sidepanel_container_type", Page::class);
                         return $instanceId;
                     })
             );
