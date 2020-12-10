@@ -30,7 +30,7 @@ class RootSectionSharpShow extends SectionSharpShow
                     $column->withSingleField("heading_text");
                 })
                 ->addColumn(12, function(ShowLayoutColumn $column) {
-                    $column->withFields("slug|2", "style_key|2", "menu_key|2");
+                    $column->withFields("style_key|2", "menu_key|2", "url|6");
                 })
                 ->addColumn(12, function(ShowLayoutColumn $column) {
                     $column->withSingleField("has_news");
@@ -45,6 +45,9 @@ class RootSectionSharpShow extends SectionSharpShow
         $section = Section::find($id);
 
         return $this
+            ->setCustomTransformer("url", function () use ($section) {
+                return "/".$section->slug;
+            })
             ->setCustomTransformer("menu_key", function($value, $instance) {
                 $configKey = "gum.menus"
                     . (SharpGumSessionValue::getDomain() ? "." . SharpGumSessionValue::getDomain() :  "");

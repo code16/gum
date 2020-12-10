@@ -5,6 +5,7 @@ namespace Code16\Gum\Sharp\Tiles;
 use Closure;
 use Code16\Gum\Models\Page;
 use Code16\Gum\Models\Pagegroup;
+use Code16\Gum\Models\Section;
 use Code16\Gum\Models\Tile;
 use Code16\Gum\Models\Tileblock;
 use Code16\Gum\Sharp\Utils\DomainFilter;
@@ -170,19 +171,30 @@ class TileblockSharpList extends GumSharpList
 
     protected function linkEntityTile(Tile $tile)
     {
-        if($tile->linkable_type === null) {
+        if($tile->linkable_type == null) {
             return $tile->title;
         }
-        else if($tile->linkable_type === Page::class) {
+        else if($tile->linkable_type == Page::class) {
+            $icon = "fa-file-o";
             $entityKey = "pages";
-        } elseif ($tile->linkable_type === Pagegroup::class) {
+        } elseif ($tile->linkable_type == Pagegroup::class) {
+            $icon = "fa-files-o";
             $entityKey = "pagegroups";
         } else {
+            if(Section::find($tile->linkable_id)->is_root) {
+                $icon = "fa-sitemap";
+            } else {
+                $icon = "fa-clone";
+            }
+
             $entityKey = "sections";
         }
 
-        return (new LinkToEntity($tile->title, $entityKey))
-            ->setInstanceId($tile->linkable_id)
-            ->render();
+        return sprintf("<span><i class='fa %s'></i> %s</span>",
+            $icon,
+            (new LinkToEntity($tile->title, $entityKey))
+                ->toShowOfInstance($tile->linkable_id)
+                ->render()
+        );
     }
 }

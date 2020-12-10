@@ -2,6 +2,8 @@
 
 namespace Code16\Gum\Sharp\Sections;
 
+use Code16\Gum\Models\ContentUrl;
+use Code16\Gum\Models\Pagegroup;
 use Code16\Gum\Models\Section;
 use Code16\Gum\Sharp\Utils\SharpGumSessionValue;
 use Code16\Sharp\Show\Fields\SharpShowEntityListField;
@@ -18,8 +20,9 @@ class SectionSharpShow extends SharpShow
         $this->addField(SharpShowTextField::make("title")
             ->setLabel("Titre"))
             ->addField(SharpShowTextField::make("heading_text")
-                ->setLabel("Chapeau"))
-            ->addField(SharpShowTextField::make("slug")
+                ->setLabel("Chapeau")
+                ->collapseToWordCount(25))
+            ->addField(SharpShowTextField::make("url")
                 ->setLabel("URL"))
             ->addField(SharpShowTextField::make("style_key")
                 ->setLabel("Thème"))
@@ -56,7 +59,7 @@ class SectionSharpShow extends SharpShow
                     $column->withSingleField("heading_text");
                 })
                 ->addColumn(12, function(ShowLayoutColumn $column) {
-                    $column->withFields( "style_key|2", "slug|2");
+                    $column->withFields(  "style_key|2", "url|6");
                 })
                 ->addColumn(12, function(ShowLayoutColumn $column) {
                     $column->withSingleField("has_news");
@@ -71,12 +74,19 @@ class SectionSharpShow extends SharpShow
         $section = Section::find($id);
 
         return $this
-            ->setCustomTransformer("style_key", function($value, $instance) {
+            ->setCustomTransformer("url", function () use ($section) {
+                $current = ContentUrl::where('content_id', $section->id)
+                    ->where('content_type', Section::class)
+                    ->first();
+
+                return $current ? $current->uri : null;
+            })
+            ->setCustomTransformer("style_key", function($value) {
                 $configKey = "gum.styles"
                     . (SharpGumSessionValue::getDomain() ? "." . SharpGumSessionValue::getDomain() :  "");
                 return config($configKey)[$value];
             })
-            ->setCustomTransformer("has_news", function($value, $instance) use ($section) {
+            ->setCustomTransformer("has_news", function() use ($section) {
                 return $section->tags->map(function ($value) {
                     return $value->name;
                 })->implode(', ');
