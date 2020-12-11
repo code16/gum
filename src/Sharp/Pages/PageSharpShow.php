@@ -76,7 +76,7 @@ class PageSharpShow extends SharpShow
             ->implode('<br>');
 
         if(is_null($urls) || empty($urls)) {
-            $urls = '<p class="mb-2" style="color:orange"><small>pas de lien</small></p>';
+            $urls = '<span class="mb-2" style="color:orange"><small>pas de lien</small></span>';
         }
 
         return sprintf("%s",$urls);
