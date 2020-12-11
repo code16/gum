@@ -24,7 +24,7 @@ class PagegroupSharpShow extends SharpShow
             ->addField(SharpShowTextField::make("url")
                 ->setLabel("URL du groupe"))
             ->addField(SharpShowTextField::make("urls")
-                ->setLabel("URLs"))
+                ->setLabel("URLs des pages"))
             ->addField(
                 SharpShowEntityListField::make("pages", "pages")
                     ->showCreateButton(true)
@@ -70,7 +70,7 @@ class PagegroupSharpShow extends SharpShow
                     ->where('content_type', Pagegroup::class)
                     ->first();
 
-                return $current ? $current->uri : null;
+                return $current ? $current->uri : '<p class="mb-2" style="color:orange"><small>pas de lien</small></p>';
             })
             ->setCustomTransformer("urls", function () use ($pagegroup) {
                 return $this->getPagesUrls($pagegroup);
