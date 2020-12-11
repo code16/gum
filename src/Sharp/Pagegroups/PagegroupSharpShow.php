@@ -72,7 +72,7 @@ class PagegroupSharpShow extends SharpShow
                 return $current ? $current->uri : '<p class="mb-2" style="color:orange"><small>pas de lien</small></p>';
             })
             ->setCustomTransformer("urls", function () use ($pagegroup) {
-                return $this->getPagesUrls($pagegroup);
+                return self::getPagesUrls($pagegroup);
             })
             ->transform($pagegroup);
     }
@@ -86,11 +86,9 @@ class PagegroupSharpShow extends SharpShow
         return $contentUrl;
     }
 
-    protected function getPagesUrls(Pagegroup $pagegroup)
+    public static function getPagesUrls(Pagegroup $pagegroup)
     {
-        $pages = $pagegroup->pages;
-
-        return $pages->map(function ($page) {
+        return $pagegroup->pages->map(function ($page) {
             return sprintf(
                 "<small>".$page->title."</small> <br>%s",
                 PageSharpShow::getUrlsFromPage($page));
