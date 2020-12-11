@@ -75,6 +75,10 @@ class PageSharpShow extends SharpShow
             ->flatten()
             ->implode('<br>');
 
+        if(is_null($urls) || empty($urls)) {
+            $urls = '<p class="mb-2" style="color:orange"><small>pas de lien</small></p>';
+        }
+
         return sprintf("%s",$urls);
     }
 }
