@@ -3,7 +3,6 @@
 namespace Code16\Gum\Sharp\Sections;
 
 use Code16\Gum\Models\ContentUrl;
-use Code16\Gum\Models\Pagegroup;
 use Code16\Gum\Models\Section;
 use Code16\Gum\Sharp\Utils\SharpGumSessionValue;
 use Code16\Sharp\Show\Fields\SharpShowEntityListField;
