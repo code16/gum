@@ -44,24 +44,13 @@ class RootSectionSharpShow extends SectionSharpShow
     {
         $section = Section::find($id);
 
+        $this->applySectionCustomTransformers($section);
+
         return $this
-            ->setCustomTransformer("url", function () use ($section) {
-                return "/".$section->slug;
-            })
             ->setCustomTransformer("menu_key", function($value, $instance) {
                 $configKey = "gum.menus"
                     . (SharpGumSessionValue::getDomain() ? "." . SharpGumSessionValue::getDomain() :  "");
                 return $value ? config($configKey)[$value] : null;
-            })
-            ->setCustomTransformer("style_key", function($value, $instance) {
-                $configKey = "gum.styles"
-                    . (SharpGumSessionValue::getDomain() ? "." . SharpGumSessionValue::getDomain() :  "");
-                return config($configKey)[$value];
-            })
-            ->setCustomTransformer("has_news", function($value, $instance) use ($section) {
-                return $section->tags->map(function ($value) {
-                    return $value->name;
-                })->implode(', ');
             })
             ->transform($section);
     }

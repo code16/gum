@@ -57,7 +57,7 @@ class PageSharpShow extends SharpShow
         $page = Page::find($id);
 
         return $this
-            ->setCustomTransformer("urls", function () use($page) {
+            ->setCustomTransformer("urls", function() use ($page) {
                 return self::getUrlsFromPage($page);
             })
             ->transform($page);

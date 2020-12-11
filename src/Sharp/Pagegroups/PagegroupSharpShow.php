@@ -14,7 +14,6 @@ use Code16\Sharp\Show\SharpShow;
 
 class PagegroupSharpShow extends SharpShow
 {
-
     use WithSharpContext;
 
     function buildShowFields()

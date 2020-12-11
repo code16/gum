@@ -74,7 +74,14 @@ class SectionSharpShow extends SharpShow
     {
         $section = Section::find($id);
 
-        return $this
+        $this->applySectionCustomTransformers($section);
+
+        return $this->transform($section);
+    }
+
+    protected function applySectionCustomTransformers(Section $section)
+    {
+        $this
             ->setCustomTransformer("url", function () use ($section) {
                 $current = ContentUrl::where('content_id', $section->id)
                     ->where('content_type', Section::class)
@@ -91,7 +98,6 @@ class SectionSharpShow extends SharpShow
                 return $section->tags->map(function ($value) {
                     return $value->name;
                 })->implode(', ');
-            })
-            ->transform($section);
+            });
     }
 }
