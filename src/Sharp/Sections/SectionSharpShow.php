@@ -16,17 +16,23 @@ class SectionSharpShow extends SharpShow
 
     function buildShowFields()
     {
-        $this->addField(SharpShowTextField::make("title")
-            ->setLabel("Titre"))
+        $this
+            ->addField(SharpShowTextField::make("title")
+                ->setLabel("Titre")
+            )
             ->addField(SharpShowTextField::make("heading_text")
                 ->setLabel("Chapeau")
-                ->collapseToWordCount(25))
+                ->collapseToWordCount(25)
+            )
             ->addField(SharpShowTextField::make("url")
-                ->setLabel("URL"))
+                ->setLabel("URL")
+            )
             ->addField(SharpShowTextField::make("style_key")
-                ->setLabel("Thème"))
+                ->setLabel("Thème")
+            )
             ->addField(SharpShowTextField::make("has_news")
-                ->setLabel("Actualités"))
+                ->setLabel("Actualités")
+            )
             ->addField(
                 SharpShowEntityListField::make("tileblocks", "tileblocks")
                     ->showCreateButton(true)
@@ -39,7 +45,7 @@ class SectionSharpShow extends SharpShow
             ->addField(
                 SharpShowEntityListField::make("section_sidepanels", "section_sidepanels")
                     ->showCreateButton(true)
-                    ->setLabel("Panneaux sections")
+                    ->setLabel("Panneaux section")
                     ->hideFilterWithValue('domain',null)
                     ->hideFilterWithValue("container", function($instanceId) {
                         SharpGumSessionValue::set("sidepanel_container_type", Section::class);
@@ -50,21 +56,20 @@ class SectionSharpShow extends SharpShow
 
     function buildShowLayout()
     {
-        $this->addSection("Sous-section", function(ShowLayoutSection $section) {
-            $section
-                ->addColumn(12, function(ShowLayoutColumn $column) {
-                    $column->withSingleField("title");
-                })
-                ->addColumn(12, function(ShowLayoutColumn $column) {
-                    $column->withSingleField("heading_text");
-                })
-                ->addColumn(12, function(ShowLayoutColumn $column) {
-                    $column->withFields(  "style_key|2", "url|6");
-                })
-                ->addColumn(12, function(ShowLayoutColumn $column) {
-                    $column->withSingleField("has_news");
-                });
-        })
+        $this
+            ->addSection("Sous-section", function(ShowLayoutSection $section) {
+                $section
+                    ->addColumn(6, function(ShowLayoutColumn $column) {
+                        $column
+                            ->withSingleField("title")
+                            ->withSingleField("style_key")
+                            ->withSingleField("url")
+                            ->withSingleField("has_news");
+                    })
+                    ->addColumn(6, function(ShowLayoutColumn $column) {
+                        $column->withSingleField("heading_text");
+                    });
+            })
             ->addEntityListSection("tileblocks")
             ->addEntityListSection("section_sidepanels");
     }

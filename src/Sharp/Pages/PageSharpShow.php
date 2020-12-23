@@ -26,7 +26,7 @@ class PageSharpShow extends SharpShow
             ->addField(
                 SharpShowEntityListField::make("page_sidepanels", "page_sidepanels")
                     ->showCreateButton(true)
-                    ->setLabel("Panneaux pages")
+                    ->setLabel("Panneaux page")
                     ->hideFilterWithValue('domain',null)
                     ->hideFilterWithValue("container", function($instanceId) {
                         SharpGumSessionValue::set("sidepanel_container_type", Page::class);
@@ -37,18 +37,18 @@ class PageSharpShow extends SharpShow
 
     function buildShowLayout()
     {
-        $this->addSection("Page", function(ShowLayoutSection $section) {
-            $section
-                ->addColumn(12, function(ShowLayoutColumn $column) {
-                    $column->withSingleField("title");
-                })
-                ->addColumn(12, function(ShowLayoutColumn $column) {
-                    $column->withSingleField("heading_text");
-                })
-                ->addColumn(12, function(ShowLayoutColumn $column) {
-                    $column->withSingleField("urls");
-                });
-        })
+        $this
+            ->addSection("Page", function(ShowLayoutSection $section) {
+                $section
+                    ->addColumn(6, function(ShowLayoutColumn $column) {
+                        $column
+                            ->withSingleField("title")
+                            ->withSingleField("urls");
+                    })
+                    ->addColumn(6, function(ShowLayoutColumn $column) {
+                        $column->withSingleField("heading_text");
+                    });
+            })
             ->addEntityListSection("page_sidepanels");
     }
 
@@ -58,27 +58,17 @@ class PageSharpShow extends SharpShow
 
         return $this
             ->setCustomTransformer("urls", function() use ($page) {
-                return self::getUrlsFromPage($page);
+                $urls = ContentUrl::where('content_id', $page->id)
+                    ->where('content_type', Page::class)
+                    ->get()
+                    ->map(function ($value) {
+                        return $value->uri;
+                    })
+                    ->flatten()
+                    ->implode('<br>');
+
+                return $urls ?: '<span class="mb-2" style="color:orange"><small>pas de lien</small></span>';
             })
             ->transform($page);
-    }
-
-    public static function getUrlsFromPage($page)
-    {
-        $contentUrls = ContentUrl::where('content_id', $page->id)
-            ->where('content_type', Page::class)
-            ->get();
-
-        $urls = $contentUrls->map(function ($value) {
-            return $value->uri;
-        })
-            ->flatten()
-            ->implode('<br>');
-
-        if(is_null($urls) || empty($urls)) {
-            $urls = '<span class="mb-2" style="color:orange"><small>pas de lien</small></span>';
-        }
-
-        return sprintf("%s",$urls);
     }
 }

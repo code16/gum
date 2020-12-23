@@ -23,14 +23,9 @@ class PageSharpForm extends SharpForm
 {
     use WithSharpFormEloquentUpdater, WithSharpContext;
     
-    protected $allowNews = false;
+    protected bool $allowNews = false;
 
-    /**
-     * Build form fields using ->addField()
-     *
-     * @return void
-     */
-    function buildFormFields()
+    function buildFormFields(): void
     {
         $this->addField(
             SharpFormTextareaField::make("title")
