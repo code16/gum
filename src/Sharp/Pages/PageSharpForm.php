@@ -16,12 +16,11 @@ use Code16\Sharp\Form\Fields\SharpFormTextField;
 use Code16\Sharp\Form\Fields\SharpFormUploadField;
 use Code16\Sharp\Form\Layout\FormLayoutColumn;
 use Code16\Sharp\Form\SharpForm;
-use Code16\Sharp\Http\WithSharpContext;
 use Illuminate\Support\Str;
 
 class PageSharpForm extends SharpForm
 {
-    use WithSharpFormEloquentUpdater, WithSharpContext;
+    use WithSharpFormEloquentUpdater;
     
     protected bool $allowNews = false;
 
@@ -68,12 +67,7 @@ class PageSharpForm extends SharpForm
         }
     }
 
-    /**
-     * Build form layout using ->addTab() or ->addColumn()
-     *
-     * @return void
-     */
-    function buildFormLayout()
+    function buildFormLayout(): void
     {
         $this->addColumn(6, function (FormLayoutColumn $column) {
             $column
@@ -97,12 +91,6 @@ class PageSharpForm extends SharpForm
         });
     }
 
-    /**
-     * Retrieve a Model for the form and pack all its data as JSON.
-     *
-     * @param $id
-     * @return array
-     */
     function find($id): array
     {
         return $this
@@ -110,11 +98,6 @@ class PageSharpForm extends SharpForm
             ->transform(Page::with("pagegroup", "tags")->findOrFail($id));
     }
 
-    /**
-     * @param $id
-     * @param array $data
-     * @return mixed
-     */
     function update($id, array $data)
     {
         $page = $id ? Page::findOrFail($id) : new Page();
@@ -128,18 +111,12 @@ class PageSharpForm extends SharpForm
         return $page->id;
     }
 
-    /**
-     * @param $id
-     */
-    function delete($id)
+    function delete($id): void
     {
         Page::findOrFail($id)->delete();
     }
 
-    /**
-     * @return SharpFormMarkdownField
-     */
-    protected function bodyField()
+    protected function bodyField(): SharpFormMarkdownField
     {
         return SharpFormMarkdownField::make("body_text")
             ->setLabel("Texte")
@@ -153,10 +130,7 @@ class PageSharpForm extends SharpForm
             ]);
     }
 
-    /**
-     * @return SharpFormMarkdownField
-     */
-    protected function headingField()
+    protected function headingField(): SharpFormMarkdownField
     {
         return SharpFormMarkdownField::make("heading_text")
             ->setLabel("Chapeau")
@@ -168,10 +142,7 @@ class PageSharpForm extends SharpForm
             ]);
     }
 
-    /**
-     * @return SharpFormUploadField
-     */
-    protected function visualField()
+    protected function visualField(): SharpFormUploadField
     {
         return SharpFormUploadField::make("visual")
             ->setFileFilterImages()

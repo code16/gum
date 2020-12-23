@@ -6,8 +6,8 @@ use Closure;
 use Code16\Gum\Models\News;
 use Code16\Gum\Sharp\Utils\GumSharpList;
 use Code16\Sharp\EntityList\Containers\EntityListDataContainer;
-use Code16\Sharp\EntityList\Eloquent\Transformers\SharpUploadModelAttributeTransformer;
 use Code16\Sharp\EntityList\EntityListQueryParams;
+use Code16\Sharp\Utils\Transformers\Attributes\Eloquent\SharpUploadModelThumbnailUrlTransformer;
 use Code16\Sharp\Utils\Transformers\SharpAttributeTransformer;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -15,37 +15,32 @@ use Illuminate\Support\Str;
 class NewsSharpList extends GumSharpList
 {
 
-    /**
-     * Build list containers using ->addDataContainer()
-     *
-     * @return void
-     */
-    function buildListDataContainers()
+    function buildListDataContainers(): void
     {
-        $this->addDataContainer(
-            EntityListDataContainer::make("visual")
-                ->setLabel("")
-        )->addDataContainer(
-            EntityListDataContainer::make("title")
-                ->setLabel("Titre")
-        )->addDataContainer(
-            EntityListDataContainer::make("tags")
-                ->setLabel("Tags")
-        )->addDataContainer(
-            EntityListDataContainer::make("heading_text")
-                ->setLabel("Chapeau")
-        )->addDataContainer(
-            EntityListDataContainer::make("published_at")
-                ->setLabel("Mise en ligne")
-        );
+        $this
+            ->addDataContainer(
+                EntityListDataContainer::make("visual")
+                    ->setLabel("")
+            )
+            ->addDataContainer(
+                EntityListDataContainer::make("title")
+                    ->setLabel("Titre")
+            )
+            ->addDataContainer(
+                EntityListDataContainer::make("tags")
+                    ->setLabel("Tags")
+            )
+            ->addDataContainer(
+                EntityListDataContainer::make("heading_text")
+                    ->setLabel("Chapeau")
+            )
+            ->addDataContainer(
+                EntityListDataContainer::make("published_at")
+                    ->setLabel("Mise en ligne")
+            );
     }
 
-    /**
-     * Build list layout using ->addColumn()
-     *
-     * @return void
-     */
-    function buildListLayout()
+    function buildListLayout(): void
     {
         $this->addColumnLarge("visual", 1)
             ->addColumn("title", 3, 7)
@@ -54,12 +49,7 @@ class NewsSharpList extends GumSharpList
             ->addColumn("published_at", 3, 5);
     }
 
-    /**
-     * Build list config
-     *
-     * @return void
-     */
-    function buildListConfig()
+    function buildListConfig(): void
     {
         $this
             ->setSearchable()
@@ -68,12 +58,6 @@ class NewsSharpList extends GumSharpList
             ->addFilter("tags", NewsTagFilterHandler::class);
     }
 
-    /**
-     * Retrieve all rows data as array.
-     *
-     * @param EntityListQueryParams $params
-     * @return array
-     */
     function getListData(EntityListQueryParams $params)
     {
         $news = News::select($this->requestSelect())
@@ -109,25 +93,16 @@ class NewsSharpList extends GumSharpList
         return $this->transform($news->paginate(30));
     }
 
-    /**
-     * @return string|array
-     */
-    protected function requestSelect()
+    protected function requestSelect(): array
     {
         return ["news.*", DB::raw("(ABS(DATEDIFF(NOW(), published_at))+1) * importance as diff")];
     }
 
-    /**
-     * @return array
-     */
     protected function requestWiths(): array
     {
         return ["visual", "tags"];
     }
 
-    /**
-     * @return string
-     */
     protected function requestOrderBy(): string
     {
         return "diff ASC";
@@ -140,7 +115,7 @@ class NewsSharpList extends GumSharpList
     protected function customTransformerFor(string $attribute)
     {
         if($attribute == "visual") {
-            return new SharpUploadModelAttributeTransformer(200);
+            return (new SharpUploadModelThumbnailUrlTransformer(200))->renderAsImageTag();
         }
 
         if($attribute == "title") {

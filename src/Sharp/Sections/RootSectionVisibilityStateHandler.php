@@ -9,22 +9,13 @@ use Code16\Sharp\Exceptions\EntityList\SharpInvalidEntityStateException;
 class RootSectionVisibilityStateHandler extends EntityState
 {
 
-    /**
-     * @return mixed
-     */
-    protected function buildStates()
+    protected function buildStates(): void
     {
         $this->addState("OFFLINE", "Masqué", static::DARKGRAY_COLOR)
             ->addState("ONLINE", "En ligne", static::PRIMARY_COLOR);
     }
 
-    /**
-     * @param string $instanceId
-     * @param string $stateId
-     * @return mixed
-     * @throws SharpInvalidEntityStateException
-     */
-    protected function updateState($instanceId, $stateId)
+    protected function updateState($instanceId, $stateId): array
     {
         $section = Section::findOrFail($instanceId);
 

@@ -8,10 +8,7 @@ use Code16\Sharp\EntityList\Commands\ReorderHandler;
 class TileblockSharpReorderHandler implements ReorderHandler
 {
 
-    /**
-     * @param array $ids
-     */
-    function reorder(array $ids)
+    function reorder(array $ids): void
     {
         Tileblock::whereIn("id", $ids)
             ->get()

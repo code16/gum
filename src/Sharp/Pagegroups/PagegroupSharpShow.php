@@ -4,7 +4,6 @@ namespace Code16\Gum\Sharp\Pagegroups;
 
 use Code16\Gum\Models\ContentUrl;
 use Code16\Gum\Models\Pagegroup;
-use Code16\Sharp\Http\WithSharpContext;
 use Code16\Sharp\Show\Fields\SharpShowEntityListField;
 use Code16\Sharp\Show\Fields\SharpShowTextField;
 use Code16\Sharp\Show\Layout\ShowLayoutColumn;
@@ -13,9 +12,8 @@ use Code16\Sharp\Show\SharpShow;
 
 class PagegroupSharpShow extends SharpShow
 {
-    use WithSharpContext;
 
-    function buildShowFields()
+    function buildShowFields(): void
     {
         $this->addField(SharpShowTextField::make("title")
             ->setLabel("Titre"))
@@ -39,7 +37,7 @@ class PagegroupSharpShow extends SharpShow
             );
     }
 
-    function buildShowLayout()
+    function buildShowLayout(): void
     {
         $this
             ->addSection("Groupe de page", function(ShowLayoutSection $section) {

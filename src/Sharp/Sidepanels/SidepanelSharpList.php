@@ -8,43 +8,31 @@ use Code16\Gum\Sharp\Utils\GumSharpList;
 use Code16\Gum\Sharp\Utils\SharpGumSessionValue;
 use Code16\Sharp\EntityList\Containers\EntityListDataContainer;
 use Code16\Sharp\EntityList\EntityListQueryParams;
+use Code16\Sharp\Utils\Transformers\SharpAttributeTransformer;
 
 abstract class SidepanelSharpList extends GumSharpList
 {
 
-    /**
-     * Build list containers using ->addDataContainer()
-     *
-     * @return void
-     */
-    function buildListDataContainers()
+    function buildListDataContainers(): void
     {
-        $this->addDataContainer(
-            EntityListDataContainer::make("layout_label")
-                ->setLabel("Type")
-        )->addDataContainer(
-            EntityListDataContainer::make("content")
-                ->setLabel("")
-        );
+        $this
+            ->addDataContainer(
+                EntityListDataContainer::make("layout_label")
+                    ->setLabel("Type")
+            )
+            ->addDataContainer(
+                EntityListDataContainer::make("content")
+                    ->setLabel("")
+            );
     }
 
-    /**
-     * Build list layout using ->addColumn()
-     *
-     * @return void
-     */
-    function buildListLayout()
+    function buildListLayout(): void
     {
         $this->addColumn("layout_label", 2, 3)
             ->addColumn("content", 10, 9);
     }
 
-    /**
-     * Build list config
-     *
-     * @return void
-     */
-    function buildListConfig()
+    function buildListConfig(): void
     {
         $this
             ->setMultiformAttribute("layout")
@@ -62,13 +50,7 @@ abstract class SidepanelSharpList extends GumSharpList
         });
     }
 
-    /**
-     * Retrieve all rows data as array.
-     *
-     * @param EntityListQueryParams $params
-     * @return array
-     */
-    function getListData(EntityListQueryParams $params)
+    function getListData(EntityListQueryParams $params): array
     {
         $sidepanels = Sidepanel::where("container_id", $params->filterFor("container"))
             ->where("container_type", $this->containerType())
@@ -80,9 +62,6 @@ abstract class SidepanelSharpList extends GumSharpList
         return $this->transform($sidepanels->get());
     }
 
-    /**
-     * @return array
-     */
     protected function requestWiths(): array
     {
         return [];
@@ -97,18 +76,9 @@ abstract class SidepanelSharpList extends GumSharpList
         return null;
     }
 
-    /**
-     * @return string
-     */
     protected abstract function containerFilter(): string;
 
-    /**
-     * @return string
-     */
     protected abstract function containerType(): string;
 
-    /**
-     * @return string
-     */
     protected abstract function containerName(): string;
 }

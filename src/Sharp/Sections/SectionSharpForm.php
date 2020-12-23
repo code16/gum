@@ -15,19 +15,13 @@ use Code16\Sharp\Form\Fields\SharpFormTextareaField;
 use Code16\Sharp\Form\Fields\SharpFormTextField;
 use Code16\Sharp\Form\Layout\FormLayoutColumn;
 use Code16\Sharp\Form\SharpForm;
-use Code16\Sharp\Http\WithSharpContext;
 use Illuminate\Support\Str;
 
 class SectionSharpForm extends SharpForm
 {
-    use WithSharpFormEloquentUpdater, WithSharpContext, SharpFormWithStyleKey;
+    use WithSharpFormEloquentUpdater, SharpFormWithStyleKey;
 
-    /**
-     * Build form fields using ->addField()
-     *
-     * @return void
-     */
-    function buildFormFields()
+    function buildFormFields(): void
     {
         $this->addField(
             SharpFormTextareaField::make("title")
@@ -60,12 +54,7 @@ class SectionSharpForm extends SharpForm
         }
     }
 
-    /**
-     * Build form layout using ->addTab() or ->addColumn()
-     *
-     * @return void
-     */
-    function buildFormLayout()
+    function buildFormLayout(): void
     {
         $this->addColumn(6, function (FormLayoutColumn $column) {
             $column
@@ -85,22 +74,11 @@ class SectionSharpForm extends SharpForm
         });
     }
 
-    /**
-     * Retrieve a Model for the form and pack all its data as JSON.
-     *
-     * @param $id
-     * @return array
-     */
     function find($id): array
     {
         return $this->transform(Section::with("tags")->findOrFail($id));
     }
 
-    /**
-     * @param $id
-     * @param array $data
-     * @return mixed
-     */
     function update($id, array $data)
     {
         $section = $id
@@ -116,15 +94,12 @@ class SectionSharpForm extends SharpForm
         return $section->id;
     }
 
-    /**
-     * @param $id
-     */
-    function delete($id)
+    function delete($id): void
     {
         Section::findOrFail($id)->delete();
     }
 
-    protected function headingField()
+    protected function headingField(): SharpFormMarkdownField
     {
         return SharpFormMarkdownField::make("heading_text")
             ->setLabel("Chapeau")

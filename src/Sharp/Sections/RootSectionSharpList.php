@@ -15,20 +15,16 @@ use Code16\Sharp\Utils\Transformers\SharpAttributeTransformer;
 class RootSectionSharpList extends GumSharpList
 {
 
-    /**
-     * Build list containers using ->addDataContainer()
-     *
-     * @return void
-     */
-    function buildListDataContainers()
+    function buildListDataContainers(): void
     {
-        $this->addDataContainer(
-            EntityListDataContainer::make("title")
-                ->setLabel("Titre")
-        )->addDataContainer(
-            EntityListDataContainer::make("urls")
-                ->setLabel("Url")
-        );
+        $this
+            ->addDataContainer(
+                EntityListDataContainer::make("title")
+                    ->setLabel("Titre")
+            )->addDataContainer(
+                EntityListDataContainer::make("urls")
+                    ->setLabel("Url")
+            );
 
         if($this->hasMultipleMenus()) {
             $this->addDataContainer(
@@ -38,12 +34,7 @@ class RootSectionSharpList extends GumSharpList
         }
     }
 
-    /**
-     * Build list layout using ->addColumn()
-     *
-     * @return void
-     */
-    function buildListLayout()
+    function buildListLayout(): void
     {
         $this->addColumn("title", 4, 6)
             ->addColumn("urls", 4, 6);
@@ -53,12 +44,7 @@ class RootSectionSharpList extends GumSharpList
         }
     }
 
-    /**
-     * Build list config
-     *
-     * @return void
-     */
-    function buildListConfig()
+    function buildListConfig(): void
     {
         $this->setReorderable(RootSectionSharpReorderHandler::class)
             ->setEntityState("visibility", RootSectionVisibilityStateHandler::class);
@@ -70,13 +56,7 @@ class RootSectionSharpList extends GumSharpList
         }
     }
 
-    /**
-     * Retrieve all rows data as array.
-     *
-     * @param EntityListQueryParams $params
-     * @return array
-     */
-    function getListData(EntityListQueryParams $params)
+    function getListData(EntityListQueryParams $params): array
     {
         $sections = Section::domain(SharpGumSessionValue::getDomain())
             ->with($this->requestWiths())
@@ -92,9 +72,6 @@ class RootSectionSharpList extends GumSharpList
         return $this->transform($sections->get());
     }
 
-    /**
-     * @return array
-     */
     protected function requestWiths(): array
     {
         return ["url"];
@@ -131,13 +108,9 @@ class RootSectionSharpList extends GumSharpList
         return null;
     }
 
-    /**
-     * @return bool
-     */
-    protected function hasMultipleMenus()
+    protected function hasMultipleMenus(): bool
     {
-        $configKey = "gum.menus"
-            . (SharpGumSessionValue::getDomain() ? "." . SharpGumSessionValue::getDomain() :  "");
+        $configKey = "gum.menus" . (SharpGumSessionValue::getDomain() ? "." . SharpGumSessionValue::getDomain() :  "");
 
         return config($configKey) && sizeof(config($configKey)) > 1;
     }

@@ -14,15 +14,19 @@ use Code16\Sharp\Show\SharpShow;
 class PageSharpShow extends SharpShow
 {
 
-    function buildShowFields()
+    function buildShowFields(): void
     {
-        $this->addField(SharpShowTextField::make("title")
-            ->setLabel("Titre"))
+        $this
+            ->addField(SharpShowTextField::make("title")
+                ->setLabel("Titre")
+            )
             ->addField(SharpShowTextField::make("heading_text")
                 ->setLabel("Chapeau")
-                ->collapseToWordCount(25))
+                ->collapseToWordCount(25)
+            )
             ->addField(SharpShowTextField::make("urls")
-                ->setLabel("URLs"))
+                ->setLabel("URLs")
+            )
             ->addField(
                 SharpShowEntityListField::make("page_sidepanels", "page_sidepanels")
                     ->showCreateButton(true)
@@ -35,7 +39,7 @@ class PageSharpShow extends SharpShow
             );
     }
 
-    function buildShowLayout()
+    function buildShowLayout(): void
     {
         $this
             ->addSection("Page", function(ShowLayoutSection $section) {

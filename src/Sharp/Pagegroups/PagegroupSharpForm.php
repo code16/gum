@@ -9,19 +9,13 @@ use Code16\Sharp\Form\Fields\SharpFormTextareaField;
 use Code16\Sharp\Form\Fields\SharpFormTextField;
 use Code16\Sharp\Form\Layout\FormLayoutColumn;
 use Code16\Sharp\Form\SharpForm;
-use Code16\Sharp\Http\WithSharpContext;
 use Illuminate\Support\Str;
 
 class PagegroupSharpForm extends SharpForm
 {
-    use WithSharpFormEloquentUpdater, WithSharpContext;
+    use WithSharpFormEloquentUpdater;
 
-    /**
-     * Build form fields using ->addField()
-     *
-     * @return void
-     */
-    function buildFormFields()
+    function buildFormFields(): void
     {
         $this->addField(
             SharpFormTextareaField::make("title")
@@ -49,12 +43,7 @@ class PagegroupSharpForm extends SharpForm
         );
     }
 
-    /**
-     * Build form layout using ->addTab() or ->addColumn()
-     *
-     * @return void
-     */
-    function buildFormLayout()
+    function buildFormLayout(): void
     {
         $this->addColumn(6, function (FormLayoutColumn $column) {
             $column
@@ -70,40 +59,26 @@ class PagegroupSharpForm extends SharpForm
         });
     }
 
-    /**
-     * Retrieve a Model for the form and pack all its data as JSON.
-     *
-     * @param $id
-     * @return array
-     */
     function find($id): array
     {
         return $this
             ->transform(Pagegroup::with("pages")->findOrFail($id));
     }
 
-    /**
-     * @param $id
-     * @param array $data
-     * @return mixed
-     */
     function update($id, array $data)
     {
-        $pagegroup = $id ? Pagegroup::findOrFail($id) : new Pagegroup();
+        $pageGroup = $id ? Pagegroup::findOrFail($id) : new Pagegroup();
 
         if(!trim($data["slug"])) {
             $data["slug"] = Str::slug($data["title"]);
         }
 
-        $this->save($pagegroup, $data);
+        $this->save($pageGroup, $data);
 
-        return $pagegroup->id;
+        return $pageGroup->id;
     }
 
-    /**
-     * @param $id
-     */
-    function delete($id)
+    function delete($id): void
     {
         Pagegroup::findOrFail($id)->delete();
     }

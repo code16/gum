@@ -23,12 +23,7 @@ class NewsSharpForm extends SharpForm
 {
     use WithSharpFormEloquentUpdater;
 
-    /**
-     * Build form fields using ->addField()
-     *
-     * @return void
-     */
-    function buildFormFields()
+    function buildFormFields(): void
     {
         $this->addField(
             SharpFormDateField::make("published_at")
@@ -40,13 +35,15 @@ class NewsSharpForm extends SharpForm
         );
 
         if($this->hasField("visual")) {
-            $this->addField(
-                SharpFormUploadField::make("visual")
-                    ->setFileFilterImages()
-                    ->setMaxFileSize(5)
-                    ->setStorageDisk("local")
-                    ->setStorageBasePath("data/news/{id}")
-                )->addField(
+            $this
+                ->addField(
+                    SharpFormUploadField::make("visual")
+                        ->setFileFilterImages()
+                        ->setMaxFileSize(5)
+                        ->setStorageDisk("local")
+                        ->setStorageBasePath("data/news/{id}")
+                )
+                ->addField(
                     SharpFormTextField::make("visual:legend")
                         ->setPlaceholder("Légende")
                 );
@@ -145,7 +142,8 @@ class NewsSharpForm extends SharpForm
                         ->setMaxFileSize(12)
                         ->setStorageDisk("local")
                         ->setStorageBasePath("data/news/{id}/attachments")
-                )->addItemField(
+                )
+                ->addItemField(
                     SharpFormTextField::make("legend")
                         ->setPlaceholder("Légende")
                 );
@@ -158,75 +156,66 @@ class NewsSharpForm extends SharpForm
         }
     }
 
-    /**
-     * Build form layout using ->addTab() or ->addColumn()
-     *
-     * @return void
-     */
-    function buildFormLayout()
+    function buildFormLayout(): void
     {
-        $this->addColumn(6, function (FormLayoutColumn $column) {
-            $column->withSingleField("published_at");
-
-            if($this->hasField("tags")) {
-                $column->withSingleField("tags");
-            }
-
-            if($this->hasField("category")) {
-                $column->withSingleField("category_label");
-            }
-
-            if($this->hasField("importance")) {
-                $column->withSingleField("importance");
-            }
-
-            if($this->hasField("title")) {
-                $column->withSingleField("title");
-            }
-
-            if($this->hasField("surtitle")) {
-                $column->withSingleField("surtitle");
-            }
-
-            if($this->hasField("visual")) {
-                $column->withFieldset("Visuel", function (FormLayoutFieldset $fieldset) {
-                    $fieldset->withSingleField("visual")
-                        ->withSingleField("visual:legend");
-
-                    foreach ($this->additionalVisualFields() as $key => $field) {
-                        $fieldset->withSingleField($key);
-                    }
-                });
-            }
-
-            if($this->hasField("attachments")) {
-                $column->withSingleField("attachments", function (FormLayoutColumn $item) {
-                    $item->withSingleField("file")
-                        ->withSingleField("legend");
-
-                    foreach($this->additionalAttachmentItemFields() as $key => $field) {
-                        $item->withSingleField($key);
-                    }
-                });
-            }
-
-        })->addColumn(6, function (FormLayoutColumn $column) {
-            if($this->hasField("heading_text")) {
-                $column->withSingleField("heading_text");
-            }
-
-            if($this->hasField("body_text")) {
-                $column->withSingleField("body_text");
-            }
-        });
+        $this
+            ->addColumn(6, function (FormLayoutColumn $column) {
+                $column->withSingleField("published_at");
+    
+                if($this->hasField("tags")) {
+                    $column->withSingleField("tags");
+                }
+    
+                if($this->hasField("category")) {
+                    $column->withSingleField("category_label");
+                }
+    
+                if($this->hasField("importance")) {
+                    $column->withSingleField("importance");
+                }
+    
+                if($this->hasField("title")) {
+                    $column->withSingleField("title");
+                }
+    
+                if($this->hasField("surtitle")) {
+                    $column->withSingleField("surtitle");
+                }
+    
+                if($this->hasField("visual")) {
+                    $column->withFieldset("Visuel", function (FormLayoutFieldset $fieldset) {
+                        $fieldset->withSingleField("visual")
+                            ->withSingleField("visual:legend");
+    
+                        foreach ($this->additionalVisualFields() as $key => $field) {
+                            $fieldset->withSingleField($key);
+                        }
+                    });
+                }
+    
+                if($this->hasField("attachments")) {
+                    $column->withSingleField("attachments", function (FormLayoutColumn $item) {
+                        $item->withSingleField("file")
+                            ->withSingleField("legend");
+    
+                        foreach($this->additionalAttachmentItemFields() as $key => $field) {
+                            $item->withSingleField($key);
+                        }
+                    });
+                }
+    
+            })
+            ->addColumn(6, function (FormLayoutColumn $column) {
+                if($this->hasField("heading_text")) {
+                    $column->withSingleField("heading_text");
+                }
+    
+                if($this->hasField("body_text")) {
+                    $column->withSingleField("body_text");
+                }
+            });
     }
 
-    /**
-     * Retrieve a Model for the form and pack all its data as JSON.
-     *
-     * @param $id
-     * @return array
-     */
     function find($id): array
     {
         return $this
@@ -235,11 +224,6 @@ class NewsSharpForm extends SharpForm
             ->transform(News::with("visual", "attachments", "tags")->findOrFail($id));
     }
 
-    /**
-     * @param $id
-     * @param array $data
-     * @return mixed
-     */
     function update($id, array $data)
     {
         $news = $id ? News::findOrFail($id) : new News();
@@ -262,17 +246,11 @@ class NewsSharpForm extends SharpForm
         ]));
     }
 
-    /**
-     * @param $id
-     */
-    function delete($id)
+    function delete($id): void
     {
         News::findOrFail($id)->delete();
     }
 
-    /**
-     * @return array
-     */
     protected function newsFields(): array
     {
         return [
@@ -281,33 +259,21 @@ class NewsSharpForm extends SharpForm
         ];
     }
 
-    /**
-     * @return array
-     */
     protected function additionalVisualFields(): array
     {
         return [];
     }
 
-    /**
-     * @return array
-     */
     protected function additionalAttachmentItemFields(): array
     {
         return [];
     }
 
-    /**
-     * @return array
-     */
     protected function categoryLabels(): array
     {
         return [];
     }
 
-    /**
-     * @return array
-     */
     protected function importanceLevels(): array
     {
         return [
@@ -319,16 +285,12 @@ class NewsSharpForm extends SharpForm
         ];
     }
 
-    /**
-     * @param $field
-     * @return bool
-     */
     private function hasField($field): bool
     {
         return in_array($field, $this->newsFields());
     }
 
-    protected function deleteOrphanTags()
+    protected function deleteOrphanTags(): void
     {
         $tags = Tag::whereNotIn("id", function($query) {
             return $query->select("tag_id")

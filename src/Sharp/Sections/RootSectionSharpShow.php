@@ -11,7 +11,7 @@ use Code16\Sharp\Show\Layout\ShowLayoutSection;
 class RootSectionSharpShow extends SectionSharpShow
 {
 
-    function buildShowFields()
+    function buildShowFields(): void
     {
         parent::buildShowFields();
 
@@ -20,7 +20,7 @@ class RootSectionSharpShow extends SectionSharpShow
         );
     }
 
-    function buildShowLayout()
+    function buildShowLayout(): void
     {
         $this->addSection("Section racine", function(ShowLayoutSection $section) {
             $section

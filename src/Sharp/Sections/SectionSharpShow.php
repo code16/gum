@@ -14,7 +14,7 @@ use Code16\Sharp\Show\SharpShow;
 class SectionSharpShow extends SharpShow
 {
 
-    function buildShowFields()
+    function buildShowFields(): void
     {
         $this
             ->addField(SharpShowTextField::make("title")
@@ -54,7 +54,7 @@ class SectionSharpShow extends SharpShow
             );
     }
 
-    function buildShowLayout()
+    function buildShowLayout(): void
     {
         $this
             ->addSection("Sous-section", function(ShowLayoutSection $section) {
