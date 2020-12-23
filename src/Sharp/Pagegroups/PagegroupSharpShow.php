@@ -53,6 +53,11 @@ class PagegroupSharpShow extends SharpShow
             ->addEntityListSection("pages");
     }
 
+    public function buildShowConfig(): void
+    {
+        $this->setBreadcrumbCustomLabelAttribute("title");
+    }
+
     function find($id): array
     {
         $pageGroup = Pagegroup::find($id);

@@ -61,6 +61,11 @@ class PageSharpShow extends SharpShow
             ->addEntityListSection("page_sidepanels");
     }
 
+    public function buildShowConfig(): void
+    {
+        $this->setBreadcrumbCustomLabelAttribute("title");
+    }
+
     function find($id): array
     {
         $page = Page::with("pagegroup", "urls")->find($id);

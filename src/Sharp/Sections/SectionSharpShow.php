@@ -74,6 +74,11 @@ class SectionSharpShow extends SharpShow
             ->addEntityListSection("section_sidepanels");
     }
 
+    public function buildShowConfig(): void
+    {
+        $this->setBreadcrumbCustomLabelAttribute("title");
+    }
+
     function find($id): array
     {
         $section = Section::find($id);
