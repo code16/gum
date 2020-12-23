@@ -33,9 +33,10 @@ class SharpGumSessionValue
 
     public static function getDomain(): ?string
     {
-        $domains = collect(config("gum.domains"))->filter(function($label, $domain) {
-            return gum_domain_allowed_to_user($domain);
-        });
+        $domains = collect(config("gum.domains"))
+            ->filter(function($label, $domain) {
+                return gum_domain_allowed_to_user($domain);
+            });
 
         if(!$domains) {
             return null;
