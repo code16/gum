@@ -63,9 +63,11 @@ class RootSectionSharpTest extends GumSharpTestCase
             "style_key" => "style",
             "slug" => "slug",
         ];
-
-        $this->storeSharpForm("root_sections", $values)->assertStatus(200);
-
+        
+        $this
+            ->storeSharpForm("root_sections", $values)
+            ->assertOk();
+        
         $this->assertEquals("/slug", Section::first()->url->uri);
         $this->assertEquals("OFFLINE", Section::first()->url->visibility);
     }

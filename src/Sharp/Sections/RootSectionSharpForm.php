@@ -50,7 +50,7 @@ class RootSectionSharpForm extends SectionSharpForm
     function update($id, array $data)
     {
         $data["is_root"] = true;
-
+        
         if(currentSharpRequest()->isCreation()) {
             $data["root_menu_order"] = 100;
         }

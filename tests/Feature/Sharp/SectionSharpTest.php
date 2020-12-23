@@ -11,6 +11,7 @@ class SectionSharpTest extends GumSharpTestCase
     /** @test */
     function we_can_update_a_section()
     {
+        $this->withoutExceptionHandling();
         $section = factory(Section::class)->create();
 
         $this->updateSharpForm("sections", $section->id, $this->getFormValues())

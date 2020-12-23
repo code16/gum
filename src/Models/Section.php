@@ -6,6 +6,9 @@ use Code16\Gum\Models\Utils\WithMenuTitle;
 use Code16\Gum\Models\Utils\WithUuid;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Laravel\Scout\Searchable;
 use Parsedown;
 
@@ -83,46 +86,39 @@ class Section extends Model
             });
     }
 
-    public function url()
+    public function url(): MorphOne
     {
         return $this->morphOne(ContentUrl::class, "content");
     }
 
-    public function sidepanels()
+    public function sidepanels(): MorphMany
     {
         return $this->morphMany(Sidepanel::class, "container")
             ->orderBy("order");
     }
 
-    public function tags()
+    public function tags(): MorphToMany
     {
         return $this->morphToMany(Tag::class, "taggable");
     }
 
-    /**
-     * @return bool
-     */
-    public function isHome()
+    public function isHome(): bool
     {
         return $this->slug == "";
     }
 
     /**
      * Get the index name for the model.
-     *
-     * @return string
      */
-    public function searchableAs()
+    public function searchableAs(): string
     {
         return env('SCOUT_PREFIX') . 'content';
     }
 
     /**
      * Get the indexable data array for the model.
-     *
-     * @return array
      */
-    public function toSearchableArray()
+    public function toSearchableArray(): array
     {
         return [
             "type" => "section",
@@ -135,10 +131,7 @@ class Section extends Model
         ];
     }
 
-    /**
-     * @return bool
-     */
-    public function shouldBeSearchable()
+    public function shouldBeSearchable(): bool
     {
         return $this->url && $this->url->isVisible()
             && (($this->is_root && !$this->isHome()) || $this->url->isPublished());

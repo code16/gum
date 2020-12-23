@@ -8,6 +8,9 @@ use Code16\Gum\Models\Utils\WithVisibility;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Str;
 
 class ContentUrl extends Model
@@ -32,21 +35,13 @@ class ContentUrl extends Model
         return $query->where("domain", $domain);
     }
 
-    /**
-     * @param bool $recursive
-     * @return bool
-     */
-    public function isVisible(bool $recursive = true)
+    public function isVisible(bool $recursive = true): bool
     {
         return $this->visibility == "ONLINE"
             && ($recursive && $this->parent ? $this->parent->isVisible() : true);
     }
 
-    /**
-     * @param Carbon|null $date
-     * @return bool
-     */
-    public function isPublished(Carbon $date = null)
+    public function isPublished(?Carbon $date = null): bool
     {
         $now = $date ?? Carbon::now();
 
@@ -55,11 +50,7 @@ class ContentUrl extends Model
             && ($this->parent ? $this->parent->isPublished($date) : true);
     }
 
-    /**
-     * @param Section $section
-     * @param Tile $tile
-     */
-    public static function createForTile(Section $section, Tile $tile)
+    public static function createForTile(Section $section, Tile $tile): void
     {
         if($tile->isFreeLink()) {
             return;
@@ -84,10 +75,7 @@ class ContentUrl extends Model
         )->save();
     }
 
-    /**
-     * @param Page $page
-     */
-    public static function createForPageInPagegroup(Page $page)
+    public static function createForPageInPagegroup(Page $page): void
     {
         try {
             $pagegroupUrl = ContentUrl::where([
@@ -131,27 +119,27 @@ class ContentUrl extends Model
         ]);
     }
 
-    public function content()
+    public function content(): MorphTo
     {
         return $this->morphTo();
     }
 
-    public function parent()
+    public function parent(): BelongsTo
     {
         return $this->belongsTo(ContentUrl::class);
     }
 
-    public function children()
+    public function children(): HasMany
     {
         return $this->hasMany(ContentUrl::class, "parent_id");
     }
 
-    public function getRelativeUriAttribute()
+    public function getRelativeUriAttribute(): string
     {
         return substr($this->attributes["uri"], 1);
     }
 
-    public function getDepthAttribute()
+    public function getDepthAttribute(): int
     {
         return count(explode("/", $this->relative_uri));
     }
@@ -162,7 +150,7 @@ class ContentUrl extends Model
      * @param string|null $subContentSlug
      * @return string
      */
-    public function findAvailableUriFor($subContent, string $domain = null, string $subContentSlug = null)
+    public function findAvailableUriFor($subContent, string $domain = null, string $subContentSlug = null): string
     {
         $subContentSlug = $subContentSlug ?: $subContent->slug;
         $uri = preg_replace('#/+#', '/', sprintf("%s/%s", $this->uri, $subContentSlug));
@@ -211,11 +199,7 @@ class ContentUrl extends Model
         });
     }
 
-    /**
-     * @param array $breadcrumb
-     * @return array
-     */
-    public function buildBreadcrumb(array &$breadcrumb = [])
+    public function buildBreadcrumb(array &$breadcrumb = []): array
     {
         if($this->parent_id) {
             $this->parent->buildBreadcrumb($breadcrumb);

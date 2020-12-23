@@ -9,11 +9,10 @@ trait SharpFormWithStyleKey
         return $this->stylesDefined() && sizeof($this->stylesDefined());
     }
 
-    protected function stylesDefined(): array
+    protected function stylesDefined(): ?array
     {
         return config(
-            "gum.styles"
-            . (SharpGumSessionValue::getDomain() ? "." . SharpGumSessionValue::getDomain() : "")
+            "gum.styles" . (SharpGumSessionValue::getDomain() ? "." . SharpGumSessionValue::getDomain() : "")
         );
     }
 }
