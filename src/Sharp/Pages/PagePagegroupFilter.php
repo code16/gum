@@ -4,20 +4,17 @@ namespace Code16\Gum\Sharp\Pages;
 
 use Code16\Gum\Models\Pagegroup;
 use Code16\Gum\Sharp\Utils\SharpGumSessionValue;
-use Code16\Sharp\EntityList\EntityListRequiredFilter;
+use Code16\Sharp\EntityList\EntityListSelectRequiredFilter;
 
-class PagePagegroupFilter implements EntityListRequiredFilter
+class PagePagegroupFilter implements EntityListSelectRequiredFilter
 {
 
-    public function label()
+    public function label(): string
     {
         return "Groupe";
     }
 
-    /**
-     * @return array
-     */
-    public function values()
+    public function values(): array
     {
         return ["0" => "- Aucun -"]
             + Pagegroup::orderBy("title")
@@ -26,9 +23,6 @@ class PagePagegroupFilter implements EntityListRequiredFilter
                 ->all();
     }
 
-    /**
-     * @return string|int
-     */
     public function defaultValue()
     {
         return SharpGumSessionValue::get("page_pagegroup", "0");

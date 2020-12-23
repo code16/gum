@@ -13,18 +13,12 @@ use Code16\Sharp\Form\Fields\SharpFormTextField;
 use Code16\Sharp\Form\Fields\SharpFormUploadField;
 use Code16\Sharp\Form\Layout\FormLayoutColumn;
 use Code16\Sharp\Form\SharpForm;
-use Code16\Sharp\Http\WithSharpContext;
 
 abstract class SidepanelSharpForm extends SharpForm
 {
-    use WithSharpFormEloquentUpdater, WithSharpContext;
+    use WithSharpFormEloquentUpdater;
 
-    /**
-     * Build form fields using ->addField()
-     *
-     * @return void
-     */
-    function buildFormFields()
+    function buildFormFields(): void
     {
         $this->addField(
             SharpFormTextField::make("layout_label")
@@ -102,48 +96,45 @@ abstract class SidepanelSharpForm extends SharpForm
             $this->addField($field);
         }
     }
-
-    /**
-     * Build form layout using ->addTab() or ->addColumn()
-     *
-     * @return void
-     */
-    function buildFormLayout()
+    
+    function buildFormLayout(): void
     {
-        $this->addColumn(6, function (FormLayoutColumn $column) {
-            $column->withSingleField("container_label")
-                ->withSingleField("layout_label");
-
-            if($this->hasField("body_text")) {
-                $column->withSingleField("body_text");
-            }
-
-            if($this->hasField("link")) {
-                $column->withSingleField("link");
-            }
-
-        })->addColumn(6, function (FormLayoutColumn $column) {
-            if($this->hasField("visual")) {
-                $column->withSingleField("visual");
-
-                if($this->hasField("video")) {
-                    $column->withSingleField("visual:video_url");
+        $this
+            ->addColumn(6, function (FormLayoutColumn $column) {
+                $column->withSingleField("container_label")
+                    ->withSingleField("layout_label");
+    
+                if($this->hasField("body_text")) {
+                    $column->withSingleField("body_text");
                 }
-
-                if($this->hasField("visual_legend")) {
-                    $column->withSingleField("visual:legend");
+    
+                if($this->hasField("link")) {
+                    $column->withSingleField("link");
                 }
-            }
-
-            if($this->hasField("download")) {
-                $column->withSingleField("downloadableFile")
-                    ->withSingleField("downloadableFile:title");
-            }
-
-            foreach ($this->additionalFields() as $key => $field) {
-                $column->withSingleField($key);
-            }
-        });
+    
+            })
+            ->addColumn(6, function (FormLayoutColumn $column) {
+                if($this->hasField("visual")) {
+                    $column->withSingleField("visual");
+    
+                    if($this->hasField("video")) {
+                        $column->withSingleField("visual:video_url");
+                    }
+    
+                    if($this->hasField("visual_legend")) {
+                        $column->withSingleField("visual:legend");
+                    }
+                }
+    
+                if($this->hasField("download")) {
+                    $column->withSingleField("downloadableFile")
+                        ->withSingleField("downloadableFile:title");
+                }
+    
+                foreach ($this->additionalFields() as $key => $field) {
+                    $column->withSingleField($key);
+                }
+            });
     }
 
     /**
@@ -171,9 +162,6 @@ abstract class SidepanelSharpForm extends SharpForm
         return $this->transform(Sidepanel::with("visual", "downloadableFile", "container")->findOrFail($id));
     }
 
-    /**
-     * @return array
-     */
     public function create(): array
     {
         return $this
@@ -189,11 +177,6 @@ abstract class SidepanelSharpForm extends SharpForm
             ->transform(new Sidepanel());
     }
 
-    /**
-     * @param $id
-     * @param array $data
-     * @return mixed
-     */
     function update($id, array $data)
     {
         $sidepanel = $id ? Sidepanel::findOrFail($id) : new Sidepanel();
@@ -204,17 +187,11 @@ abstract class SidepanelSharpForm extends SharpForm
         return $sidepanel->id;
     }
 
-    /**
-     * @param $id
-     */
-    function delete($id)
+    function delete($id): void
     {
         Sidepanel::findOrFail($id)->delete();
     }
 
-    /**
-     * @return array
-     */
     protected function sidepanelFields(): array
     {
         return [
@@ -222,48 +199,28 @@ abstract class SidepanelSharpForm extends SharpForm
         ];
     }
 
-    /**
-     * @return string
-     */
     abstract protected function layoutKey(): string;
 
-    /**
-     * @return string
-     */
     abstract protected function layoutLabel(): string;
 
-    /**
-     * @return array
-     */
     protected function additionalFields(): array
     {
         return [];
     }
 
-    /**
-     * @return array
-     */
     protected function additionalTransformers(): array
     {
         return [];
     }
 
-    /**
-     * @param $field
-     * @return bool
-     */
     private function hasField($field): bool
     {
         return in_array($field, $this->sidepanelFields());
     }
 
-    /**
-     * @param $data
-     * @return array
-     */
     protected function cleanUpData($data): array
     {
-        if($this->context()->isCreation()) {
+        if(currentSharpRequest()->isCreation()) {
             $data["layout"] = $this->layoutKey();
             $data["container_id"] = $this->containerId();
             $data["container_type"] = SharpGumSessionValue::get("sidepanel_container_type");
@@ -272,18 +229,12 @@ abstract class SidepanelSharpForm extends SharpForm
         return $data;
     }
 
-    /**
-     * @return array
-     */
-    protected function getDownloadableFileFilter()
+    protected function getDownloadableFileFilter(): array
     {
         return ["pdf","zip"];
     }
 
-    /**
-     * @return string
-     */
-    protected function containerId()
+    protected function containerId(): string
     {
         return SharpGumSessionValue::get("sidepanel_container_type") == Page::class
             ? SharpGumSessionValue::get("page")

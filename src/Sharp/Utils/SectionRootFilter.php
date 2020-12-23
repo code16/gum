@@ -3,32 +3,23 @@
 namespace Code16\Gum\Sharp\Utils;
 
 use Code16\Gum\Models\Section;
-use Code16\Sharp\EntityList\EntityListRequiredFilter;
+use Code16\Sharp\EntityList\EntityListSelectRequiredFilter;
 
-class SectionRootFilter implements EntityListRequiredFilter
+class SectionRootFilter implements EntityListSelectRequiredFilter
 {
-    /**
-     * @var bool
-     */
-    protected $withHome;
+    protected bool $withHome;
 
-    /**
-     * @param bool $withHome
-     */
-    public function __construct($withHome = false)
+    public function __construct(bool $withHome = false)
     {
         $this->withHome = $withHome;
     }
 
-    public function label()
+    public function label(): string
     {
         return "Racine";
     }
 
-    /**
-     * @return array
-     */
-    public function values()
+    public function values(): array
     {
         return
             ["-" => "- Aucune -"] +
@@ -43,9 +34,6 @@ class SectionRootFilter implements EntityListRequiredFilter
                 ->all();
     }
 
-    /**
-     * @return string|int
-     */
     public function defaultValue()
     {
         if($sectionId = SharpGumSessionValue::get("root_section")) {

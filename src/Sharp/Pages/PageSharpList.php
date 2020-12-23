@@ -12,19 +12,14 @@ use Code16\Gum\Sharp\Utils\SectionRootFilter;
 use Code16\Gum\Sharp\Utils\SharpGumSessionValue;
 use Code16\Gum\Sharp\Utils\UrlsCustomTransformer;
 use Code16\Sharp\EntityList\Containers\EntityListDataContainer;
-use Code16\Sharp\EntityList\Eloquent\Transformers\SharpUploadModelAttributeTransformer;
 use Code16\Sharp\EntityList\EntityListQueryParams;
+use Code16\Sharp\Utils\Transformers\Attributes\Eloquent\SharpUploadModelThumbnailUrlTransformer;
 use Code16\Sharp\Utils\Transformers\SharpAttributeTransformer;
 
 class PageSharpList extends GumSharpList
 {
 
-    /**
-     * Build list containers using ->addDataContainer()
-     *
-     * @return void
-     */
-    function buildListDataContainers()
+    function buildListDataContainers(): void
     {
         $this->addDataContainer(
             EntityListDataContainer::make("visual")
@@ -41,25 +36,22 @@ class PageSharpList extends GumSharpList
         );
     }
 
-    /**
-     * Build list layout using ->addColumn()
-     *
-     * @return void
-     */
-    function buildListLayout()
+    function buildListLayout(): void
     {
-        $this->addColumnLarge("visual", 2)
-            ->addColumn("title", 3, 6)
-            ->addColumnLarge("pagegroup:title", 3)
-            ->addColumn("urls", 4, 6);
+        $this->addColumnLarge("visual", 2);
+            
+        if(currentSharpRequest()->getCurrentBreadcrumbItem()->entityKey() === "pagegroups") {
+            // EEL in PagegroupSharpShow
+            $this->addColumn("title", 4, 6)
+                ->addColumn("urls", 6);
+        } else {
+            $this->addColumn("title", 3, 6)
+                ->addColumnLarge("pagegroup:title", 3)
+                ->addColumn("urls", 4, 6);
+        }
     }
 
-    /**
-     * Build list config
-     *
-     * @return void
-     */
-    function buildListConfig()
+    function buildListConfig(): void
     {
         if(sizeof(config("gum.domains"))) {
             $this->addFilter("domain", DomainFilter::class, function($value, EntityListQueryParams $params) {
@@ -74,13 +66,7 @@ class PageSharpList extends GumSharpList
         $this->setSearchable();
     }
 
-    /**
-     * Retrieve all rows data as array.
-     *
-     * @param EntityListQueryParams $params
-     * @return array
-     */
-    function getListData(EntityListQueryParams $params)
+    function getListData(EntityListQueryParams $params): array
     {
         $pages = Page::select("pages.*")
             ->with($this->requestWiths());
@@ -88,6 +74,7 @@ class PageSharpList extends GumSharpList
         $rootId = $params->filterFor("root");
 
         if($pagegroupId = $params->filterFor("pagegroup")) {
+            // EEL in PagegroupSharpShow
             $pages->where('pagegroup_id', $pagegroupId);
         }
 
@@ -160,7 +147,8 @@ class PageSharpList extends GumSharpList
                 return sizeof($page->urls)
                     ? dirname($page->urls[0]->uri)
                     : "";
-            })->sortBy(function($group, $url) {
+            })
+            ->sortBy(function($group, $url) {
                 return count(explode("/", $url));
             })
             ->flatten()
@@ -171,9 +159,6 @@ class PageSharpList extends GumSharpList
         return $this->transform($pages);
     }
 
-    /**
-     * @return array
-     */
     protected function requestWiths(): array
     {
         return ["urls", "visual", "pagegroup"];
@@ -186,7 +171,7 @@ class PageSharpList extends GumSharpList
     protected function customTransformerFor(string $attribute)
     {
         if($attribute == "visual") {
-            return new SharpUploadModelAttributeTransformer(200);
+            return (new SharpUploadModelThumbnailUrlTransformer(200))->renderAsImageTag();
         }
 
         if($attribute == "urls") {

@@ -3,25 +3,24 @@
 namespace Code16\Gum\Sharp\News;
 
 use Code16\Gum\Models\Tag;
-use Code16\Sharp\EntityList\EntityListMultipleFilter;
+use Code16\Sharp\EntityList\EntityListSelectMultipleFilter;
 
-class NewsTagFilterHandler implements EntityListMultipleFilter
+class NewsTagFilterHandler implements EntityListSelectMultipleFilter
 {
 
-    public function label()
+    public function label(): string
     {
         return "Tag";
     }
 
-    /**
-     * @return array
-     */
-    public function values()
+    public function values(): array
     {
-        return Tag::orderBy("name")->pluck("name", "id");
+        return Tag::orderBy("name")
+            ->pluck("name", "id")
+            ->toArray();
     }
 
-    public function isSearchable()
+    public function isSearchable(): bool
     {
         return true;
     }

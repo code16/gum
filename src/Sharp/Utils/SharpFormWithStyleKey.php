@@ -4,18 +4,12 @@ namespace Code16\Gum\Sharp\Utils;
 
 trait SharpFormWithStyleKey
 {
-    /**
-     * @return bool
-     */
     protected function hasStylesDefined(): bool
     {
         return $this->stylesDefined() && sizeof($this->stylesDefined());
     }
 
-    /**
-     * @return array
-     */
-    protected function stylesDefined()
+    protected function stylesDefined(): array
     {
         return config(
             "gum.styles"

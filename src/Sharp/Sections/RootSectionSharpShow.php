@@ -11,29 +11,28 @@ use Code16\Sharp\Show\Layout\ShowLayoutSection;
 class RootSectionSharpShow extends SectionSharpShow
 {
 
-    function buildShowFields()
+    function buildShowFields(): void
     {
         parent::buildShowFields();
 
         $this->addField(SharpShowTextField::make("menu_key")
-            ->setLabel("Emplacement"));
+            ->setLabel("Emplacement")
+        );
     }
 
-    function buildShowLayout()
+    function buildShowLayout(): void
     {
         $this->addSection("Section racine", function(ShowLayoutSection $section) {
             $section
-                ->addColumn(12, function(ShowLayoutColumn $column) {
-                    $column->withSingleField("title");
+                ->addColumn(6, function(ShowLayoutColumn $column) {
+                    $column
+                        ->withSingleField("title")
+                        ->withFields("style_key|6", "menu_key|6")
+                        ->withSingleField("url")
+                        ->withSingleField("has_news");
                 })
-                ->addColumn(12, function(ShowLayoutColumn $column) {
+                ->addColumn(6, function(ShowLayoutColumn $column) {
                     $column->withSingleField("heading_text");
-                })
-                ->addColumn(12, function(ShowLayoutColumn $column) {
-                    $column->withFields("style_key|2", "menu_key|2", "url|6");
-                })
-                ->addColumn(12, function(ShowLayoutColumn $column) {
-                    $column->withSingleField("has_news");
                 });
             })
             ->addEntityListSection("tileblocks")
@@ -47,9 +46,12 @@ class RootSectionSharpShow extends SectionSharpShow
         $this->applySectionCustomTransformers($section);
 
         return $this
-            ->setCustomTransformer("menu_key", function($value, $instance) {
-                $configKey = "gum.menus"
-                    . (SharpGumSessionValue::getDomain() ? "." . SharpGumSessionValue::getDomain() :  "");
+            ->setCustomTransformer("menu_key", function($value, $section) {
+                if($section->isHome()) {
+                    return null;
+                }
+                
+                $configKey = "gum.menus" . (SharpGumSessionValue::getDomain() ? "." . SharpGumSessionValue::getDomain() :  "");
                 return $value ? config($configKey)[$value] : null;
             })
             ->transform($section);

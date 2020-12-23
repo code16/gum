@@ -14,47 +14,34 @@ use Code16\Gum\Sharp\Utils\SectionFilter;
 use Code16\Gum\Sharp\Utils\SharpGumSessionValue;
 use Code16\Sharp\EntityList\Containers\EntityListDataContainer;
 use Code16\Sharp\EntityList\EntityListQueryParams;
-use Code16\Sharp\Utils\LinkToEntity;
+use Code16\Sharp\Utils\Links\LinkToShowPage;
 use Code16\Sharp\Utils\Transformers\SharpAttributeTransformer;
 use Illuminate\Support\Str;
 
 class TileblockSharpList extends GumSharpList
 {
 
-    /**
-     * Build list containers using ->addDataContainer()
-     *
-     * @return void
-     */
-    function buildListDataContainers()
+    function buildListDataContainers(): void
     {
-        $this->addDataContainer(
-            EntityListDataContainer::make("layout_label")
-                ->setLabel("Type")
-        )->addDataContainer(
-            EntityListDataContainer::make("tiles")
-                ->setLabel("Tuiles")
-        );
+        $this
+            ->addDataContainer(
+                EntityListDataContainer::make("layout_label")
+                    ->setLabel("Type")
+            )
+            ->addDataContainer(
+                EntityListDataContainer::make("tiles")
+                    ->setLabel("Tuiles")
+            );
     }
 
-    /**
-     * Build list layout using ->addColumn()
-     *
-     * @return void
-     */
-    function buildListLayout()
+    function buildListLayout(): void
     {
         $this
             ->addColumn("layout_label", 2, 4)
             ->addColumn("tiles", 10, 8);
     }
 
-    /**
-     * Build list config
-     *
-     * @return void
-     */
-    function buildListConfig()
+    function buildListConfig(): void
     {
         $this
             ->setMultiformAttribute("layout")
@@ -71,13 +58,7 @@ class TileblockSharpList extends GumSharpList
         });
     }
 
-    /**
-     * Retrieve all rows data as array.
-     *
-     * @param EntityListQueryParams $params
-     * @return array
-     */
-    function getListData(EntityListQueryParams $params)
+    function getListData(EntityListQueryParams $params): array
     {
         $tileblocks = Tileblock::with($this->requestWiths())
             ->orderBy("order")
@@ -88,9 +69,6 @@ class TileblockSharpList extends GumSharpList
         return $this->transform($tileblocks->get());
     }
 
-    /**
-     * @return array
-     */
     protected function requestWiths(): array
     {
         return ["tiles", "tiles.contentUrl"];
@@ -110,37 +88,35 @@ class TileblockSharpList extends GumSharpList
                     return $this->$customTransformer($tileblock);
                 }
 
-                return $tileblock->tiles->map(function(Tile $tile) {
-                    $style = "background-color:#eee; padding:5px; display:inline; color:gray;";
-                    if($tile->isFreeLink()) {
-                        $link = $tile->free_link_url;
-                    } elseif($tile->contentUrl) {
-                        $link = $tile->contentUrl->uri;
-                    } else {
-                        $link = 'pas de lien';
-                        $style .= 'color:orange';
-                    }
-
-                    return sprintf(
-                        '%s <div style="%s"><small>%s</small> <span style="color:gray; font-style:italic"><small>%s</small></span></div><div class="mb-2"></div>',
-                        $this->linkEntityTile($tile),
-                        $style,
-                        $link,
-                        $this->formatPublishDates($tile)
-                    );
-
-                })->implode('');
+                return $tileblock->tiles
+                    ->map(function(Tile $tile) {
+                        $style = "background-color:#eee; padding:5px; display:inline; color:gray;";
+                        if($tile->isFreeLink()) {
+                            $link = $tile->free_link_url;
+                        } elseif($tile->contentUrl) {
+                            $link = $tile->contentUrl->uri;
+                        } else {
+                            $link = 'pas de lien';
+                            $style .= 'color:orange';
+                        }
+    
+                        return sprintf(
+                            '%s <div style="%s"><small>%s</small> <span style="color:gray; font-style:italic"><small>%s</small></span></div><div class="mb-2"></div>',
+                            $this->linkEntityTile($tile),
+                            $style,
+                            $link,
+                            $this->formatPublishDates($tile)
+                        );
+    
+                    })
+                    ->implode('');
             };
         }
 
         return null;
     }
 
-    /**
-     * @param Tile $tile
-     * @return string
-     */
-    protected function formatPublishDates(Tile $tile)
+    protected function formatPublishDates(Tile $tile): string
     {
         if(!$tile->published_at && !$tile->unpublished_at) {
             return "";
@@ -171,30 +147,29 @@ class TileblockSharpList extends GumSharpList
 
     protected function linkEntityTile(Tile $tile)
     {
-        if($tile->linkable_type == null) {
-            return $tile->title;
+        if($tile->linkable_type === null) {
+            return sprintf("<span><i class='fa fa-external-link'></i> %s</span>",
+                $tile->title
+            );
         }
-        else if($tile->linkable_type == Page::class) {
+
+        if($tile->linkable_type == Page::class) {
             $icon = "fa-file-o";
             $entityKey = "pages";
         } elseif ($tile->linkable_type == Pagegroup::class) {
             $icon = "fa-files-o";
             $entityKey = "pagegroups";
         } else {
-            if(Section::find($tile->linkable_id)->is_root) {
-                $icon = "fa-sitemap";
-            } else {
-                $icon = "fa-clone";
-            }
-
             $entityKey = "sections";
+            $icon = Section::find($tile->linkable_id)->is_root
+                ? "fa-sitemap"
+                : "fa-clone";
         }
 
         return sprintf("<span><i class='fa %s'></i> %s</span>",
             $icon,
-            (new LinkToEntity($tile->title, $entityKey))
-                ->toShowOfInstance($tile->linkable_id)
-                ->render()
+            LinkToShowPage::make($entityKey, $tile->linkable_id)
+                ->renderAsText($tile->title)
         );
     }
 }

@@ -4,8 +4,6 @@ namespace Code16\Gum\Sharp\Pagegroups;
 
 use Code16\Gum\Models\ContentUrl;
 use Code16\Gum\Models\Pagegroup;
-use Code16\Gum\Sharp\Pages\PageSharpShow;
-use Code16\Sharp\Http\WithSharpContext;
 use Code16\Sharp\Show\Fields\SharpShowEntityListField;
 use Code16\Sharp\Show\Fields\SharpShowTextField;
 use Code16\Sharp\Show\Layout\ShowLayoutColumn;
@@ -14,21 +12,21 @@ use Code16\Sharp\Show\SharpShow;
 
 class PagegroupSharpShow extends SharpShow
 {
-    use WithSharpContext;
 
-    function buildShowFields()
+    function buildShowFields(): void
     {
-        $this->addField(SharpShowTextField::make("title")
-            ->setLabel("Titre"))
+        $this
+            ->addField(SharpShowTextField::make("title")
+                ->setLabel("Titre")
+            )
             ->addField(SharpShowTextField::make("url")
-                ->setLabel("URL du groupe"))
-            ->addField(SharpShowTextField::make("urls")
-                ->setLabel("URLs des pages"))
+                ->setLabel("Adresse")
+            )
             ->addField(
                 SharpShowEntityListField::make("pages", "pages")
                     ->showCreateButton(true)
                     ->setLabel("Pages associées")
-                    ->hideFilterWithValue('domain',null)
+                    ->hideFilterWithValue('domain', null)
                     ->hideFilterWithValue('root', function($instanceId) {
                         $current = ContentUrl::where('content_id', $instanceId)
                             ->where('content_type', Pagegroup::class)
@@ -42,39 +40,37 @@ class PagegroupSharpShow extends SharpShow
             );
     }
 
-    function buildShowLayout()
+    function buildShowLayout(): void
     {
-        $this->addSection("Groupe de page", function(ShowLayoutSection $section) {
-            $section
-                ->addColumn(12, function(ShowLayoutColumn $column) {
-                    $column->withSingleField("title");
-                })
-                ->addColumn(12, function(ShowLayoutColumn $column) {
-                    $column->withSingleField("url");
-                })
-                ->addColumn(12, function(ShowLayoutColumn $column) {
-                    $column->withSingleField("urls");
-                });
-        })
+        $this
+            ->addSection("Groupe de page", function(ShowLayoutSection $section) {
+                $section
+                    ->addColumn(12, function(ShowLayoutColumn $column) {
+                        $column->withSingleField("title")
+                            ->withSingleField("url");
+                    });
+            })
             ->addEntityListSection("pages");
+    }
+
+    public function buildShowConfig(): void
+    {
+        $this->setBreadcrumbCustomLabelAttribute("title");
     }
 
     function find($id): array
     {
-        $pagegroup = Pagegroup::find($id);
+        $pageGroup = Pagegroup::find($id);
 
         return $this
-            ->setCustomTransformer("url", function () use ($pagegroup) {
-                $current = ContentUrl::where('content_id', $pagegroup->id)
+            ->setCustomTransformer("url", function () use ($pageGroup) {
+                $current = ContentUrl::where('content_id', $pageGroup->id)
                     ->where('content_type', Pagegroup::class)
                     ->first();
 
                 return $current ? $current->uri : '<p class="mb-2" style="color:orange"><small>pas de lien</small></p>';
             })
-            ->setCustomTransformer("urls", function () use ($pagegroup) {
-                return self::getPagesUrls($pagegroup);
-            })
-            ->transform($pagegroup);
+            ->transform($pageGroup);
     }
 
     protected function getParentContentUrl(ContentUrl $contentUrl): ContentUrl
@@ -84,16 +80,5 @@ class PagegroupSharpShow extends SharpShow
         }
 
         return $contentUrl;
-    }
-
-    public static function getPagesUrls(Pagegroup $pagegroup)
-    {
-        return $pagegroup->pages->map(function ($page) {
-            return sprintf(
-                "<small>".$page->title."</small> <br>%s",
-                PageSharpShow::getUrlsFromPage($page));
-        })
-            ->flatten()
-            ->implode('<br><br>');
     }
 }

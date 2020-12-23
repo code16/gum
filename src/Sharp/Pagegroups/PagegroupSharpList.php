@@ -17,43 +17,31 @@ use Code16\Sharp\Utils\Transformers\SharpAttributeTransformer;
 class PagegroupSharpList extends GumSharpList
 {
 
-    /**
-     * Build list containers using ->addDataContainer()
-     *
-     * @return void
-     */
-    function buildListDataContainers()
+    function buildListDataContainers(): void
     {
-        $this->addDataContainer(
-            EntityListDataContainer::make("title")
-                ->setLabel("Titre")
-        )->addDataContainer(
-            EntityListDataContainer::make("urls")
-                ->setLabel("Url groupe")
-        )->addDataContainer(
-            EntityListDataContainer::make("pages")
-                ->setLabel("Pages")
-        );
+        $this
+            ->addDataContainer(
+                EntityListDataContainer::make("title")
+                    ->setLabel("Titre")
+            )
+            ->addDataContainer(
+                EntityListDataContainer::make("urls")
+                    ->setLabel("Url groupe")
+            )
+            ->addDataContainer(
+                EntityListDataContainer::make("pages")
+                    ->setLabel("Pages")
+            );
     }
 
-    /**
-     * Build list layout using ->addColumn()
-     *
-     * @return void
-     */
-    function buildListLayout()
+    function buildListLayout(): void
     {
         $this->addColumn("title", 4, 6)
             ->addColumn("pages", 4, 6)
             ->addColumnLarge("urls", 4);
     }
 
-    /**
-     * Build list config
-     *
-     * @return void
-     */
-    function buildListConfig()
+    function buildListConfig(): void
     {
         if(sizeof(config("gum.domains"))) {
             $this->addFilter("domain", DomainFilter::class, function($value, EntityListQueryParams $params) {
@@ -66,18 +54,12 @@ class PagegroupSharpList extends GumSharpList
         });
     }
 
-    /**
-     * Retrieve all rows data as array.
-     *
-     * @param EntityListQueryParams $params
-     * @return array
-     */
-    function getListData(EntityListQueryParams $params)
+    function getListData(EntityListQueryParams $params): array
     {
+        $rootId = $params->filterFor("root");
+
         $pagegroups = Pagegroup::orderBy('title')
             ->with($this->requestWiths());
-
-        $rootId = $params->filterFor("root");
 
         if($rootId && ($root = Section::where("is_root", true)->find($rootId))) {
             $pagegroups->whereExists(function($query) use($root) {
@@ -120,9 +102,6 @@ class PagegroupSharpList extends GumSharpList
         return $this->transform($pagegroups->get());
     }
 
-    /**
-     * @return array
-     */
     protected function requestWiths(): array
     {
         return ["pages"];
@@ -140,8 +119,11 @@ class PagegroupSharpList extends GumSharpList
 
         if($attribute == "pages") {
             return function($value, $pagegroup) {
-                return '<p class="mb-2"><small>'
-                    . $pagegroup->pages->pluck("title")->implode('</small></p><p class="mb-2"><small>')
+                return '<p class="mb-1"><small>'
+                    . $pagegroup
+                        ->pages->take(6)
+                        ->pluck("title")
+                        ->implode('</small></p><p class="mb-1"><small>')
                     . '</small></p>';
             };
         }

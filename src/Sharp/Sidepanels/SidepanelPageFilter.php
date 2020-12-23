@@ -6,19 +6,17 @@ use Code16\Gum\Models\ContentUrl;
 use Code16\Gum\Models\Page;
 use Code16\Gum\Sharp\Utils\SharpGumSessionValue;
 use Code16\Sharp\EntityList\EntityListRequiredFilter;
+use Code16\Sharp\EntityList\EntityListSelectRequiredFilter;
 
-class SidepanelPageFilter implements EntityListRequiredFilter
+class SidepanelPageFilter implements EntityListSelectRequiredFilter
 {
 
-    public function label()
+    public function label(): string
     {
         return "Page";
     }
 
-    /**
-     * @return array
-     */
-    public function values()
+    public function values(): array
     {
         $pages = Page::orderBy("title");
 

@@ -8,9 +8,6 @@ use Code16\Sharp\Utils\Transformers\SharpAttributeTransformer;
 
 abstract class GumSharpList extends SharpEntityList
 {
-    /**
-     * @return array
-     */
     abstract protected function requestWiths(): array;
 
     /**

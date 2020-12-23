@@ -8,21 +8,13 @@ use Code16\Sharp\EntityList\Commands\EntityState;
 class NewsVisibilityStateHandler extends EntityState
 {
 
-    /**
-     * @return mixed
-     */
-    protected function buildStates()
+    protected function buildStates(): void
     {
         $this->addState("OFFLINE", "Masqué", static::DARKGRAY_COLOR)
             ->addState("ONLINE", "En ligne", static::PRIMARY_COLOR);
     }
 
-    /**
-     * @param string $instanceId
-     * @param string $stateId
-     * @return mixed
-     */
-    protected function updateState($instanceId, $stateId)
+    protected function updateState($instanceId, $stateId): array
     {
         News::findOrFail($instanceId)->update([
             "visibility" => $stateId

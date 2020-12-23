@@ -1,17 +1,10 @@
 <?php
 
-/**
- * @return string
- */
-function gum_current_theme()
+function gum_current_theme(): ?string
 {
     return \Code16\Gum\Models\Utils\GumContext::theme();
 }
 
-/**
- * @param string $slug
- * @return string
- */
 function append_suffix_to_slug(string $slug): string
 {
     if(preg_match("/(.*?)-(\d+)$/", $slug, $matches)) {
@@ -21,12 +14,7 @@ function append_suffix_to_slug(string $slug): string
     return "$slug-2";
 }
 
-/**
- * @param string $domain
- * @param null $user
- * @return bool
- */
-function gum_domain_allowed_to_user($domain, $user = null): bool
+function gum_domain_allowed_to_user(?string $domain, $user = null): bool
 {
     $user = $user ?: auth()->user();
 

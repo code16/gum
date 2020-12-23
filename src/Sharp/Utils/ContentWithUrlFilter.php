@@ -2,20 +2,17 @@
 
 namespace Code16\Gum\Sharp\Utils;
 
-use Code16\Sharp\EntityList\EntityListFilter;
+use Code16\Sharp\EntityList\EntityListSelectFilter;
 
-class ContentWithUrlFilter implements EntityListFilter
+class ContentWithUrlFilter implements EntityListSelectFilter
 {
 
-    public function label()
+    public function label(): string
     {
         return "Statut";
     }
 
-    /**
-     * @return array
-     */
-    public function values()
+    public function values(): array
     {
         return [
             "off" => "Orphelines",

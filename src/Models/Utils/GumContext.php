@@ -7,11 +7,8 @@ use Code16\Gum\Models\Section;
 
 class GumContext
 {
-    /** @var ContentUrl */
-    protected static $leafContentUrl;
-
-    /** @var Section */
-    protected static $section;
+    protected static ContentUrl $leafContentUrl;
+    protected static ?Section $section;
 
     public static function buildFor(array $segments)
     {
@@ -19,18 +16,12 @@ class GumContext
         self::$leafContentUrl = ContentUrl::byPath(implode("/", $segments))->firstOrFail();
     }
 
-    /**
-     * @return string|null
-     */
-    public static function theme()
+    public static function theme(): ?string
     {
         return self::section()->style_key ?? null;
     }
 
-    /**
-     * @return Section|null
-     */
-    public static function section()
+    public static function section(): ?Section
     {
         if(is_null(self::$section)) {
             self::$section = self::findCurrentSection(self::$leafContentUrl);
@@ -39,11 +30,7 @@ class GumContext
         return self::$section;
     }
 
-    /**
-     * @param ContentUrl|null $contentUrl
-     * @return Section|null
-     */
-    protected static function findCurrentSection(ContentUrl $contentUrl = null)
+    protected static function findCurrentSection(ContentUrl $contentUrl = null): ?Section
     {
         if(!$contentUrl) {
             return null;
@@ -59,5 +46,4 @@ class GumContext
             ? self::findCurrentSection($contentUrl->parent)
             : null;
     }
-
 }

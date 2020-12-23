@@ -4,14 +4,9 @@ namespace Code16\Gum\Sharp\Utils;
 
 class SharpGumSessionValue
 {
-    protected static $values = [];
+    protected static array $values = [];
 
-    /**
-     * @param string $key
-     * @param null $default
-     * @return mixed|null
-     */
-    public static function get(string $key, $default = null)
+    public static function get(string $key, string $default = null): ?string
     {
         $value = self::$values[$key] ?? session("sharpgum_$key");
 
@@ -23,34 +18,25 @@ class SharpGumSessionValue
         return $value;
     }
 
-    /**
-     * @param string $key
-     * @param $value
-     */
-    public static function set(string $key, $value)
+    public static function set(string $key, ?string $value): void
     {
         self::$values[$key] = $value;
         session(["sharpgum_$key" => $value]);
     }
 
-    /**
-     * @param $value
-     */
-    public static function setDomain($value)
+    public static function setDomain(?string $value): void
     {
         if(gum_domain_allowed_to_user($value)) {
             self::set("domain", $value);
         }
     }
 
-    /**
-     * @return string|null
-     */
-    public static function getDomain()
+    public static function getDomain(): ?string
     {
-        $domains = collect(config("gum.domains"))->filter(function($label, $domain) {
-            return gum_domain_allowed_to_user($domain);
-        });
+        $domains = collect(config("gum.domains"))
+            ->filter(function($label, $domain) {
+                return gum_domain_allowed_to_user($domain);
+            });
 
         if(!$domains) {
             return null;

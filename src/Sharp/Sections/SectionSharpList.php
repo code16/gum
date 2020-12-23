@@ -16,39 +16,26 @@ use Code16\Sharp\Utils\Transformers\SharpAttributeTransformer;
 class SectionSharpList extends GumSharpList
 {
 
-    /**
-     * Build list containers using ->addDataContainer()
-     *
-     * @return void
-     */
-    function buildListDataContainers()
+    function buildListDataContainers(): void
     {
-        $this->addDataContainer(
-            EntityListDataContainer::make("title")
-                ->setLabel("Titre")
-        )->addDataContainer(
-            EntityListDataContainer::make("url")
-                ->setLabel("Url")
-        );
+        $this
+            ->addDataContainer(
+                EntityListDataContainer::make("title")
+                    ->setLabel("Titre")
+            )
+            ->addDataContainer(
+                EntityListDataContainer::make("url")
+                    ->setLabel("Url")
+            );
     }
 
-    /**
-     * Build list layout using ->addColumn()
-     *
-     * @return void
-     */
-    function buildListLayout()
+    function buildListLayout(): void
     {
         $this->addColumn("title", 4, 6)
             ->addColumn("url", 8, 6);
     }
 
-    /**
-     * Build list config
-     *
-     * @return void
-     */
-    function buildListConfig()
+    function buildListConfig(): void
     {
         if(sizeof(config("gum.domains"))) {
             $this->addFilter("domain", DomainFilter::class, function($value, EntityListQueryParams $params) {
@@ -61,13 +48,7 @@ class SectionSharpList extends GumSharpList
         });
     }
 
-    /**
-     * Retrieve all rows data as array.
-     *
-     * @param EntityListQueryParams $params
-     * @return array
-     */
-    function getListData(EntityListQueryParams $params)
+    function getListData(EntityListQueryParams $params): array
     {
         $sections = Section::domain(SharpGumSessionValue::getDomain())
             ->with($this->requestWiths())
@@ -104,9 +85,6 @@ class SectionSharpList extends GumSharpList
         return $this->transform($sections->get());
     }
 
-    /**
-     * @return array
-     */
     protected function requestWiths(): array
     {
         return [];
@@ -118,10 +96,8 @@ class SectionSharpList extends GumSharpList
      */
     protected function customTransformerFor(string $attribute)
     {
-        if($attribute == "url") {
-            return UrlsCustomTransformer::class;
-        }
-
-        return null;
+        return $attribute == "url"
+            ?  UrlsCustomTransformer::class
+            : null;
     }
 }
