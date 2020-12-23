@@ -10,12 +10,7 @@ use Code16\Sharp\Form\Layout\FormLayoutColumn;
 
 class RootSectionSharpForm extends SectionSharpForm
 {
-    /**
-     * Build form fields using ->addField()
-     *
-     * @return void
-     */
-    function buildFormFields()
+    function buildFormFields(): void
     {
         parent::buildFormFields();
 
@@ -28,12 +23,7 @@ class RootSectionSharpForm extends SectionSharpForm
         }
     }
 
-    /**
-     * Build form layout using ->addTab() or ->addColumn()
-     *
-     * @return void
-     */
-    function buildFormLayout()
+    function buildFormLayout(): void
     {
         $this->addColumn(6, function (FormLayoutColumn $column) {
             $column
@@ -57,22 +47,17 @@ class RootSectionSharpForm extends SectionSharpForm
         });
     }
 
-    /**
-     * @param $id
-     * @param array $data
-     * @return mixed
-     */
     function update($id, array $data)
     {
         $data["is_root"] = true;
 
-        if($this->context()->isCreation()) {
+        if(currentSharpRequest()->isCreation()) {
             $data["root_menu_order"] = 100;
         }
 
         $id = parent::update($id, $data);
 
-        if($this->context()->isCreation()) {
+        if(currentSharpRequest()->isCreation()) {
             $section = Section::find($id);
             $section->url()->create([
                 "uri" => (new ContentUrl())->findAvailableUriFor($section, $section->domain),
@@ -84,13 +69,9 @@ class RootSectionSharpForm extends SectionSharpForm
         return $id;
     }
 
-    /**
-     * @return array
-     */
-    protected function getMenus()
+    protected function getMenus(): array
     {
-        $configKey = "gum.menus"
-            . (SharpGumSessionValue::getDomain() ? "." . SharpGumSessionValue::getDomain() :  "");
+        $configKey = "gum.menus" . (SharpGumSessionValue::getDomain() ? "." . SharpGumSessionValue::getDomain() :  "");
 
         return config($configKey) && sizeof(config($configKey)) > 1
             ? config($configKey)

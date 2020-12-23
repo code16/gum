@@ -20,31 +20,28 @@ use Code16\Sharp\Form\Fields\SharpFormTextField;
 use Code16\Sharp\Form\Fields\SharpFormUploadField;
 use Code16\Sharp\Form\Layout\FormLayoutColumn;
 use Code16\Sharp\Form\SharpForm;
-use Code16\Sharp\Http\WithSharpContext;
 
 abstract class TileblockSharpForm extends SharpForm
 {
-    use WithSharpFormEloquentUpdater, WithSharpContext, SharpFormWithStyleKey;
+    use WithSharpFormEloquentUpdater, SharpFormWithStyleKey;
 
-    /**
-     * Build form fields using ->addField()
-     *
-     * @return void
-     */
-    function buildFormFields()
+    function buildFormFields(): void
     {
-        $this->addField(
-            SharpFormTextField::make("layout_label")
-                ->setReadOnly()
-                ->setLabel("Type de tuiles")
-        )->addField(
-            SharpFormTextField::make("section_label")
-                ->setReadOnly()
-                ->setLabel("Section")
-        )->addField(
-            $this->createTilesListField()
-        );
-
+        $this
+            ->addField(
+                SharpFormTextField::make("layout_label")
+                    ->setReadOnly()
+                    ->setLabel("Type de tuiles")
+            )
+            ->addField(
+                SharpFormTextField::make("section_label")
+                    ->setReadOnly()
+                    ->setLabel("Section")
+            )
+            ->addField(
+                $this->createTilesListField()
+            );
+    
         if($this->hasLayoutVariants()) {
             $this->addField(
                 SharpFormSelectField::make("layout_variant", $this->layoutVariants())
@@ -65,67 +62,58 @@ abstract class TileblockSharpForm extends SharpForm
         }
     }
 
-    /**
-     * Build form layout using ->addTab() or ->addColumn()
-     *
-     * @return void
-     */
-    function buildFormLayout()
+    function buildFormLayout(): void
     {
-        $this->addColumn(4, function (FormLayoutColumn $column) {
-            $column->withSingleField("section_label")
-                ->withSingleField("layout_label");
+        $this
+            ->addColumn(4, function (FormLayoutColumn $column) {
+                $column->withSingleField("section_label")
+                    ->withSingleField("layout_label");
+    
+                if($this->hasLayoutVariants()) {
+                    $column->withSingleField("layout_variant");
+                }
+    
+                if($this->hasStylesDefined()) {
+                    $column->withSingleField("style_key");
+                }
 
-            if($this->hasLayoutVariants()) {
-                $column->withSingleField("layout_variant");
-            }
-
-            if($this->hasStylesDefined()) {
-                $column->withSingleField("style_key");
-            }
-
-        })->addColumn(8, function (FormLayoutColumn $column) {
-            $column
-                ->withSingleField("tiles", function (FormLayoutColumn $item) {
-                    if($this->tileHasField("visual")) {
-                        $item->withSingleField("visual");
-
-                        if($this->tileHasField("video")) {
-                            $item->withSingleField("visual:is_video");
+            })
+            ->addColumn(8, function (FormLayoutColumn $column) {
+                $column
+                    ->withSingleField("tiles", function (FormLayoutColumn $item) {
+                        if($this->tileHasField("visual")) {
+                            $item->withSingleField("visual");
+    
+                            if($this->tileHasField("video")) {
+                                $item->withSingleField("visual:is_video");
+                            }
                         }
-                    }
-
-                    foreach ($this->additionalVisualFields() as $key => $field) {
-                        $item->withSingleField($key);
-                    }
-
-                    if($this->tileHasField("surtitle")) {
-                        $item->withSingleField("surtitle");
-                    }
-
-                    if($this->tileHasField("title") && $this->tileHasField("body_text")) {
-                        $item->withFields("title|6", "body_text|6");
-                    } elseif($this->tileHasField("title")) {
-                        $item->withSingleField("title");
-                    } elseif($this->tileHasField("body_text")) {
-                        $item->withSingleField("body_text");
-                    }
-
-                    if($this->tileHasLink()) {
-                        $item->withFields("link_type|4", "free_link_url|8", "section|8", "pagegroup|8", "page|8");
-                    }
-
-                    $item->withFields("visibility|4", "published_at|4", "unpublished_at|4");
-                });
-        });
+    
+                        foreach ($this->additionalVisualFields() as $key => $field) {
+                            $item->withSingleField($key);
+                        }
+    
+                        if($this->tileHasField("surtitle")) {
+                            $item->withSingleField("surtitle");
+                        }
+    
+                        if($this->tileHasField("title") && $this->tileHasField("body_text")) {
+                            $item->withFields("title|6", "body_text|6");
+                        } elseif($this->tileHasField("title")) {
+                            $item->withSingleField("title");
+                        } elseif($this->tileHasField("body_text")) {
+                            $item->withSingleField("body_text");
+                        }
+    
+                        if($this->tileHasLink()) {
+                            $item->withFields("link_type|4", "free_link_url|8", "section|8", "pagegroup|8", "page|8");
+                        }
+    
+                        $item->withFields("visibility|4", "published_at|4", "unpublished_at|4");
+                    });
+            });
     }
 
-    /**
-     * Retrieve a Model for the form and pack all its data as JSON.
-     *
-     * @param $id
-     * @return array
-     */
     function find($id): array
     {
         return $this
@@ -163,11 +151,6 @@ abstract class TileblockSharpForm extends SharpForm
             ->transform(new Tileblock());
     }
 
-    /**
-     * @param $id
-     * @param array $data
-     * @return mixed
-     */
     function update($id, array $data)
     {
         $tileblock = $id ? Tileblock::findOrFail($id) : new Tileblock();
@@ -179,17 +162,11 @@ abstract class TileblockSharpForm extends SharpForm
         return $tileblock->id;
     }
 
-    /**
-     * @param $id
-     */
-    function delete($id)
+    function delete($id): void
     {
         Tileblock::findOrFail($id)->delete();
     }
 
-    /**
-     * @return array
-     */
     protected function tileFields(): array
     {
         return [
@@ -197,69 +174,40 @@ abstract class TileblockSharpForm extends SharpForm
         ];
     }
 
-    /**
-     * @return array
-     */
     protected function layoutVariants(): array
     {
         return [];
     }
 
-    /**
-     * @return string
-     */
     abstract protected function layoutKey(): string;
 
-    /**
-     * @return string
-     */
     abstract protected function layoutLabel(): string;
 
-    /**
-     * @return bool
-     */
     private function hasLayoutVariants(): bool
     {
         return !! sizeof($this->layoutVariants());
     }
 
-    /**
-     * @return int
-     */
     protected function maxTilesCount(): int
     {
         return 0;
     }
 
-    /**
-     * @return bool
-     */
     protected function tileHasLink(): bool
     {
         return true;
     }
 
-    /**
-     * @return array
-     */
     protected function additionalVisualFields(): array
     {
         return [];
     }
 
-    /**
-     * @param $field
-     * @return bool
-     */
     private function tileHasField($field): bool
     {
         return in_array($field, $this->tileFields());
     }
 
-    /**
-     * @param $data
-     * @return array
-     */
     protected function cleanUpData($data): array
     {
         if(isset($data["tiles"])) {
@@ -278,7 +226,7 @@ abstract class TileblockSharpForm extends SharpForm
             }
         }
 
-        if($this->context()->isCreation()) {
+        if(currentSharpRequest()->isCreation()) {
             $data["layout"] = $this->layoutKey();
             $data["section_id"] = SharpGumSessionValue::get("section");
         }
@@ -286,10 +234,7 @@ abstract class TileblockSharpForm extends SharpForm
         return $data;
     }
 
-    /**
-     * @return SharpFormListField
-     */
-    protected function createTilesListField()
+    protected function createTilesListField(): SharpFormListField
     {
         $listField = SharpFormListField::make("tiles")
             ->setLabel("Tuiles")
@@ -344,65 +289,73 @@ abstract class TileblockSharpForm extends SharpForm
             );
         }
 
-        $listField->addItemField(
-            SharpFormSelectField::make("visibility", ["ONLINE" => "Visible", "OFFLINE" => "Masqué"])
-                ->setDisplayAsDropdown()
-                ->setLabel("Visibilité")
-        )->addItemField(
-            SharpFormDateField::make("published_at")
-                ->addConditionalDisplay("visibility", "ONLINE")
-                ->setLabel("Publié le")
-                ->setMondayFirst()
-                ->setHasTime(true)
-                ->setDisplayFormat("DD/MM/YYYY HH:mm")
-        )->addItemField(
-            SharpFormDateField::make("unpublished_at")
-                ->addConditionalDisplay("visibility", "ONLINE")
-                ->setLabel("Jusqu'au")
-                ->setMondayFirst()
-                ->setHasTime(true)
-                ->setDisplayFormat("DD/MM/YYYY HH:mm")
-        );
+        $listField
+            ->addItemField(
+                SharpFormSelectField::make("visibility", ["ONLINE" => "Visible", "OFFLINE" => "Masqué"])
+                    ->setDisplayAsDropdown()
+                    ->setLabel("Visibilité")
+            )
+            ->addItemField(
+                SharpFormDateField::make("published_at")
+                    ->addConditionalDisplay("visibility", "ONLINE")
+                    ->setLabel("Publié le")
+                    ->setMondayFirst()
+                    ->setHasTime(true)
+                    ->setDisplayFormat("DD/MM/YYYY HH:mm")
+            )
+            ->addItemField(
+                SharpFormDateField::make("unpublished_at")
+                    ->addConditionalDisplay("visibility", "ONLINE")
+                    ->setLabel("Jusqu'au")
+                    ->setMondayFirst()
+                    ->setHasTime(true)
+                    ->setDisplayFormat("DD/MM/YYYY HH:mm")
+            );
 
         if($this->tileHasLink()) {
-            $listField->addItemField(
-                SharpFormSelectField::make("link_type", [
-                    "free" => "Lien libre",
-                    Page::class => "Page",
-                    Pagegroup::class => "Groupe de pages",
-                    Section::class => "Section",
-                ])
-                    ->setDisplayAsDropdown()
-                    ->setLabel("Lien")
-            )->addItemField(
-                SharpFormAutocompleteField::make("section", "local")
-                    ->setLocalSearchKeys(["title"])
-                    ->addConditionalDisplay("link_type", Section::class)
-                    ->setResultItemInlineTemplate("{{title}} <small>{{url ? url.uri : ''}}</small>")
-                    ->setListItemInlineTemplate("{{title}}<br><small>{{url ? url.uri : ''}}</small>")
-                    ->setLocalValues(Section::domain(SharpGumSessionValue::getDomain())->with("url")->orderBy("title")->get()->toArray())
-                    ->setLabel("Section")
-            )->addItemField(
-                SharpFormAutocompleteField::make("page", "local")
-                    ->setLocalSearchKeys(["label"])
-                    ->addConditionalDisplay("link_type", Page::class)
-                    ->setResultItemInlineTemplate("{{label}}")
-                    ->setListItemInlineTemplate("{{label}}")
-                    ->setLocalValues(Page::whereNull("pagegroup_id")->orderBy("title")->get()->pluck("title", "id")->all())
-                    ->setLabel("Page")
-            )->addItemField(
-                SharpFormAutocompleteField::make("pagegroup", "local")
-                    ->setLocalSearchKeys(["label"])
-                    ->addConditionalDisplay("link_type", Pagegroup::class)
-                    ->setResultItemInlineTemplate("{{label}}")
-                    ->setListItemInlineTemplate("{{label}}")
-                    ->setLocalValues(Pagegroup::orderBy("title")->get()->pluck("title", "id")->all())
-                    ->setLabel("Groupe de pages")
-            )->addItemField(
-                SharpFormTextField::make("free_link_url")
-                    ->addConditionalDisplay("link_type", "free")
-                    ->setLabel("Lien")
-            );
+            $listField
+                ->addItemField(
+                    SharpFormSelectField::make("link_type", [
+                        "free" => "Lien libre",
+                        Page::class => "Page",
+                        Pagegroup::class => "Groupe de pages",
+                        Section::class => "Section",
+                    ])
+                        ->setDisplayAsDropdown()
+                        ->setLabel("Lien")
+                )
+                ->addItemField(
+                    SharpFormAutocompleteField::make("section", "local")
+                        ->setLocalSearchKeys(["title"])
+                        ->addConditionalDisplay("link_type", Section::class)
+                        ->setResultItemInlineTemplate("{{title}} <small>{{url ? url.uri : ''}}</small>")
+                        ->setListItemInlineTemplate("{{title}}<br><small>{{url ? url.uri : ''}}</small>")
+                        ->setLocalValues(Section::domain(SharpGumSessionValue::getDomain())->with("url")->orderBy("title")->get()->toArray())
+                        ->setLabel("Section")
+                )
+                ->addItemField(
+                    SharpFormAutocompleteField::make("page", "local")
+                        ->setLocalSearchKeys(["label"])
+                        ->addConditionalDisplay("link_type", Page::class)
+                        ->setResultItemInlineTemplate("{{title}} <small>{{slug}}</small>")
+                        ->setListItemInlineTemplate("{{title}}<br><small>{{slug}}</small>")
+                        ->setLocalValues(Page::whereNull("pagegroup_id")->orderBy("title")->get()->all())
+                        ->setLabel("Page")
+                )
+                ->addItemField(
+                    SharpFormAutocompleteField::make("pagegroup", "local")
+                        ->setLocalSearchKeys(["label"])
+                        ->addConditionalDisplay("link_type", Pagegroup::class)
+                        ->setResultItemInlineTemplate("{{title}} <small>{{slug}}</small>")
+                        ->setListItemInlineTemplate("{{title}}<br><small>{{slug}}</small>")
+                        ->setLocalValues(Pagegroup::orderBy("title")->get()->all())
+                        ->setLabel("Groupe de pages")
+                )
+                ->addItemField(
+                    SharpFormTextField::make("free_link_url")
+                        ->addConditionalDisplay("link_type", "free")
+                        ->setLabel("Lien")
+                );
         }
 
         return $listField;

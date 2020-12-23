@@ -3,21 +3,18 @@
 namespace Code16\Gum\Sharp\Utils;
 
 use Code16\Gum\Models\Section;
-use Code16\Sharp\EntityList\EntityListRequiredFilter;
+use Code16\Sharp\EntityList\EntityListSelectRequiredFilter;
 use Illuminate\Support\Arr;
 
-class SectionFilter implements EntityListRequiredFilter
+class SectionFilter implements EntityListSelectRequiredFilter
 {
 
-    public function label()
+    public function label(): string
     {
         return "Section";
     }
 
-    /**
-     * @return array
-     */
-    public function values()
+    public function values(): array
     {
         $sections = [];
 
@@ -60,9 +57,6 @@ class SectionFilter implements EntityListRequiredFilter
         });
     }
 
-    /**
-     * @return string|int
-     */
     public function defaultValue()
     {
         if($sectionId = SharpGumSessionValue::get("section")) {
