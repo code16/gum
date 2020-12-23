@@ -15,10 +15,13 @@ class PagegroupSharpShow extends SharpShow
 
     function buildShowFields(): void
     {
-        $this->addField(SharpShowTextField::make("title")
-            ->setLabel("Titre"))
+        $this
+            ->addField(SharpShowTextField::make("title")
+                ->setLabel("Titre")
+            )
             ->addField(SharpShowTextField::make("url")
-                ->setLabel("Adresse"))
+                ->setLabel("Adresse")
+            )
             ->addField(
                 SharpShowEntityListField::make("pages", "pages")
                     ->showCreateButton(true)

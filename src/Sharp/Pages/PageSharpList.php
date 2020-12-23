@@ -38,10 +38,17 @@ class PageSharpList extends GumSharpList
 
     function buildListLayout(): void
     {
-        $this->addColumnLarge("visual", 2)
-            ->addColumn("title", 3, 6)
-            ->addColumnLarge("pagegroup:title", 3)
-            ->addColumn("urls", 4, 6);
+        $this->addColumnLarge("visual", 2);
+            
+        if(currentSharpRequest()->getCurrentBreadcrumbItem()->entityKey() === "pagegroups") {
+            // EEL in PagegroupSharpShow
+            $this->addColumn("title", 4, 6)
+                ->addColumn("urls", 6);
+        } else {
+            $this->addColumn("title", 3, 6)
+                ->addColumnLarge("pagegroup:title", 3)
+                ->addColumn("urls", 4, 6);
+        }
     }
 
     function buildListConfig(): void
@@ -67,6 +74,7 @@ class PageSharpList extends GumSharpList
         $rootId = $params->filterFor("root");
 
         if($pagegroupId = $params->filterFor("pagegroup")) {
+            // EEL in PagegroupSharpShow
             $pages->where('pagegroup_id', $pagegroupId);
         }
 
@@ -139,7 +147,8 @@ class PageSharpList extends GumSharpList
                 return sizeof($page->urls)
                     ? dirname($page->urls[0]->uri)
                     : "";
-            })->sortBy(function($group, $url) {
+            })
+            ->sortBy(function($group, $url) {
                 return count(explode("/", $url));
             })
             ->flatten()
