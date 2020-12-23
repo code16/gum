@@ -7,8 +7,8 @@ use Code16\Gum\Models\Section;
 
 class GumContext
 {
-    protected static ContentUrl $leafContentUrl;
-    protected static ?Section $section;
+    protected static ?ContentUrl $leafContentUrl = null;
+    protected static ?Section $section = null;
 
     public static function buildFor(array $segments)
     {
