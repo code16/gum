@@ -148,7 +148,9 @@ class TileblockSharpList extends GumSharpList
     protected function linkEntityTile(Tile $tile)
     {
         if($tile->linkable_type === null) {
-            return $tile->title;
+            return sprintf("<span><i class='fa fa-external-link'></i> %s</span>",
+                $tile->title
+            );
         }
 
         if($tile->linkable_type == Page::class) {

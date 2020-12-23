@@ -46,7 +46,11 @@ class RootSectionSharpShow extends SectionSharpShow
         $this->applySectionCustomTransformers($section);
 
         return $this
-            ->setCustomTransformer("menu_key", function($value, $instance) {
+            ->setCustomTransformer("menu_key", function($value, $section) {
+                if($section->isHome()) {
+                    return null;
+                }
+                
                 $configKey = "gum.menus" . (SharpGumSessionValue::getDomain() ? "." . SharpGumSessionValue::getDomain() :  "");
                 return $value ? config($configKey)[$value] : null;
             })

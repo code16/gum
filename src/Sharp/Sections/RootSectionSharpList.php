@@ -21,7 +21,8 @@ class RootSectionSharpList extends GumSharpList
             ->addDataContainer(
                 EntityListDataContainer::make("title")
                     ->setLabel("Titre")
-            )->addDataContainer(
+            )
+            ->addDataContainer(
                 EntityListDataContainer::make("urls")
                     ->setLabel("Url")
             );

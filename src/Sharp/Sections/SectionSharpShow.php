@@ -37,7 +37,7 @@ class SectionSharpShow extends SharpShow
                 SharpShowEntityListField::make("tileblocks", "tileblocks")
                     ->showCreateButton(true)
                     ->setLabel("Tuiles")
-                    ->hideFilterWithValue('domain',null)
+                    ->hideFilterWithValue('domain', SharpGumSessionValue::getDomain())
                     ->hideFilterWithValue("section", function($instanceId) {
                         return $instanceId;
                     })
@@ -87,21 +87,35 @@ class SectionSharpShow extends SharpShow
     {
         $this
             ->setCustomTransformer("url", function () use ($section) {
+                if($section->isHome()) {
+                    return null;
+                }
+                
                 $current = ContentUrl::where('content_id', $section->id)
                     ->where('content_type', Section::class)
                     ->first();
 
                 return $current ? $current->uri : null;
             })
-            ->setCustomTransformer("style_key", function($value) {
+            ->setCustomTransformer("style_key", function($value) use ($section) {
+                if($section->isHome()) {
+                    return null;
+                }
+                
                 $configKey = "gum.styles"
                     . (SharpGumSessionValue::getDomain() ? "." . SharpGumSessionValue::getDomain() :  "");
                 return config($configKey)[$value];
             })
             ->setCustomTransformer("has_news", function() use ($section) {
-                return $section->tags->map(function ($value) {
-                    return $value->name;
-                })->implode(', ');
+                if($section->isHome()) {
+                    return null;
+                }
+                
+                if($section->has_news) {
+                    return $section->tags->pluck("name")->implode(', ');
+                }
+
+                return '<i class="fa fa-times"></i> aucune';
             });
     }
 }
