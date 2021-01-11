@@ -168,8 +168,10 @@ class TileblockSharpList extends GumSharpList
 
         return sprintf("<span><i class='fa %s'></i> %s</span>",
             $icon,
-            LinkToShowPage::make($entityKey, $tile->linkable_id)
+            $tile->title
+                ? LinkToShowPage::make($entityKey, $tile->linkable_id)
                 ->renderAsText($tile->title)
+                : null
         );
     }
 }
