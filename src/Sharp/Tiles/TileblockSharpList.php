@@ -147,7 +147,7 @@ class TileblockSharpList extends GumSharpList
 
     protected function linkEntityTile(Tile $tile)
     {
-        if($tile->linkable_type === null) {
+        if($tile->linkable_type === null || !$tile->linkable_id) {
             return sprintf("<span><i class='fa fa-external-link'></i> %s</span>",
                 $tile->title
             );
@@ -168,8 +168,11 @@ class TileblockSharpList extends GumSharpList
 
         return sprintf("<span><i class='fa %s'></i> %s</span>",
             $icon,
-            LinkToShowPage::make($entityKey, $tile->linkable_id)
+            $tile->title
+                ? LinkToShowPage::make($entityKey, $tile->linkable_id)
                 ->renderAsText($tile->title)
+                : LinkToShowPage::make($entityKey, $tile->linkable_id)
+                ->renderAsText("Sans titre")
         );
     }
 }
