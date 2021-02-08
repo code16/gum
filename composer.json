@@ -13,7 +13,6 @@
     "moontoast/math": "^1.1"
   },
   "require-dev": {
-    "algolia/algoliasearch-client-php": "^2.2",
     "laravel/scout": "^8.0",
     "code16/sharp": "^6.0",
     "fzaninotto/faker": "~1.4",

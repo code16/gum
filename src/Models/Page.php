@@ -70,21 +70,9 @@ class Page extends Model
      */
     public function toSearchableArray()
     {
-        $urls = $this->urls()->visible()->published()->get()
-            ->filter(function(ContentUrl $url) {
-                return $url->isVisible() && $url->isPublished();
-            });
-
         return [
-            "type" => "page",
-            "depth" => 5,
             "title" => strip_tags((new Parsedown)->text($this->title)),
-            "group" => $this->pagegroup ? $this->pagegroup->title : "",
             "text" => (new Parsedown)->text(($this->heading_text ? $this->heading_text . "\n\n" : "") . $this->body_text),
-            "_tags" => $urls->pluck("domain")->unique()->all(),
-            "url" => $urls->groupBy("domain")->map(function($urlGroup) {
-                return $urlGroup->pluck("uri")->all();
-            })->all(),
         ];
     }
 

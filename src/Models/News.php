@@ -141,16 +141,6 @@ class News extends Model
     }
 
     /**
-     * Get the index name for the model.
-     *
-     * @return string
-     */
-    public function searchableAs()
-    {
-        return env('SCOUT_PREFIX') . 'news';
-    }
-
-    /**
      * Get the indexable data array for the model.
      *
      * @return array
@@ -158,13 +148,10 @@ class News extends Model
     public function toSearchableArray()
     {
         return [
-            "type" => "news",
-            "importance" => $this->importance,
-            "published_at" => $this->published_at->timestamp,
             "surtitle" => strip_tags((new Parsedown)->text($this->surtitle)),
             "title" => strip_tags((new Parsedown)->text($this->title)),
             "text" => (new Parsedown)->text(($this->heading_text ? $this->heading_text . "\n\n" : "") . $this->body_text),
-            "_tags" => $this->tags->pluck("name"),
+            "tags" => $this->tags->implode("name",", "),
         ];
     }
 

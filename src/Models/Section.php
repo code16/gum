@@ -15,7 +15,7 @@ use Parsedown;
 class Section extends Model
 {
     use WithUuid, WithMenuTitle, Searchable;
-    
+
     /** @var string */
     protected $keyType = 'string';
 
@@ -108,26 +108,13 @@ class Section extends Model
     }
 
     /**
-     * Get the index name for the model.
-     */
-    public function searchableAs(): string
-    {
-        return env('SCOUT_PREFIX') . 'content';
-    }
-
-    /**
      * Get the indexable data array for the model.
      */
     public function toSearchableArray(): array
     {
         return [
-            "type" => "section",
-            "depth" => $this->url->depth,
             "title" => strip_tags((new Parsedown)->text($this->title)),
-            "group" => "",
             "text" => (new Parsedown)->text($this->heading_text),
-            "_tags" => $this->domain,
-            "url" => $this->url->uri
         ];
     }
 
