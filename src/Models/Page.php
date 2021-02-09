@@ -71,8 +71,9 @@ class Page extends Model
     public function toSearchableArray()
     {
         return [
-            "title" => strip_tags((new Parsedown)->text($this->title)),
-            "text" => (new Parsedown)->text(($this->heading_text ? $this->heading_text . "\n\n" : "") . $this->body_text),
+            "title" => strip_tags($this->title),
+            "heading_text" => strip_tags($this->heading_text),
+            "text" => (new Parsedown)->text($this->body_text),
         ];
     }
 

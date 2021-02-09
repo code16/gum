@@ -113,7 +113,7 @@ class Section extends Model
     public function toSearchableArray(): array
     {
         return [
-            "title" => strip_tags((new Parsedown)->text($this->title)),
+            "title" => strip_tags($this->title),
             "text" => (new Parsedown)->text($this->heading_text),
         ];
     }
