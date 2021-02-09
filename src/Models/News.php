@@ -162,6 +162,6 @@ class News extends Model
      */
     public function shouldBeSearchable()
     {
-        return $this->isVisible() && $this->isPublished();
+        return config("gum.scout_enabled") && $this->isVisible() && $this->isPublished();
     }
 }

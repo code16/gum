@@ -83,6 +83,10 @@ class Page extends Model
      */
     public function shouldBeSearchable()
     {
+        if(!config("gum.scout_enabled")){
+            return false;
+        }
+
         foreach($this->urls()->visible()->published()->get() as $url) {
             if($url->isVisible() && $url->isPublished()) {
                 return true;

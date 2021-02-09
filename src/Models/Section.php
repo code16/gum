@@ -121,7 +121,9 @@ class Section extends Model
 
     public function shouldBeSearchable(): bool
     {
-        return $this->url && $this->url->isVisible()
+        return config("gum.scout_enabled")
+            && $this->url
+            && $this->url->isVisible()
             && (($this->is_root && !$this->isHome()) || $this->url->isPublished());
     }
 }
