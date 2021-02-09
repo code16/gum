@@ -148,6 +148,7 @@ class News extends Model
     public function toSearchableArray()
     {
         return [
+            "id" => $this->id,
             "surtitle" => strip_tags($this->surtitle),
             "title" => strip_tags($this->title),
             "heading_text" => strip_tags($this->heading_text),
