@@ -6,67 +6,49 @@ use Code16\Gum\Models\Utils\WithMenuTitle;
 use Code16\Gum\Models\Utils\WithUuid;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
+use Illuminate\Support\Collection;
 use Laravel\Scout\Searchable;
-use Parsedown;
 
 class Section extends Model
 {
     use WithUuid, WithMenuTitle, Searchable;
 
-    /** @var string */
     protected $keyType = 'string';
-
-    /** @var bool */
     public $incrementing = false;
-
-    /** @var array */
     protected $guarded = [];
 
-    /**
-     * @param Builder $query
-     * @return Builder
-     */
-    public function scopeUnattached(Builder $query)
+    public function scopeUnattached(Builder $query): void
     {
-        return $query->whereNotExists(function($query) {
+        $query->whereNotExists(function($query) {
             return $query->from("content_urls")
                 ->where("content_type", Section::class)
                 ->whereRaw("content_id = sections.id");
         });
     }
 
-    /**
-     * @param Builder $query
-     * @return Builder
-     */
-    public function scopeDomain(Builder $query, $domain)
+    public function scopeDomain(Builder $query, $domain): void
     {
         if($domain) {
-            return $query->where("domain", $domain);
+            $query->where("domain", $domain);
         }
-
-        return $query;
     }
 
-    /**
-     * @param Builder $query
-     * @return Builder
-     */
-    public function scopeHome(Builder $query)
+    public function scopeHome(Builder $query): void
     {
-        return $query->where("slug", "");
+        $query->where("slug", "");
     }
 
-    public function tileblocks()
+    public function tileblocks(): HasMany
     {
         return $this->hasMany(Tileblock::class)
             ->orderby("order");
     }
 
-    public function getOnlineTileblocksAttribute()
+    public function getOnlineTileblocksAttribute(): Collection
     {
         return $this
             ->tileblocks()
@@ -107,23 +89,29 @@ class Section extends Model
         return $this->slug == "";
     }
 
-    /**
-     * Get the indexable data array for the model.
-     */
+    public function searchableAs(): string
+    {
+        return env('SCOUT_PREFIX') . 'content';
+    }
+
     public function toSearchableArray(): array
     {
         return [
             "id" => $this->id,
+            "type" => Section::class,
+            "domain" => $this->url->domain,
+            "updated_at" => $this->updated_at->timestamp,
             "title" => strip_tags($this->title),
-            "text" => (new Parsedown)->text($this->heading_text),
+            "text" => strip_tags($this->heading_text),
         ];
     }
 
     public function shouldBeSearchable(): bool
     {
         return config("gum.scout_enabled")
+            && !$this->isHome()
             && $this->url
             && $this->url->isVisible()
-            && (($this->is_root && !$this->isHome()) || $this->url->isPublished());
+            && $this->url->isPublished();
     }
 }
