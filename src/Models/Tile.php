@@ -3,7 +3,10 @@
 namespace Code16\Gum\Models;
 
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
 
 class Tile extends Model
 {
@@ -11,91 +14,78 @@ class Tile extends Model
 
     protected $dates = ['created_at', 'updated_at', 'published_at', 'unpublished_at'];
 
-    /** @var bool */
-    public $mustRemoveOldUrl;
+    public static function scopeVisible(Builder $query)
+    {
+        $query->where("visibility", "ONLINE");
+    }
 
-    /** @var bool */
-    public $mustCreateNewUrl;
+    public static function scopePublished(Builder $query)
+    {
+        $query
+            ->where(function ($query) {
+                $query
+                    ->where(function ($query) {
+                        $query->whereNull("published_at")
+                            ->whereNull("unpublished_at");
+                    })
+                    ->orWhere(function ($query) {
+                        $query->where("published_at", "<=", now())
+                            ->where("unpublished_at", ">", now());
+                    })
+                    ->orWhere(function ($query) {
+                        $query->where("published_at", "<=", now())
+                            ->whereNull("unpublished_at");
+                    })
+                    ->orWhere(function ($query) {
+                        $query->whereNull("published_at")
+                            ->where("unpublished_at", ">", now());
+                    });
+            });
+    }
 
-    public function visual()
+    public function visual(): MorphOne
     {
         return $this->morphOne(Media::class, "model")
             ->where("model_key", "visual");
     }
 
-    public function tileblock()
+    public function tileblock(): BelongsTo
     {
         return $this->belongsTo(Tileblock::class);
     }
 
-    public function contentUrl()
+    public function page(): BelongsTo
     {
-        return $this->belongsTo(ContentUrl::class);
+        return $this->belongsTo(Page::class);
     }
 
-    public function linkable()
-    {
-        return $this->morphTo();
-    }
-
-    /**
-     * @return null|string
-     */
-    public function getUriAttribute()
-    {
-        if(!$this->contentUrl) {
-            return null;
-        }
-
-        return $this->contentUrl->relative_uri;
-    }
-
-    /**
-     * @return string
-     */
-    public function getUrlAttribute()
+    public function getUrlAttribute(): string
     {
         if($this->isFreeLink()) {
             return $this->free_link_url;
         }
-
-        return $this->uri ? route("page", $this->uri) : "";
+        
+        if($this->page) {
+            return route(
+                "page.show",
+                implode("/", request()->segments()) . "/{$this->page->slug}"
+            );
+        }
+        
+        return "";
     }
 
-    public function setLinkableIdAttribute($value)
-    {
-        $this->mustRemoveOldUrl =
-            isset($this->attributes["linkable_id"])
-            && $this->attributes["linkable_id"] != $value;
-
-        $this->mustCreateNewUrl =
-            !is_null($value)
-            && ($this->attributes["linkable_id"] ?? null) != $value;
-
-        $this->attributes["linkable_id"] = $value;
-    }
-
-    /**
-     * @return bool
-     */
     public function isFreeLink(): bool
     {
-        return is_null($this->linkable_id) && strlen($this->free_link_url) > 0;
+        return is_null($this->page_id) && strlen($this->free_link_url) > 0;
     }
 
-    /**
-     * @return bool
-     */
-    public function isVisible()
+    public function isVisible(): bool
     {
         return $this->visibility == "ONLINE";
     }
 
-    /**
-     * @param Carbon|null $date
-     * @return bool
-     */
-    public function isPublished(Carbon $date = null)
+    public function isPublished(Carbon $date = null): bool
     {
         $now = $date ?? Carbon::now();
 
@@ -103,7 +93,7 @@ class Tile extends Model
             && (is_null($this->unpublished_at) || $this->unpublished_at > $now);
     }
 
-    public function getDefaultAttributesFor($attribute)
+    public function getDefaultAttributesFor($attribute): array
     {
         return in_array($attribute, ["visual"])
             ? ["model_key" => $attribute]

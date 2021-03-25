@@ -3,41 +3,36 @@
 namespace Code16\Gum\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
 
 class Sidepanel extends Model
 {
     protected $guarded = [];
 
-    /**
-     * @var array
-     */
+    /** @var array */
     protected $casts = [
         'custom_properties' => 'array',
     ];
 
-    public function container()
+    public function page(): BelongsTo
     {
-        return $this->morphTo();
+        return $this->belongsTo(Page::class);
     }
 
-    public function relatedContent()
-    {
-        return $this->morphTo('related_content');
-    }
-
-    public function visual()
+    public function visual(): MorphOne
     {
         return $this->morphOne(Media::class, "model")
             ->where("model_key", "visual");
     }
 
-    public function downloadableFile()
+    public function downloadableFile(): MorphOne
     {
         return $this->morphOne(Media::class, "model")
             ->where("model_key", "downloadableFile");
     }
 
-    public function getDefaultAttributesFor($attribute)
+    public function getDefaultAttributesFor($attribute): array
     {
         return in_array($attribute, ["visual", "downloadableFile"])
             ? ["model_key" => $attribute]
@@ -85,16 +80,11 @@ class Sidepanel extends Model
         return $this;
     }
 
-    /**
-     * @param string $name
-     * @return bool
-     */
-    private function isRealAttribute(string $name)
+    private function isRealAttribute(string $name): bool
     {
         return in_array($name, [
             "id", "layout", "link", "body_text", "order", "custom_properties",
-            "container_id", "container_type", "related_content_id", "related_content_type",
-            "container", "relatedContent", "visual", "downloadableFile",
+            "page_id", "page", "visual", "downloadableFile",
             "created_at", "updated_at"
         ]);
     }

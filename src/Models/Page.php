@@ -4,11 +4,14 @@ namespace Code16\Gum\Models;
 
 use Code16\Gum\Models\Utils\WithMenuTitle;
 use Code16\Gum\Models\Utils\WithUuid;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
+use Illuminate\Support\Collection;
 use Laravel\Scout\Searchable;
 
 class Page extends Model
@@ -19,25 +22,91 @@ class Page extends Model
     public $incrementing = false;
     protected $guarded = [];
 
+    public static function buildBreadcrumbFromPath(string $path, ?string $domain): Collection
+    {
+        $currentPage = Page::domain($domain)
+            ->home()
+            ->with("tileblocks")
+            ->firstOrFail();
+
+        $breadcrumb = collect();
+
+        foreach(explode("/", $path) as $segment) {
+            $pages = Page::where("slug", $segment)
+                ->with("tileblocks")
+                ->get();
+
+            foreach($pages as $page) {
+                // Look for an online tile which links $currentPage -> $page 
+                $tile = Tile::where("page_id", $page->id)
+                    ->visible()
+                    ->published()
+                    ->whereIn("tileblock_id", $currentPage->tileblocks->pluck("id"))
+                    ->first();
+
+                if($tile) {
+                    $breadcrumb->add($page);
+                    $currentPage = $page;
+                    
+                    continue 2;
+                }
+            }
+
+            throw new ModelNotFoundException();
+        }
+        
+        return $breadcrumb;
+    }
+
+    public function scopeDomain(Builder $query, $domain): void
+    {
+        if($domain) {
+            $query->where("domain", $domain);
+        }
+    }
+
+    public function scopeHome(Builder $query): void
+    {
+        $query->where("slug", "");
+    }
+
+    public function pagegroup(): BelongsTo
+    {
+        return $this->belongsTo(Page::class);
+    }
+
+    public function tileblocks(): HasMany
+    {
+        return $this->hasMany(Tileblock::class)
+            ->orderby("order");
+    }
+
+    public function getOnlineTileblocksAttribute(): Collection
+    {
+        // TODO refactor this to a proper sql query
+        return $this
+            ->tileblocks()
+            ->with("tiles")
+            ->get()
+            ->filter(function(Tileblock $tileblock) {
+                $tileblock->tiles = $tileblock->tiles
+                    ->filter(function(Tile $tile) {
+                        return $tile->isVisible() && $tile->isPublished();
+                    });
+
+                return count($tileblock->tiles);
+            });
+    }
+
     public function visual(): MorphOne
     {
         return $this->morphOne(Media::class, "model")
             ->where("model_key", "visual");
     }
 
-    public function pagegroup(): BelongsTo
+    public function sidepanels(): HasMany
     {
-        return $this->belongsTo(Pagegroup::class);
-    }
-
-    public function urls(): MorphMany
-    {
-        return $this->morphMany(ContentUrl::class, "content");
-    }
-
-    public function sidepanels(): MorphMany
-    {
-        return $this->morphMany(Sidepanel::class, "container")
+        return $this->hasMany(Sidepanel::class)
             ->orderBy("order");
     }
 
@@ -76,6 +145,6 @@ class Page extends Model
             return false;
         }
         
-        return $this->urls()->visible()->published()->count() > 0;
+        return true; // TODO $this->urls()->visible()->published()->count() > 0;
     }
 }
