@@ -37,14 +37,20 @@ class Page extends Model
                 ->get();
 
             foreach($pages as $page) {
-                // Look for an online tile which links $currentPage -> $page 
-                $tile = Tile::where("page_id", $page->id)
-                    ->visible()
-                    ->published()
-                    ->whereIn("tileblock_id", $currentPage->tileblocks->pluck("id"))
-                    ->first();
+                if($currentPage->is_pagegroup) {
+                    // Check that $page is subpage of $currentPage
+                    $isSegmentValid = $page->pagegroup_id === $currentPage->id;
+                    
+                } else {
+                    // Look for an online tile which links $currentPage -> $page 
+                    $isSegmentValid = Tile::where("page_id", $page->id)
+                        ->visible()
+                        ->published()
+                        ->whereIn("tileblock_id", $currentPage->tileblocks->pluck("id"))
+                        ->exists();
+                }
 
-                if($tile) {
+                if($isSegmentValid) {
                     $breadcrumb->add($page);
                     $currentPage = $page;
                     
@@ -73,6 +79,12 @@ class Page extends Model
     public function pagegroup(): BelongsTo
     {
         return $this->belongsTo(Page::class);
+    }
+
+    public function subpages(): HasMany
+    {
+        return $this->hasMany(Page::class, "pagegroup_id")
+            ->orderBy("pagegroup_order");
     }
 
     public function tileblocks(): HasMany

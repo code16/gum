@@ -15,10 +15,10 @@ class RefactorWithoutSectionsAndContentUrls extends Migration
         $this->linkTileblocksToPages();
         
         $this->linkSidePanelsToPages();
-
-        $this->linkTilesToPages();
         
         $this->movePagegroupsToSubpages();
+        
+        $this->linkTilesToPages();
 
         Schema::dropIfExists("sections");
         Schema::dropIfExists("pagegroups");
@@ -136,23 +136,11 @@ class RefactorWithoutSectionsAndContentUrls extends Migration
                 return strlen($tile->linkable_id) > 0;
             })
             ->each(function($tile) {
-                if($tile->linkable_type == "Code16\Gum\Models\Pagegroup") {
-                    $pagegroupFirstPage = DB::table("pages")
-                        ->where("pagegroup_id", $tile->linkable_id)
-                        ->first();
-
-                    $pageId = $pagegroupFirstPage ? $pagegroupFirstPage->id : null;
-                } else {
-                    // Section or Page
-                    $page = DB::table("pages")->where("id", $tile->linkable_id)->first();
-                    $pageId = $page ? $page->id : null;
-                }
-
-                if($pageId) {
+                if($page = DB::table("pages")->where("id", $tile->linkable_id)->first()) {
                     DB::table("tiles")
                         ->where("id", $tile->id)
                         ->update([
-                            "page_id" => $pageId
+                            "page_id" => $page->id
                         ]);
                 } else {
                     Log::warning("Delete tile " . $tile->id);
@@ -173,23 +161,29 @@ class RefactorWithoutSectionsAndContentUrls extends Migration
     private function movePagegroupsToSubpages()
     {
         Schema::table('pages', function (Blueprint $table) {
+            $table->boolean('is_pagegroup')->default(false);
             $table->dropForeign("pages_pagegroup_id_foreign");
         });
-        
-        $pagesgroups = [];
-        DB::table("pages")
-            ->whereNotNull("pagegroup_id")
-            ->orderBy("pagegroup_order")
-            ->get()
-            ->each(function($page) use(&$pagesgroups) {
-                if(!isset($pagesgroups[$page->pagegroup_id])) {
-                    $pagesgroups[$page->pagegroup_id] = $page->id;
-                }
 
-                DB::table("pages")
-                    ->where("id", $page->id)
-                    ->update([
-                        "pagegroup_id" => $pagesgroups[$page->pagegroup_id]
+        DB::table("pagegroups")
+            ->get()
+            ->each(function($pagegroup) {
+                $page = DB::table("pages")
+                    ->insert([
+                        'id' => $pagegroup->id,
+                        'slug' => $pagegroup->slug,
+                        'title' => $pagegroup->title,
+                        'short_title' => $pagegroup->short_title,
+                        'is_pagegroup' => true,
+                        'body_text' => null,
+                        'pagegroup_order' => 100,
+                        'pagegroup_id' => null,
+                        'created_at' => $pagegroup->created_at,
+                        'updated_at' => $pagegroup->updated_at,
+                        'heading_text' => null,
+                        'has_news' => false,
+                        'domain' => null,
+                        'style_key' => null,
                     ]);
             });
 
