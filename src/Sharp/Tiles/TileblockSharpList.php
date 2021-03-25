@@ -3,24 +3,19 @@
 namespace Code16\Gum\Sharp\Tiles;
 
 use Closure;
-use Code16\Gum\Models\Page;
-use Code16\Gum\Models\Pagegroup;
-use Code16\Gum\Models\Section;
 use Code16\Gum\Models\Tile;
 use Code16\Gum\Models\Tileblock;
 use Code16\Gum\Sharp\Utils\DomainFilter;
 use Code16\Gum\Sharp\Utils\GumSharpList;
-use Code16\Gum\Sharp\Utils\SectionFilter;
 use Code16\Gum\Sharp\Utils\SharpGumSessionValue;
 use Code16\Sharp\EntityList\Containers\EntityListDataContainer;
 use Code16\Sharp\EntityList\EntityListQueryParams;
-use Code16\Sharp\Utils\Links\LinkToShowPage;
 use Code16\Sharp\Utils\Transformers\SharpAttributeTransformer;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 
 class TileblockSharpList extends GumSharpList
 {
-
     function buildListDataContainers(): void
     {
         $this
@@ -52,17 +47,13 @@ class TileblockSharpList extends GumSharpList
                 SharpGumSessionValue::setDomain($value);
             });
         }
-
-        $this->addFilter("section", SectionFilter::class, function($value) {
-            SharpGumSessionValue::set("section", $value);
-        });
     }
 
     function getListData(EntityListQueryParams $params): array
     {
         $tileblocks = Tileblock::with($this->requestWiths())
             ->orderBy("order")
-            ->where("section_id", $params->filterFor("section") ?: (new SectionFilter())->defaultValue());
+            ->where("page_id", $params->filterFor("page"));
 
         $this->applyCustomTransformers();
 
@@ -71,7 +62,7 @@ class TileblockSharpList extends GumSharpList
 
     protected function requestWiths(): array
     {
-        return ["tiles", "tiles.contentUrl"];
+        return ["tiles"];
     }
 
     /**
@@ -82,7 +73,6 @@ class TileblockSharpList extends GumSharpList
     {
         if($attribute == "tiles") {
             return function($value, $tileblock) {
-
                 $customTransformer = Str::camel($tileblock->layout) . "TileCustomTransformer";
                 if(method_exists($this, $customTransformer)) {
                     return $this->$customTransformer($tileblock);
@@ -90,12 +80,8 @@ class TileblockSharpList extends GumSharpList
 
                 return $tileblock->tiles
                     ->map(function(Tile $tile) {
-                        $style = "background-color:#eee; padding:5px; display:inline; color:gray;";
-                        if($tile->isFreeLink()) {
-                            $link = $tile->free_link_url;
-                        } elseif($tile->contentUrl) {
-                            $link = $tile->contentUrl->uri;
-                        } else {
+                        $style = "padding:5px; display:inline; color:gray;";
+                        if(!$link = $tile->url) {
                             $link = 'pas de lien';
                             $style .= 'color:orange';
                         }
@@ -107,7 +93,6 @@ class TileblockSharpList extends GumSharpList
                             $link,
                             $this->formatPublishDates($tile)
                         );
-    
                     })
                     ->implode('');
             };
@@ -147,29 +132,35 @@ class TileblockSharpList extends GumSharpList
 
     protected function linkEntityTile(Tile $tile)
     {
-        if($tile->linkable_type === null || !$tile->linkable_id) {
-            return sprintf("<span><i class='fa fa-external-link'></i> %s</span>",
+        if($tile->isFreeLink()) {
+            return sprintf(
+                "<span><i class='fa fa-external-link'></i> %s</span>",
                 $tile->title
             );
         }
 
-        if($tile->linkable_type == Page::class) {
-            $icon = "fa-file-o";
-            $entityKey = "pages";
-        } elseif ($tile->linkable_type == Pagegroup::class) {
-            $icon = "fa-files-o";
-            $entityKey = "pagegroups";
-        } else {
-            $entityKey = "sections";
-            $icon = Section::find($tile->linkable_id)->is_root
-                ? "fa-sitemap"
-                : "fa-clone";
+        return sprintf(
+            '<a href="/%s/%s/s-show/pages/%s">%s</a>',
+            sharp_base_url_segment(),
+            $this->getSegmentsFromRequest()->implode("/"),
+            $tile->page_id,
+            $tile->page->title
+        );
+    }
+
+    private function getSegmentsFromRequest(): Collection
+    {
+        if(request()->wantsJson()) {
+            // API case: we use the referer
+            $urlToParse = request()->header("referer");
+
+            return collect(explode("/", parse_url($urlToParse)["path"]))
+                ->filter(function(string $segment) {
+                    return strlen(trim($segment)) && $segment !== sharp_base_url_segment();
+                })
+                ->values();
         }
 
-        return sprintf("<span><i class='fa %s'></i> %s</span>",
-            $icon,
-            LinkToShowPage::make($entityKey, $tile->linkable_id)
-                ->renderAsText($tile->title ?: "Sans titre")
-        );
+        return collect(request()->segments())->slice(1)->values();
     }
 }

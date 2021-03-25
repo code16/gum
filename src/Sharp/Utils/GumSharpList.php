@@ -17,7 +17,7 @@ abstract class GumSharpList extends SharpEntityList
     abstract protected function customTransformerFor(string $attribute);
 
     /**
-     * Lookup for custom transformers fort each key and apply it.
+     * Lookup for custom transformers for each key and apply it.
      */
     protected function applyCustomTransformers()
     {

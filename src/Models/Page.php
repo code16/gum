@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Laravel\Scout\Searchable;
 
 class Page extends Model
@@ -64,11 +65,24 @@ class Page extends Model
         return $breadcrumb;
     }
 
-    public function scopeDomain(Builder $query, $domain): void
+    public function scopeDomain(Builder $query, ?string $domain = null): void
     {
         if($domain) {
             $query->where("domain", $domain);
         }
+    }
+
+    public function scopeOrphan(Builder $query, ?string $domain = null): void
+    {
+        $query
+            ->where("slug", "!=", "")
+            ->whereNotNull("slug")
+            ->whereNull("pagegroup_id")
+            ->whereNotExists(function($query) {
+                return $query->select(DB::raw(1))
+                    ->from('tiles')
+                    ->whereRaw('tiles.page_id = pages.id');
+            });
     }
 
     public function scopeHome(Builder $query): void
@@ -144,7 +158,7 @@ class Page extends Model
         return [
             "id" => $this->id,
             "type" => Page::class,
-            "domain" => $this->urls()->visible()->published()->first()->domain,
+            "domain" => null,// TODO DOMAIN $this->urls()->visible()->published()->first()->domain,
             "updated_at" => $this->updated_at->timestamp,
             "title" => strip_tags($this->title),
             "text" => strip_tags($this->heading_text . " " . $this->body_text),

@@ -10,7 +10,7 @@ use Code16\Sharp\EntityList\Containers\EntityListDataContainer;
 use Code16\Sharp\EntityList\EntityListQueryParams;
 use Code16\Sharp\Utils\Transformers\SharpAttributeTransformer;
 
-abstract class SidepanelSharpList extends GumSharpList
+class SidepanelSharpList extends GumSharpList
 {
 
     function buildListDataContainers(): void
@@ -21,7 +21,7 @@ abstract class SidepanelSharpList extends GumSharpList
                     ->setLabel("Type")
             )
             ->addDataContainer(
-                EntityListDataContainer::make("content")
+                EntityListDataContainer::make("page")
                     ->setLabel("")
             );
     }
@@ -29,7 +29,7 @@ abstract class SidepanelSharpList extends GumSharpList
     function buildListLayout(): void
     {
         $this->addColumn("layout_label", 2, 3)
-            ->addColumn("content", 10, 9);
+            ->addColumn("page", 10, 9);
     }
 
     function buildListConfig(): void
@@ -43,17 +43,11 @@ abstract class SidepanelSharpList extends GumSharpList
                 SharpGumSessionValue::setDomain($value);
             });
         }
-
-        $this->addFilter("container", $this->containerFilter(), function($value) {
-            SharpGumSessionValue::set($this->containerName(), $value);
-            SharpGumSessionValue::set("sidepanel_container_type", $this->containerType());
-        });
     }
 
     function getListData(EntityListQueryParams $params): array
     {
-        $sidepanels = Sidepanel::where("container_id", $params->filterFor("container"))
-            ->where("container_type", $this->containerType())
+        $sidepanels = Sidepanel::where("page_id", $params->filterFor("page"))
             ->with($this->requestWiths())
             ->orderBy("order");
 
@@ -75,10 +69,4 @@ abstract class SidepanelSharpList extends GumSharpList
     {
         return null;
     }
-
-    protected abstract function containerFilter(): string;
-
-    protected abstract function containerType(): string;
-
-    protected abstract function containerName(): string;
 }

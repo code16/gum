@@ -7,18 +7,23 @@ use Code16\Sharp\Show\Fields\SharpShowEntityListField;
 use Code16\Sharp\Show\Fields\SharpShowTextField;
 use Code16\Sharp\Show\Layout\ShowLayoutColumn;
 use Code16\Sharp\Show\Layout\ShowLayoutSection;
-use Code16\Sharp\Show\SharpShow;
+use Code16\Sharp\Show\SharpSingleShow;
 
-class PageSharpShow extends SharpShow
+class HomepageSharpShow extends SharpSingleShow
 {
 
     function buildShowFields(): void
     {
+        $homepage = Page::domain("acacia") // TODO Domain
+            ->home()
+            ->firstOrFail();
+        
         $this
-            ->addField(SharpShowTextField::make("title")
-                ->setLabel("Titre")
-            )
+//            ->addField(SharpShowTextField::make("title")
+//                ->setLabel("Titre")
+//            )
             ->addField(SharpShowTextField::make("heading_text")
+                ->setLabel("Chapeau")
                 ->collapseToWordCount(25)
             )
 //            ->addField(SharpShowTextField::make("pagegroup")
@@ -28,26 +33,18 @@ class PageSharpShow extends SharpShow
 //                ->setLabel("URLs")
 //            )
             ->addField(
-                SharpShowTextField::make("body_text")
-                    ->collapseToWordCount(100)
-            )
-            ->addField(
                 SharpShowEntityListField::make("sidepanels", "sidepanels")
                     ->showCreateButton(true)
-                    ->setLabel("Panneaux latéraux")
+                    ->setLabel("Panneaux page")
                     ->hideFilterWithValue('domain', null)
-                    ->hideFilterWithValue("page", function($instanceId) {
-                        return $instanceId;
-                    })
+                    ->hideFilterWithValue("page", $homepage->id)
             )
             ->addField(
                 SharpShowEntityListField::make("tileblocks", "tileblocks")
                     ->showCreateButton(true)
                     ->setLabel("Tuiles")
                     ->hideFilterWithValue('domain', null)
-                    ->hideFilterWithValue("page", function($instanceId) {
-                        return $instanceId;
-                    })
+                    ->hideFilterWithValue("page", $homepage->id)
             );
     }
 
@@ -56,20 +53,15 @@ class PageSharpShow extends SharpShow
         $this
             ->addSection("Page", function(ShowLayoutSection $section) {
                 $section
-                    ->addColumn(6, function(ShowLayoutColumn $column) {
-                        $column
-                            ->withSingleField("title");
-//                            ->withSingleField("pagegroup")
-//                            ->withSingleField("urls");
-                    })
+//                    ->addColumn(6, function(ShowLayoutColumn $column) {
+//                        $column
+//                            ->withSingleField("title");
+////                            ->withSingleField("pagegroup")
+////                            ->withSingleField("urls");
+//                    })
                     ->addColumn(6, function(ShowLayoutColumn $column) {
                         $column->withSingleField("heading_text");
                     });
-            })
-            ->addSection("Texte", function(ShowLayoutSection $section) {
-                $section->addColumn(8, function(ShowLayoutColumn $column) {
-                    $column->withSingleField("body_text");
-                });
             })
             ->addEntityListSection("sidepanels")
             ->addEntityListSection("tileblocks");
@@ -80,18 +72,14 @@ class PageSharpShow extends SharpShow
         $this->setBreadcrumbCustomLabelAttribute("title");
     }
 
-    function find($id): array
+    function findSingle(): array
     {
         return $this
-            ->setCustomTransformer("heading_text", function($value) {
-                return (new \Parsedown())->parse($value);
-            })
-            ->setCustomTransformer("body_text", function($value) {
-                return (new \Parsedown())->parse($value);
-            })
             ->transform(
-                Page::with("tileblocks") // TODO Domain??
-                    ->findOrFail($id)
+                Page::domain("acacia") // TODO Domain
+                    ->home()
+                    ->with("tileblocks")
+                    ->firstOrFail()
             );
     }
 }

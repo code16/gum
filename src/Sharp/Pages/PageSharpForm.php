@@ -3,13 +3,13 @@
 namespace Code16\Gum\Sharp\Pages;
 
 use Code16\Gum\Models\Page;
-use Code16\Gum\Models\Pagegroup;
 use Code16\Gum\Models\Tag;
+use Code16\Gum\Sharp\Utils\SharpFormWithStyleKey;
 use Code16\Sharp\Form\Eloquent\Uploads\Transformers\SharpUploadModelFormAttributeTransformer;
 use Code16\Sharp\Form\Eloquent\WithSharpFormEloquentUpdater;
-use Code16\Sharp\Form\Fields\SharpFormAutocompleteField;
 use Code16\Sharp\Form\Fields\SharpFormCheckField;
 use Code16\Sharp\Form\Fields\SharpFormMarkdownField;
+use Code16\Sharp\Form\Fields\SharpFormSelectField;
 use Code16\Sharp\Form\Fields\SharpFormTagsField;
 use Code16\Sharp\Form\Fields\SharpFormTextareaField;
 use Code16\Sharp\Form\Fields\SharpFormTextField;
@@ -20,7 +20,7 @@ use Illuminate\Support\Str;
 
 class PageSharpForm extends SharpForm
 {
-    use WithSharpFormEloquentUpdater;
+    use WithSharpFormEloquentUpdater, SharpFormWithStyleKey;
     
     protected bool $allowNews = false;
 
@@ -56,16 +56,16 @@ class PageSharpForm extends SharpForm
                     ->setHelpMessage("Il s'agit de l'URL (slug) de la page ; laissez ce champ vide pour remplissage automatique à partir du titre. Ne peut contenir que des lettres, des chiffres et des tirets. Attention, si vous modifiez cette valeur, les URLs du site seront modifiées.")
             );
         
-        if(!$this->isNewPageInPagegroup()) {
-            $this->addField(
-                SharpFormAutocompleteField::make("pagegroup_id", "local")
-                    ->setLabel("Groupe de pages")
-                    ->setLocalSearchKeys(["label"])
-                    ->setListItemInlineTemplate("{{label}}")
-                    ->setResultItemInlineTemplate("{{label}}")
-                    ->setLocalValues(Pagegroup::all()->pluck("title", "id")->all())
-            );
-        }
+//        if(!$this->isNewPageInPagegroup()) {
+//            $this->addField(
+//                SharpFormAutocompleteField::make("pagegroup_id", "local")
+//                    ->setLabel("Groupe de pages")
+//                    ->setLocalSearchKeys(["label"])
+//                    ->setListItemInlineTemplate("{{label}}")
+//                    ->setResultItemInlineTemplate("{{label}}")
+//                    ->setLocalValues(Pagegroup::all()->pluck("title", "id")->all())
+//            );
+//        }
         
         if($this->allowNews) {
             $this->addField(
@@ -74,6 +74,15 @@ class PageSharpForm extends SharpForm
                 SharpFormTagsField::make("tags", Tag::orderBy("name")->pluck("name", "id")->toArray())
                     ->addConditionalDisplay("has_news")
                     ->setLabel("Tags concernés")
+            );
+        }
+
+        if($this->hasStylesDefined()) {
+            $this->addField(
+                SharpFormSelectField::make("style_key", $this->stylesDefined())
+                    ->setLabel("Thème")
+                    ->setClearable()
+                    ->setDisplayAsDropdown()
             );
         }
     }
@@ -86,10 +95,14 @@ class PageSharpForm extends SharpForm
                     ->withSingleField("title")
                     ->withSingleField("short_title")
                     ->withSingleField("slug");
-    
-                if(!$this->isNewPageInPagegroup()) {
-                    $column->withSingleField("pagegroup_id");
+
+                if($this->hasStylesDefined()) {
+                    $column->withSingleField("style_key");
                 }
+    
+//                if(!$this->isNewPageInPagegroup()) {
+//                    $column->withSingleField("pagegroup_id");
+//                }
                     
                 $column->withFieldset("Visuel", function($fieldset) {
                     $fieldset->withSingleField("visual")
@@ -112,7 +125,7 @@ class PageSharpForm extends SharpForm
     {
         return $this
             ->setCustomTransformer('visual', SharpUploadModelFormAttributeTransformer::class)
-            ->transform(Page::with("pagegroup", "tags")->findOrFail($id));
+            ->transform(Page::with("tags")->findOrFail($id));
     }
 
     function update($id, array $data)
@@ -123,9 +136,9 @@ class PageSharpForm extends SharpForm
             $data["slug"] = Str::slug($data["title"]);
         }
         
-        if($this->isNewPageInPagegroup()) {
-            $data["pagegroup_id"] = currentSharpRequest()->getPreviousShowFromBreadcrumbItems()->instanceId();
-        }
+//        if($this->isNewPageInPagegroup()) {
+//            $data["pagegroup_id"] = currentSharpRequest()->getPreviousShowFromBreadcrumbItems()->instanceId();
+//        }
 
         $this->save($page, $data);
 

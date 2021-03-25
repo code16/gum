@@ -1,10 +1,9 @@
 <?php
 
-namespace Code16\Gum\Sharp\Sidepanels\Forms;
+namespace Code16\Gum\Sharp\Sidepanels;
 
 use Code16\Gum\Models\Page;
 use Code16\Gum\Models\Sidepanel;
-use Code16\Gum\Sharp\Utils\SharpGumSessionValue;
 use Code16\Sharp\Form\Eloquent\Uploads\Transformers\SharpUploadModelFormAttributeTransformer;
 use Code16\Sharp\Form\Eloquent\WithSharpFormEloquentUpdater;
 use Code16\Sharp\Form\Fields\SharpFormMarkdownField;
@@ -20,15 +19,17 @@ abstract class SidepanelSharpForm extends SharpForm
 
     function buildFormFields(): void
     {
-        $this->addField(
-            SharpFormTextField::make("layout_label")
-                ->setReadOnly()
-                ->setLabel("Type de panneau")
-        )->addField(
-            SharpFormTextField::make("container_label")
-                ->setReadOnly()
-                ->setLabel("Page ou section")
-        );
+        $this
+            ->addField(
+                SharpFormTextField::make("layout_label")
+                    ->setReadOnly()
+                    ->setLabel("Type de panneau")
+            )
+            ->addField(
+                SharpFormTextField::make("page_label")
+                    ->setReadOnly()
+                    ->setLabel("Page")
+            );
 
         if($this->hasField("visual")) {
             $this->addField(
@@ -57,18 +58,20 @@ abstract class SidepanelSharpForm extends SharpForm
         }
 
         if($this->hasField("download")) {
-            $this->addField(
-                SharpFormUploadField::make("downloadableFile")
-                    ->setLabel("Fichier")
-                    ->setFileFilter($this->getDownloadableFileFilter())
-                    ->setMaxFileSize(12)
-                    ->setStorageDisk("local")
-                    ->setStorageBasePath("data/sidepanels/{id}")
-            )->addField(
-                SharpFormTextareaField::make("downloadableFile:title")
-                    ->setRowCount(3)
-                    ->setLabel("Titre")
-            );
+            $this
+                ->addField(
+                    SharpFormUploadField::make("downloadableFile")
+                        ->setLabel("Fichier")
+                        ->setFileFilter($this->getDownloadableFileFilter())
+                        ->setMaxFileSize(12)
+                        ->setStorageDisk("local")
+                        ->setStorageBasePath("data/sidepanels/{id}")
+                )
+                ->addField(
+                    SharpFormTextareaField::make("downloadableFile:title")
+                        ->setRowCount(3)
+                        ->setLabel("Titre")
+                );
         }
 
         if($this->hasField("body_text")) {
@@ -101,7 +104,7 @@ abstract class SidepanelSharpForm extends SharpForm
     {
         $this
             ->addColumn(6, function (FormLayoutColumn $column) {
-                $column->withSingleField("container_label")
+                $column->withSingleField("page_label")
                     ->withSingleField("layout_label");
     
                 if($this->hasField("body_text")) {
@@ -137,19 +140,13 @@ abstract class SidepanelSharpForm extends SharpForm
             });
     }
 
-    /**
-     * Retrieve a Model for the form and pack all its data as JSON.
-     *
-     * @param $id
-     * @return array
-     */
     function find($id): array
     {
         $this
             ->setCustomTransformer('visual', SharpUploadModelFormAttributeTransformer::class)
             ->setCustomTransformer('downloadableFile', SharpUploadModelFormAttributeTransformer::class)
-            ->setCustomTransformer('container_label', function($value, $sidepanel) {
-                return $sidepanel->container->title;
+            ->setCustomTransformer('page_label', function($value, SidePanel $sidepanel) {
+                return $sidepanel->page->title;
             })
             ->setCustomTransformer('layout_label', function() {
                 return $this->layoutLabel();
@@ -159,7 +156,7 @@ abstract class SidepanelSharpForm extends SharpForm
             $this->setCustomTransformer($attribute, $transformer);
         }
 
-        return $this->transform(Sidepanel::with("visual", "downloadableFile", "container")->findOrFail($id));
+        return $this->transform(Sidepanel::with("visual", "downloadableFile", "page")->findOrFail($id));
     }
 
     public function create(): array
@@ -168,21 +165,25 @@ abstract class SidepanelSharpForm extends SharpForm
             ->setCustomTransformer('layout_label', function() {
                 return $this->layoutLabel();
             })
-            ->setCustomTransformer('container_label', function() {
-                return call_user_func([
-                    SharpGumSessionValue::get("sidepanel_container_type"),
-                    "find"
-                ], $this->containerId())->title;
+            ->setCustomTransformer('page_label', function() {
+                return Page::findOrFail(
+                    currentSharpRequest()->getPreviousShowFromBreadcrumbItems()->instanceId()
+                )->title;
             })
             ->transform(new Sidepanel());
     }
 
     function update($id, array $data)
     {
-        $sidepanel = $id ? Sidepanel::findOrFail($id) : new Sidepanel();
+        $sidepanel = $id 
+            ? Sidepanel::findOrFail($id) 
+            : new Sidepanel([
+                "layout" => $this->layoutKey(),
+                "page_id" => currentSharpRequest()->getPreviousShowFromBreadcrumbItems()->instanceId()
+            ]);
 
-        $this->ignore(["container_label", "layout_label"])
-            ->save($sidepanel, $this->cleanUpData($data));
+        $this->ignore(["page_label", "layout_label"])
+            ->save($sidepanel, $data);
 
         return $sidepanel->id;
     }
@@ -218,26 +219,8 @@ abstract class SidepanelSharpForm extends SharpForm
         return in_array($field, $this->sidepanelFields());
     }
 
-    protected function cleanUpData($data): array
-    {
-        if(currentSharpRequest()->isCreation()) {
-            $data["layout"] = $this->layoutKey();
-            $data["container_id"] = $this->containerId();
-            $data["container_type"] = SharpGumSessionValue::get("sidepanel_container_type");
-        }
-
-        return $data;
-    }
-
     protected function getDownloadableFileFilter(): array
     {
         return ["pdf","zip"];
-    }
-
-    protected function containerId(): string
-    {
-        return SharpGumSessionValue::get("sidepanel_container_type") == Page::class
-            ? SharpGumSessionValue::get("page")
-            : SharpGumSessionValue::get("section");
     }
 }
