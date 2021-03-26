@@ -145,7 +145,7 @@ class TileblockSharpList extends GumSharpList
             
         } elseif($tile->page_id) {
             $html .= sprintf(
-                '<a href="/%s/%s/s-show/pages/%s">%s</a>',
+                '<a class="ui-font" href="/%s/%s/s-show/pages/%s">%s</a>',
                 sharp_base_url_segment(),
                 $this->getSegmentsFromRequest()->implode("/"),
                 $tile->page_id,
