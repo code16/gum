@@ -331,8 +331,8 @@ abstract class TileblockSharpForm extends SharpForm
                         ->setLabel("Page")
                         ->setLocalValues(Page::notHome()->notOrphan()->orderBy("title")->get())
                         ->setLocalSearchKeys(["title", "slug"])
-                        ->setResultItemInlineTemplate("{{title}} <small class='text-muted'>{{slug}}</small>")
-                        ->setListItemInlineTemplate("{{title}}<div class='text-muted'><small>{{slug}}</small></div>")
+                        ->setResultItemInlineTemplate("{{title}} <span class='badge text-white p-1 rounded bg-primary' style='font-size:.6em'>{{admin_label}}</span>")
+                        ->setListItemInlineTemplate("{{title}} <div><span class='badge text-white rounded bg-primary' style='font-size:.7em'>{{admin_label}}</span> <span class='text-muted'><small>{{slug}}</small></span></div>")
                         ->addConditionalDisplay("link_type", "page")
                 )
                 ->addItemField(
@@ -340,8 +340,8 @@ abstract class TileblockSharpForm extends SharpForm
                         ->setLabel("Page")
                         ->setLocalValues(Page::notHome()->orphan()->orderBy("title")->get())
                         ->setLocalSearchKeys(["title", "slug"])
-                        ->setResultItemInlineTemplate("{{title}} <small class='text-muted'>{{slug}}</small>")
-                        ->setListItemInlineTemplate("{{title}}<div class='text-muted'><small>{{slug}}</small></div>")
+                        ->setResultItemInlineTemplate("{{title}} <span class='badge text-white p-1 rounded bg-primary' style='font-size:.6em'>{{admin_label}}</span>")
+                        ->setListItemInlineTemplate("{{title}} <div><span class='badge text-white rounded bg-primary' style='font-size:.7em'>{{admin_label}}</span> <span class='text-muted'><small>{{slug}}</small></span></div>")
                         ->addConditionalDisplay("link_type", "orphan")
                 )
                 ->addItemField(

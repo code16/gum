@@ -8,6 +8,7 @@ use Code16\Sharp\Show\Fields\SharpShowTextField;
 use Code16\Sharp\Show\Layout\ShowLayoutColumn;
 use Code16\Sharp\Show\Layout\ShowLayoutSection;
 use Code16\Sharp\Show\SharpShow;
+use Illuminate\Support\Str;
 
 class PageSharpShow extends SharpShow
 {
@@ -18,6 +19,7 @@ class PageSharpShow extends SharpShow
             ->addField(SharpShowTextField::make("title")
                 ->setLabel("Titre")
             )
+            ->addField(SharpShowTextField::make("admin_label"))
             ->addField(SharpShowTextField::make("heading_text")
                 ->collapseToWordCount(25)
             )
@@ -59,7 +61,8 @@ class PageSharpShow extends SharpShow
             ->addSection("Page", function(ShowLayoutSection $section) {
                 $section
                     ->addColumn(6, function(ShowLayoutColumn $column) {
-                        $column->withSingleField("title");
+                        $column->withSingleField("title")
+                            ->withSingleField("admin_label");
                     })
                     ->addColumn(6, function(ShowLayoutColumn $column) {
                         $column->withSingleField("heading_text");
@@ -81,12 +84,18 @@ class PageSharpShow extends SharpShow
 
     public function buildShowConfig(): void
     {
-        $this->setBreadcrumbCustomLabelAttribute("title");
+        $this->setBreadcrumbCustomLabelAttribute("breadcrumb_label");
     }
 
     function find($id): array
     {
         return $this
+            ->setCustomTransformer("breadcrumb_label", function($value, Page $page) {
+                return Str::limit($page->title, 35);
+            })
+            ->setCustomTransformer("admin_label", function($value) {
+                return sprintf('<span class="badge text-white p-1 bg-primary"><small>%s</small></span>', $value);
+            })
             ->setCustomTransformer("heading_text", function($value) {
                 return (new \Parsedown())->parse($value);
             })

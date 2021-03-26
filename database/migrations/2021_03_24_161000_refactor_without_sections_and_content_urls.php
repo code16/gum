@@ -19,6 +19,8 @@ class RefactorWithoutSectionsAndContentUrls extends Migration
         $this->movePagegroupsToSubpages();
         
         $this->linkTilesToPages();
+        
+        $this->adaptPagesTable();
 
         Schema::dropIfExists("sections");
         Schema::dropIfExists("pagegroups");
@@ -192,6 +194,13 @@ class RefactorWithoutSectionsAndContentUrls extends Migration
                 ->references('id')
                 ->on('pages')
                 ->onDelete('set null');
+        });
+    }
+
+    private function adaptPagesTable()
+    {
+        Schema::table('pages', function (Blueprint $table) {
+            $table->string('admin_label')->nullable();
         });
     }
 }

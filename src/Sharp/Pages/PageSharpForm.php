@@ -38,6 +38,11 @@ class PageSharpForm extends SharpForm
                     ->setHelpMessage("Utilisé dans les menus / fils d'ariane. Facultatif.")
             )
             ->addField(
+                SharpFormTextField::make("admin_label")
+                    ->setLabel("Référence admin")
+                    ->setHelpMessage("Référence libre, qui n'est affichée que dans Sharp, pour distinguer plus facilement les pages entre elles. Facultatif.")
+            )
+            ->addField(
                 $this->bodyField()
             )
             ->addField(
@@ -88,6 +93,7 @@ class PageSharpForm extends SharpForm
                 $column
                     ->withSingleField("title")
                     ->withSingleField("short_title")
+                    ->withSingleField("admin_label")
                     ->withSingleField("slug");
 
                 if($this->hasStylesDefined()) {

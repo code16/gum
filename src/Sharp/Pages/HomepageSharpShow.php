@@ -11,27 +11,17 @@ use Code16\Sharp\Show\SharpSingleShow;
 
 class HomepageSharpShow extends SharpSingleShow
 {
+    protected ?string $domainName = null;
 
     function buildShowFields(): void
     {
-        $homepage = Page::domain("acacia") // TODO Domain
-            ->home()
-            ->firstOrFail();
+        $homepage = $this->findHomePage();
         
         $this
-//            ->addField(SharpShowTextField::make("title")
-//                ->setLabel("Titre")
-//            )
             ->addField(SharpShowTextField::make("heading_text")
                 ->setLabel("Chapeau")
                 ->collapseToWordCount(25)
             )
-//            ->addField(SharpShowTextField::make("pagegroup")
-//                ->setLabel("Groupe de pages")
-//            )
-//            ->addField(SharpShowTextField::make("urls")
-//                ->setLabel("URLs")
-//            )
             ->addField(
                 SharpShowEntityListField::make("sidepanels", "sidepanels")
                     ->showCreateButton(true)
@@ -51,12 +41,6 @@ class HomepageSharpShow extends SharpSingleShow
         $this
             ->addSection("Page", function(ShowLayoutSection $section) {
                 $section
-//                    ->addColumn(6, function(ShowLayoutColumn $column) {
-//                        $column
-//                            ->withSingleField("title");
-////                            ->withSingleField("pagegroup")
-////                            ->withSingleField("urls");
-//                    })
                     ->addColumn(6, function(ShowLayoutColumn $column) {
                         $column->withSingleField("heading_text");
                     });
@@ -74,10 +58,14 @@ class HomepageSharpShow extends SharpSingleShow
     {
         return $this
             ->transform(
-                Page::domain("acacia") // TODO Domain
-                    ->home()
-                    ->with("tileblocks")
-                    ->firstOrFail()
+                $this->findHomePage(["tileblocks"])
             );
+    }
+
+    protected function findHomePage(?array $with = []): Page
+    {
+        return Page::home($this->domainName)
+            ->with($with)
+            ->firstOrFail();
     }
 }

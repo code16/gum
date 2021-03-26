@@ -25,8 +25,7 @@ class Page extends Model
 
     public static function buildBreadcrumbFromPath(string $path, ?string $domain): Collection
     {
-        $currentPage = Page::domain($domain)
-            ->home()
+        $currentPage = Page::home($domain)
             ->with("tileblocks")
             ->firstOrFail();
 
@@ -65,14 +64,7 @@ class Page extends Model
         return $breadcrumb;
     }
 
-    public function scopeDomain(Builder $query, ?string $domain = null): void
-    {
-        if($domain) {
-            $query->where("domain", $domain);
-        }
-    }
-
-    public function scopeOrphan(Builder $query, ?string $domain = null): void
+    public function scopeOrphan(Builder $query): void
     {
         $query
             ->whereNull("pagegroup_id")
@@ -83,7 +75,7 @@ class Page extends Model
             });
     }
 
-    public function scopeNotOrphan(Builder $query, ?string $domain = null): void
+    public function scopeNotOrphan(Builder $query): void
     {
         $query->where(function($query) {
             return $query->orWhereNotNull("pagegroup_id")
@@ -95,9 +87,13 @@ class Page extends Model
         });
     }
 
-    public function scopeHome(Builder $query): void
+    public function scopeHome(Builder $query, ?string $domain = null): void
     {
-        $query->where("slug", "");
+        $query
+            ->where("slug", "")
+            ->when($domain, function($query, $domain) {
+                return $query->where("domain", $domain);
+            });
     }
 
     public function scopeNotHome(Builder $query): void
@@ -180,7 +176,7 @@ class Page extends Model
         return [
             "id" => $this->id,
             "type" => Page::class,
-            "domain" => null,// TODO DOMAIN $this->urls()->visible()->published()->first()->domain,
+            "domain" => null, // TODO DOMAIN
             "updated_at" => $this->updated_at->timestamp,
             "title" => strip_tags($this->title),
             "text" => strip_tags($this->heading_text . " " . $this->body_text),
