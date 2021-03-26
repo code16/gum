@@ -8,7 +8,7 @@ use Code16\Sharp\EntityList\Containers\EntityListDataContainer;
 use Code16\Sharp\EntityList\EntityListQueryParams;
 use Code16\Sharp\Utils\Transformers\Attributes\Eloquent\SharpUploadModelThumbnailUrlTransformer;
 
-class PageSharpEmbeddedList extends GumSharpList
+class PageInPagegroupSharpEmbeddedList extends GumSharpList
 {
 
     function buildListDataContainers(): void

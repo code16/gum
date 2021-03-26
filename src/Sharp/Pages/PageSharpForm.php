@@ -114,6 +114,11 @@ class PageSharpForm extends SharpForm
             });
         }
     }
+    
+    public function buildFormConfig(): void
+    {
+        $this->setDisplayShowPageAfterCreation();
+    }
 
     function find($id): array
     {
