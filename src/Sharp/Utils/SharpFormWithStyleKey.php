@@ -12,7 +12,7 @@ trait SharpFormWithStyleKey
     protected function stylesDefined(): ?array
     {
         return config(
-            "gum.styles" . (SharpGumSessionValue::getDomain() ? "." . SharpGumSessionValue::getDomain() : "")
+            "gum.styles.acacia" // TODO Domain
         );
     }
 }

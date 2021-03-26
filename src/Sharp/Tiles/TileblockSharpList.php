@@ -5,9 +5,7 @@ namespace Code16\Gum\Sharp\Tiles;
 use Closure;
 use Code16\Gum\Models\Tile;
 use Code16\Gum\Models\Tileblock;
-use Code16\Gum\Sharp\Utils\DomainFilter;
 use Code16\Gum\Sharp\Utils\GumSharpList;
-use Code16\Gum\Sharp\Utils\SharpGumSessionValue;
 use Code16\Sharp\EntityList\Containers\EntityListDataContainer;
 use Code16\Sharp\EntityList\EntityListQueryParams;
 use Code16\Sharp\Utils\Transformers\SharpAttributeTransformer;
@@ -41,12 +39,6 @@ class TileblockSharpList extends GumSharpList
         $this
             ->setMultiformAttribute("layout")
             ->setReorderable(TileblockSharpReorderHandler::class);
-
-        if(sizeof(config("gum.domains"))) {
-            $this->addFilter("domain", DomainFilter::class, function($value, EntityListQueryParams $params) {
-                SharpGumSessionValue::setDomain($value);
-            });
-        }
     }
 
     function getListData(EntityListQueryParams $params): array

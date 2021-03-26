@@ -36,14 +36,12 @@ class HomepageSharpShow extends SharpSingleShow
                 SharpShowEntityListField::make("sidepanels", "sidepanels")
                     ->showCreateButton(true)
                     ->setLabel("Panneaux page")
-                    ->hideFilterWithValue('domain', null)
                     ->hideFilterWithValue("page", $homepage->id)
             )
             ->addField(
                 SharpShowEntityListField::make("tileblocks", "tileblocks")
                     ->showCreateButton(true)
                     ->setLabel("Tuiles")
-                    ->hideFilterWithValue('domain', null)
                     ->hideFilterWithValue("page", $homepage->id)
             );
     }

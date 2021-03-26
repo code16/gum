@@ -29,7 +29,6 @@ class PageSharpShow extends SharpShow
                 SharpShowEntityListField::make("subpages", "pages")
                     ->showCreateButton(true)
                     ->setLabel("Sous-pages")
-                    ->hideFilterWithValue('domain', null)
                     ->hideFilterWithValue("pagegroup", function($instanceId) {
                         return $instanceId;
                     })
@@ -38,7 +37,6 @@ class PageSharpShow extends SharpShow
                 SharpShowEntityListField::make("sidepanels", "sidepanels")
                     ->showCreateButton(true)
                     ->setLabel("Panneaux latéraux")
-                    ->hideFilterWithValue('domain', null)
                     ->hideFilterWithValue("page", function($instanceId) {
                         return $instanceId;
                     })
@@ -47,7 +45,6 @@ class PageSharpShow extends SharpShow
                 SharpShowEntityListField::make("tileblocks", "tileblocks")
                     ->showCreateButton(true)
                     ->setLabel("Tuiles")
-                    ->hideFilterWithValue('domain', null)
                     ->hideFilterWithValue("page", function($instanceId) {
                         return $instanceId;
                     })
@@ -97,7 +94,7 @@ class PageSharpShow extends SharpShow
                 return (new \Parsedown())->parse($value);
             })
             ->transform(
-                Page::with("tileblocks") // TODO Domain??
+                Page::with("tileblocks")
                     ->findOrFail($id)
             );
     }

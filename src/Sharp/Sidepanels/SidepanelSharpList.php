@@ -3,9 +3,7 @@
 namespace Code16\Gum\Sharp\Sidepanels;
 
 use Code16\Gum\Models\Sidepanel;
-use Code16\Gum\Sharp\Utils\DomainFilter;
 use Code16\Gum\Sharp\Utils\GumSharpList;
-use Code16\Gum\Sharp\Utils\SharpGumSessionValue;
 use Code16\Sharp\EntityList\Containers\EntityListDataContainer;
 use Code16\Sharp\EntityList\EntityListQueryParams;
 use Code16\Sharp\Utils\Transformers\SharpAttributeTransformer;
@@ -37,12 +35,6 @@ class SidepanelSharpList extends GumSharpList
         $this
             ->setMultiformAttribute("layout")
             ->setReorderable(SidepanelSharpReorderHandler::class);
-
-        if(sizeof(config("gum.domains"))) {
-            $this->addFilter("domain", DomainFilter::class, function($value, EntityListQueryParams $params) {
-                SharpGumSessionValue::setDomain($value);
-            });
-        }
     }
 
     function getListData(EntityListQueryParams $params): array
