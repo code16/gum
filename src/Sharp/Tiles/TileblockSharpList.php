@@ -72,9 +72,14 @@ class TileblockSharpList extends GumSharpList
 
                 $lines = $tileblock->tiles
                     ->map(function(Tile $tile) {
+                        $link = $this->getLinkForTile($tile);
+                        
                         return sprintf(
-                            '<div class="list-group-item">%s <div style="color:gray; font-style:italic"><small>%s</small></div></div>',
-                            $this->linkEntityTile($tile),
+                            '<a class="list-group-item text-dark %s" %s><div>%s</div><div>%s</div><div class="text-muted"><small>%s</small></div></a>',
+                            $link ? "list-group-item-action" : "bg-light",
+                            $link ? "href='{$link}'" : '',
+                            $tile->title,
+                            $this->formatTileText($tile),
                             $this->formatPublishDates($tile)
                         );
                     })
@@ -118,7 +123,21 @@ class TileblockSharpList extends GumSharpList
         );
     }
 
-    protected function linkEntityTile(Tile $tile): string
+    protected function getLinkForTile(Tile $tile): ?string
+    {
+        if($tile->page_id) {
+            return sprintf(
+                '/%s/%s/s-show/pages/%s',
+                sharp_base_url_segment(),
+                $this->getSegmentsFromRequest()->implode("/"),
+                $tile->page_id
+            );
+        }
+        
+        return null;
+    }
+
+    protected function formatTileText(Tile $tile): string
     {
         $html = "";
         
@@ -130,22 +149,15 @@ class TileblockSharpList extends GumSharpList
         
         if($tile->isFreeLink()) {
             $html .= sprintf(
-                "<span><i class='fa fa-external-link'></i> %s</span> <span class='text-muted'><small>%s</small></span>",
-                $tile->title,
+                "<span><i class='fa fa-external-link'></i> %s</span>",
                 $tile->free_link_url
             );
             
         } elseif($tile->page_id) {
             $html .= sprintf(
-                '<a class="ui-font" href="/%s/%s/s-show/pages/%s">%s</a>',
-                sharp_base_url_segment(),
-                $this->getSegmentsFromRequest()->implode("/"),
-                $tile->page_id,
+                '<i class="fa fa-file-o"></i> <span class="ui-font text-primary">%s</span>',
                 $tile->page->title
             );
-        
-        } else {
-            $html .= $tile->title;
         }
         
         return $html;

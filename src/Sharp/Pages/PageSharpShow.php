@@ -94,7 +94,9 @@ class PageSharpShow extends SharpShow
                 return Str::limit($page->title, 35);
             })
             ->setCustomTransformer("admin_label", function($value) {
-                return sprintf('<span class="badge text-white p-1 bg-primary"><small>%s</small></span>', $value);
+                return $value 
+                    ? sprintf('<span class="badge text-white p-1 bg-primary"><small>%s</small></span>', $value)
+                    : null;
             })
             ->setCustomTransformer("heading_text", function($value) {
                 return (new \Parsedown())->parse($value);
