@@ -87,7 +87,7 @@ class Tile extends Model
 
     public function isPublished(Carbon $date = null): bool
     {
-        $now = $date ?? Carbon::now();
+        $now = $date ?? now();
 
         return (is_null($this->published_at) || $this->published_at <= $now)
             && (is_null($this->unpublished_at) || $this->unpublished_at > $now);
