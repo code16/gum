@@ -18,6 +18,7 @@ use Code16\Sharp\Form\Fields\SharpFormTextField;
 use Code16\Sharp\Form\Fields\SharpFormUploadField;
 use Code16\Sharp\Form\Layout\FormLayoutColumn;
 use Code16\Sharp\Form\SharpForm;
+use Illuminate\Support\Str;
 
 abstract class TileblockSharpForm extends SharpForm
 {
@@ -104,7 +105,7 @@ abstract class TileblockSharpForm extends SharpForm
                         }
     
                         if($this->tileHasLink()) {
-                            $item->withFields("link_type|4", "free_link_url|8", "page_id|8");
+                            $item->withFields("link_type|4", "free_link_url|8", "page_id|8", "orphan_page_id|8", "new_page_title|8");
                         }
     
                         $item->withFields("visibility|4", "published_at|4", "unpublished_at|4");
@@ -154,14 +155,27 @@ abstract class TileblockSharpForm extends SharpForm
         unset($data["page_label"], $data["layout_label"]);
 
         if($this->tileHasLink()) {
-            $data["tiles"] = collect($data["tiles"])
-                ->map(function($dataTile) {
-                    if ($dataTile["link_type"] === "page") {
-                        $dataTile["free_link_url"] = null;
-                    } else {
+            $data["tiles"] = collect($data["tiles"] ?? [])
+                ->map(function($dataTile) use($tileblock) {
+                    if ($dataTile["link_type"] === "free") {
                         $dataTile["page_id"] = null;
+                        
+                    } else {
+                        $dataTile["free_link_url"] = null;
+                        
+                        if ($dataTile["link_type"] === "orphan") {
+                            $dataTile["page_id"] = $dataTile["orphan_page_id"];
+
+                        } elseif (in_array($dataTile["link_type"], ["new", "new_pagegroup"])) {
+                            $dataTile["page_id"] = Page::create([
+                                "title" => $dataTile["new_page_title"],
+                                "slug" => Str::slug($dataTile["new_page_title"]),
+                                "is_pagegroup" => $dataTile["link_type"] == "new_pagegroup"
+                            ])->id;
+                        }
                     }
-                    unset($dataTile["link_type"]);
+                    
+                    unset($dataTile["link_type"], $dataTile["orphan_page_id"], $dataTile["new_page_title"]);
                     
                     return $dataTile;
                 })
@@ -305,6 +319,9 @@ abstract class TileblockSharpForm extends SharpForm
                     SharpFormSelectField::make("link_type", [
                         "free" => "Lien libre",
                         "page" => "Page",
+                        "orphan" => "Page orpheline",
+                        "new" => "Nouvelle page",
+                        "new_pagegroup" => "Nouveau groupe",
                     ])
                         ->setDisplayAsDropdown()
                         ->setLabel("Lien")
@@ -312,15 +329,25 @@ abstract class TileblockSharpForm extends SharpForm
                 ->addItemField(
                     SharpFormAutocompleteField::make("page_id", "local")
                         ->setLabel("Page")
-                        ->setLocalValues(
-                            Page::orphan() // TODO won't work on update, because linked page is NOT orphan...
-                                ->orderBy("title")
-                                ->get()
-                        )
+                        ->setLocalValues(Page::notHome()->notOrphan()->orderBy("title")->get())
                         ->setLocalSearchKeys(["title", "slug"])
-                        ->setResultItemInlineTemplate("{{title}} <small>{{slug}}</small>")
-                        ->setListItemInlineTemplate("{{title}}<br><small>{{slug}}</small>")
+                        ->setResultItemInlineTemplate("{{title}} <small class='text-muted'>{{slug}}</small>")
+                        ->setListItemInlineTemplate("{{title}}<div class='text-muted'><small>{{slug}}</small></div>")
                         ->addConditionalDisplay("link_type", "page")
+                )
+                ->addItemField(
+                    SharpFormAutocompleteField::make("orphan_page_id", "local")
+                        ->setLabel("Page")
+                        ->setLocalValues(Page::notHome()->orphan()->orderBy("title")->get())
+                        ->setLocalSearchKeys(["title", "slug"])
+                        ->setResultItemInlineTemplate("{{title}} <small class='text-muted'>{{slug}}</small>")
+                        ->setListItemInlineTemplate("{{title}}<div class='text-muted'><small>{{slug}}</small></div>")
+                        ->addConditionalDisplay("link_type", "orphan")
+                )
+                ->addItemField(
+                    SharpFormTextField::make("new_page_title")
+                        ->addConditionalDisplay("link_type", ["new", "new_pagegroup"])
+                        ->setLabel("Titre de la page")
                 )
                 ->addItemField(
                     SharpFormTextField::make("free_link_url")

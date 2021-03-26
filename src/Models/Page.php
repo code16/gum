@@ -75,8 +75,6 @@ class Page extends Model
     public function scopeOrphan(Builder $query, ?string $domain = null): void
     {
         $query
-            ->where("slug", "!=", "")
-            ->whereNotNull("slug")
             ->whereNull("pagegroup_id")
             ->whereNotExists(function($query) {
                 return $query->select(DB::raw(1))
@@ -85,9 +83,28 @@ class Page extends Model
             });
     }
 
+    public function scopeNotOrphan(Builder $query, ?string $domain = null): void
+    {
+        $query->where(function($query) {
+            return $query->orWhereNotNull("pagegroup_id")
+                ->orWhereExists(function ($query) {
+                    return $query->select(DB::raw(1))
+                        ->from('tiles')
+                        ->whereRaw('tiles.page_id = pages.id');
+                });
+        });
+    }
+
     public function scopeHome(Builder $query): void
     {
         $query->where("slug", "");
+    }
+
+    public function scopeNotHome(Builder $query): void
+    {
+        $query
+            ->where("slug", "!=", "")
+            ->whereNotNull("slug");
     }
 
     public function pagegroup(): BelongsTo
@@ -139,6 +156,11 @@ class Page extends Model
     public function tags(): MorphToMany
     {
         return $this->morphToMany(Tag::class, "taggable");
+    }
+
+    public function isPagegroup(): bool
+    {
+        return $this->is_pagegroup;
     }
 
     public function getDefaultAttributesFor(string $attribute): array

@@ -56,25 +56,16 @@ class PageSharpForm extends SharpForm
                     ->setHelpMessage("Il s'agit de l'URL (slug) de la page ; laissez ce champ vide pour remplissage automatique à partir du titre. Ne peut contenir que des lettres, des chiffres et des tirets. Attention, si vous modifiez cette valeur, les URLs du site seront modifiées.")
             );
         
-//        if(!$this->isNewPageInPagegroup()) {
-//            $this->addField(
-//                SharpFormAutocompleteField::make("pagegroup_id", "local")
-//                    ->setLabel("Groupe de pages")
-//                    ->setLocalSearchKeys(["label"])
-//                    ->setListItemInlineTemplate("{{label}}")
-//                    ->setResultItemInlineTemplate("{{label}}")
-//                    ->setLocalValues(Pagegroup::all()->pluck("title", "id")->all())
-//            );
-//        }
-        
         if($this->allowNews) {
-            $this->addField(
-                SharpFormCheckField::make("has_news", "Propose des actualités")
-            )->addField(
-                SharpFormTagsField::make("tags", Tag::orderBy("name")->pluck("name", "id")->toArray())
-                    ->addConditionalDisplay("has_news")
-                    ->setLabel("Tags concernés")
-            );
+            $this
+                ->addField(
+                    SharpFormCheckField::make("has_news", "Propose des actualités")
+                )
+                ->addField(
+                    SharpFormTagsField::make("tags", Tag::orderBy("name")->pluck("name", "id")->toArray())
+                        ->addConditionalDisplay("has_news")
+                        ->setLabel("Tags concernés")
+                );
         }
 
         if($this->hasStylesDefined()) {
@@ -89,8 +80,11 @@ class PageSharpForm extends SharpForm
 
     function buildFormLayout(): void
     {
+        $isPagegroup = currentSharpRequest()->isUpdate()
+            && Page::find(currentSharpRequest()->instanceId())->isPageGroup();
+        
         $this
-            ->addColumn(6, function (FormLayoutColumn $column) {
+            ->addColumn(6, function (FormLayoutColumn $column) use ($isPagegroup) {
                 $column
                     ->withSingleField("title")
                     ->withSingleField("short_title")
@@ -99,26 +93,26 @@ class PageSharpForm extends SharpForm
                 if($this->hasStylesDefined()) {
                     $column->withSingleField("style_key");
                 }
-    
-//                if(!$this->isNewPageInPagegroup()) {
-//                    $column->withSingleField("pagegroup_id");
-//                }
-                    
-                $column->withFieldset("Visuel", function($fieldset) {
-                    $fieldset->withSingleField("visual")
-                        ->withSingleField("visual:legend");
-                });
-    
-            })
-            ->addColumn(6, function (FormLayoutColumn $column) {
+                
+                if(!$isPagegroup) {
+                    $column->withFieldset("Visuel", function ($fieldset) {
+                        $fieldset->withSingleField("visual")
+                            ->withSingleField("visual:legend");
+                    });
+                }
+            });
+        
+        if(!$isPagegroup) {
+            $this->addColumn(6, function (FormLayoutColumn $column) {
                 $column->withSingleField("heading_text")
                     ->withSingleField("body_text");
-    
-                if($this->allowNews) {
+
+                if ($this->allowNews) {
                     $column->withSingleField("has_news")
                         ->withSingleField("tags");
                 }
             });
+        }
     }
 
     function find($id): array
@@ -130,15 +124,25 @@ class PageSharpForm extends SharpForm
 
     function update($id, array $data)
     {
-        $page = $id ? Page::findOrFail($id) : new Page();
+        if($id) {
+            $page = Page::findOrFail($id);
+        } else {
+            $pagegroupId = null;
+            if($previousPage = currentSharpRequest()->getPreviousShowFromBreadcrumbItems()) {
+                $previousPage = Page::findOrFail($previousPage->instanceId());
+                if($previousPage->isPagegroup()) {
+                    $pagegroupId = $previousPage->id;
+                }
+            }
+            
+            $page = new Page([
+                "pagegroup_id" => $pagegroupId
+            ]);
+        }
 
         if(array_key_exists("slug", $data) && !trim($data["slug"])) {
             $data["slug"] = Str::slug($data["title"]);
         }
-        
-//        if($this->isNewPageInPagegroup()) {
-//            $data["pagegroup_id"] = currentSharpRequest()->getPreviousShowFromBreadcrumbItems()->instanceId();
-//        }
 
         $this->save($page, $data);
 
@@ -183,12 +187,5 @@ class PageSharpForm extends SharpForm
             ->setMaxFileSize(5)
             ->setStorageDisk("local")
             ->setStorageBasePath("data/pages/{id}");
-    }
-
-    private function isNewPageInPagegroup(): bool
-    {
-        $previousShow = currentSharpRequest()->getPreviousShowFromBreadcrumbItems();
-        
-        return currentSharpRequest()->isCreation() && $previousShow && $previousShow->entityKey() === "pagegroups";
     }
 }

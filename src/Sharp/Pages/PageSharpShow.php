@@ -21,15 +21,18 @@ class PageSharpShow extends SharpShow
             ->addField(SharpShowTextField::make("heading_text")
                 ->collapseToWordCount(25)
             )
-//            ->addField(SharpShowTextField::make("pagegroup")
-//                ->setLabel("Groupe de pages")
-//            )
-//            ->addField(SharpShowTextField::make("urls")
-//                ->setLabel("URLs")
-//            )
             ->addField(
                 SharpShowTextField::make("body_text")
                     ->collapseToWordCount(100)
+            )
+            ->addField(
+                SharpShowEntityListField::make("subpages", "pages")
+                    ->showCreateButton(true)
+                    ->setLabel("Sous-pages")
+                    ->hideFilterWithValue('domain', null)
+                    ->hideFilterWithValue("pagegroup", function($instanceId) {
+                        return $instanceId;
+                    })
             )
             ->addField(
                 SharpShowEntityListField::make("sidepanels", "sidepanels")
@@ -53,14 +56,13 @@ class PageSharpShow extends SharpShow
 
     function buildShowLayout(): void
     {
+        $page = Page::findOrFail(currentSharpRequest()->instanceId());
+        
         $this
             ->addSection("Page", function(ShowLayoutSection $section) {
                 $section
                     ->addColumn(6, function(ShowLayoutColumn $column) {
-                        $column
-                            ->withSingleField("title");
-//                            ->withSingleField("pagegroup")
-//                            ->withSingleField("urls");
+                        $column->withSingleField("title");
                     })
                     ->addColumn(6, function(ShowLayoutColumn $column) {
                         $column->withSingleField("heading_text");
@@ -70,9 +72,14 @@ class PageSharpShow extends SharpShow
                 $section->addColumn(8, function(ShowLayoutColumn $column) {
                     $column->withSingleField("body_text");
                 });
-            })
-            ->addEntityListSection("sidepanels")
-            ->addEntityListSection("tileblocks");
+            });
+        
+        if($page->isPagegroup()) {
+            $this->addEntityListSection("subpages");
+        } else {
+            $this->addEntityListSection("sidepanels")
+                ->addEntityListSection("tileblocks");
+        }
     }
 
     public function buildShowConfig(): void

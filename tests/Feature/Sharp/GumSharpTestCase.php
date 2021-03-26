@@ -44,7 +44,7 @@ class GumSharpTestCase extends TestCase
                         "validator" => \Code16\Gum\Sharp\Sections\SectionSharpValidator::class,
                     ],
                     "pages" => [
-                        "list" => \Code16\Gum\Sharp\Pages\PageSharpList::class,
+                        "list" => \Code16\Gum\Sharp\Pages\PageSharpEmbeddedList::class,
                         "form" => \Code16\Gum\Sharp\Pages\PageSharpForm::class,
                         "validator" => \Code16\Gum\Sharp\Pages\PageSharpValidator::class,
                     ],

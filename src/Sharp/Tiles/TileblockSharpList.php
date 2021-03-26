@@ -81,16 +81,15 @@ class TileblockSharpList extends GumSharpList
                 return $tileblock->tiles
                     ->map(function(Tile $tile) {
                         $style = "padding:5px; display:inline; color:gray;";
-                        if(!$link = $tile->url) {
-                            $link = 'pas de lien';
-                            $style .= 'color:orange';
-                        }
+//                        if(!$link = $tile->url) {
+//                            $link = 'pas de lien';
+//                            $style .= 'color:orange';
+//                        }
     
                         return sprintf(
-                            '%s <div style="%s"><small>%s</small> <span style="color:gray; font-style:italic"><small>%s</small></span></div><div class="mb-2"></div>',
+                            '%s <div style="%s"> <span style="color:gray; font-style:italic"><small>%s</small></span></div><div class="mb-2"></div>',
                             $this->linkEntityTile($tile),
                             $style,
-                            $link,
                             $this->formatPublishDates($tile)
                         );
                     })
@@ -108,23 +107,23 @@ class TileblockSharpList extends GumSharpList
         }
 
         if(!$tile->published_at) {
-            return "jusqu'au " . $tile->unpublished_at->formatLocalized("%e %b %Y à %Hh%M");
+            return " • jusqu'au " . $tile->unpublished_at->formatLocalized("%e %b %Y à %Hh%M");
         }
 
         if(!$tile->unpublished_at) {
-            return "à partir du " . $tile->published_at->formatLocalized("%e %b %Y à %Hh%M");
+            return " • à partir du " . $tile->published_at->formatLocalized("%e %b %Y à %Hh%M");
         }
 
         if($tile->published_at->isSameYear($tile->unpublished_at)) {
             return sprintf(
-                "du %s au %s",
+                " • du %s au %s",
                 $tile->published_at->formatLocalized("%e %b à %Hh%M"),
                 $tile->unpublished_at->formatLocalized("%e %b %Y à %Hh%M")
             );
         }
 
         return sprintf(
-            "du %s au %s",
+            " • du %s au %s",
             $tile->published_at->formatLocalized("%e %b %Y à %Hh%M"),
             $tile->unpublished_at->formatLocalized("%e %b %Y à %Hh%M")
         );
@@ -134,18 +133,23 @@ class TileblockSharpList extends GumSharpList
     {
         if($tile->isFreeLink()) {
             return sprintf(
-                "<span><i class='fa fa-external-link'></i> %s</span>",
-                $tile->title
+                "<span><i class='fa fa-external-link'></i> %s</span> <span class='text-muted'><small>%s</small></span>",
+                $tile->title,
+                $tile->free_link_url
             );
         }
-
-        return sprintf(
-            '<a href="/%s/%s/s-show/pages/%s">%s</a>',
-            sharp_base_url_segment(),
-            $this->getSegmentsFromRequest()->implode("/"),
-            $tile->page_id,
-            $tile->page->title
-        );
+        
+        if($tile->page_id) {
+            return sprintf(
+                '<a href="/%s/%s/s-show/pages/%s">%s</a>',
+                sharp_base_url_segment(),
+                $this->getSegmentsFromRequest()->implode("/"),
+                $tile->page_id,
+                $tile->page->title
+            );
+        }
+        
+        return $tile->title;
     }
 
     private function getSegmentsFromRequest(): Collection
