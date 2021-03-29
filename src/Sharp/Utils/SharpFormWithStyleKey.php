@@ -11,8 +11,6 @@ trait SharpFormWithStyleKey
 
     protected function stylesDefined(): ?array
     {
-        return config(
-            "gum.styles.acacia" // TODO Domain
-        );
+        return config("gum.styles");
     }
 }
