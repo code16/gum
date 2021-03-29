@@ -22,6 +22,10 @@ class Page extends Model
     protected $keyType = 'string';
     public $incrementing = false;
     protected $guarded = [];
+    protected $touches = [
+        "subpages",
+        "tileblocks"
+    ];
 
     public static function buildBreadcrumbFromPath(string $path, ?string $domain): Collection
     {
@@ -103,6 +107,14 @@ class Page extends Model
             ->whereNotNull("slug");
     }
 
+    public function scopeDomain(Builder $query, ?string $domain = null): void
+    {
+        $query
+            ->when($domain, function($query, $domain) {
+                return $query->where("domain", $domain);
+            });
+    }
+
     public function pagegroup(): BelongsTo
     {
         return $this->belongsTo(Page::class);
@@ -159,6 +171,32 @@ class Page extends Model
         return $this->is_pagegroup;
     }
 
+    public function isHome(): bool
+    {
+        return $this->slug === null || $this->slug === "";
+    }
+
+    public function findUri(string $currentPath = ""): ?string
+    {
+        if($this->isHome()) {
+            return $currentPath;
+        }
+
+        if($this->pagegroup_id) {
+            return $this->pagegroup->findUri("{$this->slug}/{$currentPath}");
+        }
+        
+        $tile = Tile::select("tiles.*")
+            ->visible()->published()
+            ->with("tileblock", "tileblock.page")
+            ->leftJoin("tileblocks", "tiles.tileblock_id", "=", "tileblocks.id")
+            ->where("tileblocks.layout", "!=", "text") // Text layout is considered as "not publicly linked tile"
+            ->where("tiles.page_id", $this->id)
+            ->first();
+        
+        return $tile ? $tile->tileblock->page->findUri("{$this->slug}/{$currentPath}") : "";
+    }
+
     public function getDefaultAttributesFor(string $attribute): array
     {
         return in_array($attribute, ["visual"])
@@ -175,9 +213,6 @@ class Page extends Model
     {
         return [
             "id" => $this->id,
-            "type" => Page::class,
-            "domain" => null, // TODO DOMAIN
-            "updated_at" => $this->updated_at->timestamp,
             "title" => strip_tags($this->title),
             "text" => strip_tags($this->heading_text . " " . $this->body_text),
         ];
@@ -189,6 +224,26 @@ class Page extends Model
             return false;
         }
         
-        return true; // TODO $this->urls()->visible()->published()->count() > 0;
+        if($this->isHome()) {
+            return true;
+        }
+        
+        if($this->pagegroup_id) {
+            return $this->pagegroup->shouldBeSearchable();
+        }
+        
+        $tile = Tile::select("tiles.*")
+            ->visible()
+            ->published()
+            ->with("tileblock", "tileblock.page")
+            ->leftJoin("tileblocks", "tiles.tileblock_id", "=", "tileblocks.id")
+            ->where("tileblocks.layout", "!=", "text") // Text layout is considered as "not publicly linked tile"
+            ->where("tiles.page_id", $this->id)
+            ->get()
+            ->first(function(Tile $tile) {
+                return $tile->tileblock->page->shouldBeSearchable();
+            });
+        
+        return $tile !== null;
     }
 }

@@ -11,8 +11,6 @@ use Code16\Sharp\Show\SharpSingleShow;
 
 class HomepageSharpShow extends SharpSingleShow
 {
-    protected ?string $domainName = null;
-
     function buildShowFields(): void
     {
         $homepage = $this->findHomePage();
@@ -64,7 +62,7 @@ class HomepageSharpShow extends SharpSingleShow
 
     protected function findHomePage(?array $with = []): Page
     {
-        return Page::home($this->domainName)
+        return Page::home(gum_sharp_current_domain())
             ->with($with)
             ->firstOrFail();
     }

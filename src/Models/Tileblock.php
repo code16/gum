@@ -12,6 +12,8 @@ class Tileblock extends Model
 
     protected $dates = ["created_at", "updated_at", "published_at", "unpublished_at"];
 
+    protected $touches = ['tiles'];
+
     public function tiles(): HasMany
     {
         return $this->hasMany(Tile::class)

@@ -147,6 +147,7 @@ class PageSharpForm extends SharpForm
             }
             
             $page = new Page([
+                "domain" => gum_sharp_current_domain(),
                 "pagegroup_id" => $pagegroupId
             ]);
         }

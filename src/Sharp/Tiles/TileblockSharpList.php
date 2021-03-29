@@ -54,7 +54,7 @@ class TileblockSharpList extends GumSharpList
 
     protected function requestWiths(): array
     {
-        return ["tiles"];
+        return ["tiles", "page"];
     }
 
     /**

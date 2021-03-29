@@ -47,6 +47,7 @@ class OrphanPageSharpList extends GumSharpList
     function getListData(EntityListQueryParams $params) 
     {
         $pages = Page::orphan()
+            ->domain(gum_sharp_current_domain())
             ->notHome()
             ->select("pages.*")
             ->with($this->requestWiths())

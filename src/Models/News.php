@@ -111,7 +111,6 @@ class News extends Model
             "title" => strip_tags($this->title),
             "heading_text" => strip_tags($this->heading_text),
             "text" => (new Parsedown)->text($this->body_text),
-            "tags" => $this->tags->implode("name",", "),
         ];
     }
 

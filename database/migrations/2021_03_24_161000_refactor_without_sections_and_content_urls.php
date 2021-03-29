@@ -226,5 +226,61 @@ class RefactorWithoutSectionsAndContentUrls extends Migration
         Schema::table('pages', function (Blueprint $table) {
             $table->string('admin_label')->nullable();
         });
+        
+        DB::table("pages")
+            ->whereNull("domain")
+            ->get()
+            ->each(function($page) {
+                DB::table("pages")
+                    ->where("id", $page->id)
+                    ->update(["domain" => $this->findDomainForPage($page)]);
+            });
+    }
+
+    private function findDomainForPage(object $page): string
+    {
+        if($page->domain) {
+            return $page->domain;
+        }
+        
+        if($page->pagegroup_id) {
+            return $this->findDomainForPage(
+                DB::table("pages")->find($page->pagegroup_id)
+            );
+        }
+        
+        $tiles = DB::table("tiles")
+            ->where("page_id", $page->id)
+            ->get();
+
+        if(count($tiles) > 1) {
+            $domains = [];
+            foreach($tiles as $tile) {
+                $domains[$this->findDomainForPage(
+                    DB::table("pages")
+                        ->find(
+                            DB::table("tileblocks")->find($tile->tileblock_id)->page_id
+                        )
+                )] = true;
+            }
+            
+            if(count(array_keys($domains)) > 1) {
+                Log::warning("Page {$page->id} is multidomain: " . implode(", ", $domains));
+            }
+            
+            return array_key_first($domains);
+        }
+        
+        if(count($tiles) == 1) {
+            return $this->findDomainForPage(
+                DB::table("pages")
+                    ->find(
+                        DB::table("tileblocks")->find($tiles[0]->tileblock_id)->page_id
+                    )
+            );
+        }
+        
+        // Orphan page
+        return "acacia";
     }
 }
