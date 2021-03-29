@@ -83,7 +83,9 @@ class RefactorWithoutSectionsAndContentUrls extends Migration
             });
 
         Schema::table('tileblocks', function (Blueprint $table) {
-            $table->dropForeign("tileblocks_section_id_foreign");
+            if(config("database.default") != "sqlite") {
+                $table->dropForeign("tileblocks_section_id_foreign");
+            }
             $table->dropColumn("section_id");
         });
     }
@@ -112,8 +114,17 @@ class RefactorWithoutSectionsAndContentUrls extends Migration
 
         Schema::table('sidepanels', function (Blueprint $table) {
             $table->dropColumn("container_id");
+        });
+
+        Schema::table('sidepanels', function (Blueprint $table) {
             $table->dropColumn("container_type");
+        });
+
+        Schema::table('sidepanels', function (Blueprint $table) {
             $table->dropColumn("related_content_id");
+        });
+
+        Schema::table('sidepanels', function (Blueprint $table) {
             $table->dropColumn("related_content_type");
         });
         
@@ -154,8 +165,19 @@ class RefactorWithoutSectionsAndContentUrls extends Migration
 
         Schema::table('tiles', function (Blueprint $table) {
             $table->dropColumn("linkable_id");
+        });
+
+        Schema::table('tiles', function (Blueprint $table) {
             $table->dropColumn("linkable_type");
-            $table->dropForeign("tiles_content_url_id_foreign");
+        });
+        
+        Schema::table('tiles', function (Blueprint $table) {
+            if(config("database.default") != "sqlite") {
+                $table->dropForeign("tiles_content_url_id_foreign");
+            }
+        });
+
+        Schema::table('tiles', function (Blueprint $table) {
             $table->dropColumn("content_url_id");
         });
     }
@@ -164,7 +186,9 @@ class RefactorWithoutSectionsAndContentUrls extends Migration
     {
         Schema::table('pages', function (Blueprint $table) {
             $table->boolean('is_pagegroup')->default(false);
-            $table->dropForeign("pages_pagegroup_id_foreign");
+            if(config("database.default") != "sqlite") {
+                $table->dropForeign("pages_pagegroup_id_foreign");
+            }
         });
 
         DB::table("pagegroups")

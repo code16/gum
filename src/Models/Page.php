@@ -185,7 +185,7 @@ class Page extends Model
 
     public function shouldBeSearchable(): bool
     {
-        if(!config("gum.scout_enabled")){
+        if(!config("gum.scout_enabled")) {
             return false;
         }
         
