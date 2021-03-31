@@ -2,7 +2,6 @@
 
 namespace Code16\Gum\Models;
 
-use Code16\Gum\Models\Utils\WithMenuTitle;
 use Code16\Gum\Models\Utils\WithUuid;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -17,7 +16,7 @@ use Laravel\Scout\Searchable;
 
 class Page extends Model
 {
-    use WithUuid, WithMenuTitle, Searchable;
+    use WithUuid, Searchable;
 
     protected $keyType = 'string';
     public $incrementing = false;
@@ -136,6 +135,11 @@ class Page extends Model
     {
         return $this->hasMany(Tileblock::class)
             ->orderby("order");
+    }
+
+    public function getMenuTitleAttribute(): string
+    {
+        return $this->attributes["short_title"] ?: $this->attributes["title"];
     }
 
     public function getOnlineTileblocksAttribute(): Collection

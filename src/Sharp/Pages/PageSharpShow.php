@@ -99,10 +99,10 @@ class PageSharpShow extends SharpShow
                     : null;
             })
             ->setCustomTransformer("heading_text", function($value) {
-                return (new \Parsedown())->parse($value);
+                return gum_markdown($value);
             })
             ->setCustomTransformer("body_text", function($value) {
-                return (new \Parsedown())->parse($value);
+                return gum_markdown($value);
             })
             ->transform(
                 Page::with("tileblocks")

@@ -1,15 +1,6 @@
 <?php
 
-function gum_domain_allowed_to_user(?string $domain, $user = null): bool
-{
-    $user = $user ?: auth()->user();
-
-    if($domain && method_exists($user, "isAdminForDomain")) {
-        return $user->isAdminforDomain($domain);
-    }
-
-    return true;
-}
+use League\CommonMark\GithubFlavoredMarkdownConverter;
 
 function gum_sharp_current_domain(): ?string
 {
@@ -18,4 +9,9 @@ function gum_sharp_current_domain(): ?string
     }
     
     return null;
+}
+
+function gum_markdown(?string $text): string
+{
+    return (new GithubFlavoredMarkdownConverter())->convertToHtml($text);
 }

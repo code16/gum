@@ -11,16 +11,13 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Laravel\Scout\Searchable;
-use Parsedown;
 
 class News extends Model
 {
     use Searchable;
 
     protected $guarded = [];
-
     protected $table = "news";
-
     protected $dates = ["created_at", "updated_at", "published_at"];
 
     public function scopeForTags(Builder $query, Collection $tags = null)
@@ -110,7 +107,7 @@ class News extends Model
             "surtitle" => strip_tags($this->surtitle),
             "title" => strip_tags($this->title),
             "heading_text" => strip_tags($this->heading_text),
-            "text" => (new Parsedown)->text($this->body_text),
+            "text" => gum_markdown($this->body_text),
         ];
     }
 

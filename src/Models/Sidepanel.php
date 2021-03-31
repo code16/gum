@@ -9,8 +9,6 @@ use Illuminate\Database\Eloquent\Relations\MorphOne;
 class Sidepanel extends Model
 {
     protected $guarded = [];
-
-    /** @var array */
     protected $casts = [
         'custom_properties' => 'array',
     ];
@@ -39,10 +37,6 @@ class Sidepanel extends Model
             : [];
     }
 
-    /**
-     * @param string $key
-     * @return mixed|null
-     */
     public function getAttribute($key)
     {
         if(!$this->isRealAttribute($key)) {
@@ -52,11 +46,6 @@ class Sidepanel extends Model
         return parent::getAttribute($key);
     }
 
-    /**
-     * @param string $key
-     * @param mixed $value
-     * @return Model
-     */
     public function setAttribute($key, $value)
     {
         if(!$this->isRealAttribute($key)) {
@@ -66,12 +55,7 @@ class Sidepanel extends Model
         return parent::setAttribute($key, $value);
     }
 
-    /**
-     * @param $key
-     * @param $value
-     * @return $this
-     */
-    private function updateCustomProperty($key, $value)
+    private function updateCustomProperty(string $key, $value): self
     {
         $properties = $this->getAttribute("custom_properties");
         $properties[$key] = $value;

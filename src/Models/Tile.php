@@ -11,9 +11,7 @@ use Illuminate\Database\Eloquent\Relations\MorphOne;
 class Tile extends Model
 {
     protected $guarded = [];
-
     protected $dates = ['created_at', 'updated_at', 'published_at', 'unpublished_at'];
-
     protected $touches = ['page'];
 
     public static function scopeVisible(Builder $query)

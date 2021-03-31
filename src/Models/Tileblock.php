@@ -9,9 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Tileblock extends Model
 {
     protected $guarded = [];
-
     protected $dates = ["created_at", "updated_at", "published_at", "unpublished_at"];
-
     protected $touches = ['tiles'];
 
     public function tiles(): HasMany
