@@ -13,5 +13,7 @@ function gum_sharp_current_domain(): ?string
 
 function gum_markdown(?string $text): string
 {
-    return (new GithubFlavoredMarkdownConverter())->convertToHtml($text);
+    return $text 
+        ? (new GithubFlavoredMarkdownConverter())->convertToHtml($text)
+        : "";
 }
