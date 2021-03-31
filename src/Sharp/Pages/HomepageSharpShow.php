@@ -23,7 +23,7 @@ class HomepageSharpShow extends SharpSingleShow
             ->addField(
                 SharpShowEntityListField::make("sidepanels", "sidepanels")
                     ->showCreateButton(true)
-                    ->setLabel("Panneaux page")
+                    ->setLabel("Panneaux latéraux")
                     ->hideFilterWithValue("page", $homepage->id)
             )
             ->addField(
