@@ -37,6 +37,7 @@ class Page extends Model
 
         foreach(explode("/", $path) as $segment) {
             $pages = Page::where("slug", $segment)
+                ->where("domain", $domain)
                 ->with("tileblocks")
                 ->get();
 
@@ -105,6 +106,11 @@ class Page extends Model
         $query
             ->where("slug", "!=", "")
             ->whereNotNull("slug");
+    }
+
+    public function scopeNotSubpage(Builder $query): void
+    {
+        $query->whereNull("pagegroup_id");
     }
 
     public function scopeDomain(Builder $query, ?string $domain = null): void

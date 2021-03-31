@@ -237,7 +237,7 @@ class RefactorWithoutSectionsAndContentUrls extends Migration
             });
     }
 
-    private function findDomainForPage(object $page): string
+    private function findDomainForPage(object $page): ?string
     {
         if($page->domain) {
             return $page->domain;
@@ -281,6 +281,6 @@ class RefactorWithoutSectionsAndContentUrls extends Migration
         }
         
         // Orphan page
-        return "acacia";
+        return null;
     }
 }

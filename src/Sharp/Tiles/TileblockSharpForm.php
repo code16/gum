@@ -138,7 +138,7 @@ abstract class TileblockSharpForm extends SharpForm
                 return $this->layoutLabel();
             })
             ->setCustomTransformer('page_label', function($value, $tileblock) {
-                return Page::find(currentSharpRequest()->getPreviousShowFromBreadcrumbItems()->instanceId())->title;
+                return $this->getPreviousPageInBreadcrumb()->title;
             })
             ->transform(new Tileblock());
     }
@@ -149,7 +149,7 @@ abstract class TileblockSharpForm extends SharpForm
             ? Tileblock::findOrFail($id) 
             : new Tileblock([
                 "layout" => $this->layoutKey(),
-                "page_id" => currentSharpRequest()->getPreviousShowFromBreadcrumbItems()->instanceId()
+                "page_id" => $this->getPreviousPageInBreadcrumb()->id
             ]);
         
         unset($data["page_label"], $data["layout_label"]);
@@ -168,6 +168,7 @@ abstract class TileblockSharpForm extends SharpForm
 
                         } elseif (in_array($dataTile["link_type"], ["new", "new_pagegroup"])) {
                             $dataTile["page_id"] = Page::create([
+                                "domain" => gum_sharp_current_domain(),
                                 "title" => $dataTile["new_page_title"],
                                 "slug" => Str::slug($dataTile["new_page_title"]),
                                 "is_pagegroup" => $dataTile["link_type"] == "new_pagegroup"
@@ -329,7 +330,7 @@ abstract class TileblockSharpForm extends SharpForm
                 ->addItemField(
                     SharpFormAutocompleteField::make("page_id", "local")
                         ->setLabel("Page")
-                        ->setLocalValues(Page::domain(gum_sharp_current_domain())->notHome()->notOrphan()->orderBy("title")->get())
+                        ->setLocalValues(Page::domain(gum_sharp_current_domain())->notHome()->notOrphan()->notSubpage()->orderBy("title")->get())
                         ->setLocalSearchKeys(["title", "slug"])
                         ->setResultItemInlineTemplate("{{title}} <span class='badge text-white rounded bg-primary' style='font-size:.7em'>{{admin_label}}</span>")
                         ->setListItemInlineTemplate("{{title}} <div><span class='badge text-white rounded bg-primary' style='font-size:.7em'>{{admin_label}}</span> <span class='text-muted'><small>{{slug}}</small></span></div>")
@@ -338,7 +339,7 @@ abstract class TileblockSharpForm extends SharpForm
                 ->addItemField(
                     SharpFormAutocompleteField::make("orphan_page_id", "local")
                         ->setLabel("Page")
-                        ->setLocalValues(Page::domain(gum_sharp_current_domain())->notHome()->orphan()->orderBy("title")->get())
+                        ->setLocalValues(Page::domain(gum_sharp_current_domain())->notHome()->orphan()->notSubpage()->orderBy("title")->get())
                         ->setLocalSearchKeys(["title", "slug"])
                         ->setResultItemInlineTemplate("{{title}} <span class='badge text-white rounded bg-primary' style='font-size:.7em'>{{admin_label}}</span>")
                         ->setListItemInlineTemplate("{{title}} <div><span class='badge text-white rounded bg-primary' style='font-size:.7em'>{{admin_label}}</span> <span class='text-muted'><small>{{slug}}</small></span></div>")
@@ -357,5 +358,14 @@ abstract class TileblockSharpForm extends SharpForm
         }
 
         return $listField;
+    }
+
+    private function getPreviousPageInBreadcrumb(): Page
+    {
+        if($pageId = currentSharpRequest()->getPreviousShowFromBreadcrumbItems()->instanceId()) {
+            return Page::find($pageId);
+        }
+        
+        return Page::home(gum_sharp_current_domain())->first();
     }
 }
