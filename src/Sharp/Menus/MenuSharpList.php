@@ -5,11 +5,11 @@ namespace Code16\Gum\Sharp\Menus;
 use Code16\Gum\Models\Page;
 use Code16\Gum\Models\Tileblock;
 use Code16\Gum\Sharp\Tiles\Utils\TileblockTilesCustomTransformer;
+use Code16\Gum\Sharp\Utils\GumSharpList;
 use Code16\Sharp\EntityList\Containers\EntityListDataContainer;
 use Code16\Sharp\EntityList\EntityListQueryParams;
-use Code16\Sharp\EntityList\SharpEntityList;
 
-class MenuSharpList extends SharpEntityList
+class MenuSharpList extends GumSharpList
 {
     function buildListDataContainers(): void
     {
@@ -36,14 +36,27 @@ class MenuSharpList extends SharpEntityList
 
     function getListData(EntityListQueryParams $params)
     {
+        $this->applyCustomTransformers();
+        
         return $this
-            ->setCustomTransformer("pages", TileblockTilesCustomTransformer::class)
             ->transform(
-                Tileblock::with("tiles", "tiles.page")
+                Tileblock::with($this->requestWiths())
                     ->where("page_id", Page::home(gum_sharp_current_domain())->first()->id)
                     ->where("layout", "_menu")
                     ->orderBy("layout_variant")
                     ->get()
             );
+    }
+
+    protected function requestWiths(): array
+    {
+        return ["tiles", "tiles.page"];
+    }
+
+    protected function customTransformerFor(string $attribute)
+    {
+        if($attribute === "pages") {
+            return TileblockTilesCustomTransformer::class;
+        }
     }
 }
