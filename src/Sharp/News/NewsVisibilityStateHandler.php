@@ -10,8 +10,8 @@ class NewsVisibilityStateHandler extends EntityState
 
     protected function buildStates(): void
     {
-        $this->addState("OFFLINE", "Masqué", static::DARKGRAY_COLOR)
-            ->addState("ONLINE", "En ligne", static::PRIMARY_COLOR);
+        $this->addState("OFFLINE", "Masqué", "#8C9BA5")
+            ->addState("ONLINE", "En ligne", config("sharp.theme.primary_color"));
     }
 
     protected function updateState($instanceId, $stateId): array
