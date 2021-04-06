@@ -19,6 +19,9 @@ class PageSharpShow extends SharpShow
             ->addField(SharpShowTextField::make("title")
                 ->setLabel("Titre")
             )
+            ->addField(SharpShowTextField::make("slug")
+                ->setLabel("Adresse")
+            )
             ->addField(SharpShowTextField::make("admin_label"))
             ->addField(SharpShowTextField::make("heading_text")
                 ->collapseToWordCount(25)
@@ -60,11 +63,12 @@ class PageSharpShow extends SharpShow
         $this
             ->addSection("Page", function(ShowLayoutSection $section) {
                 $section
-                    ->addColumn(6, function(ShowLayoutColumn $column) {
+                    ->addColumn(7, function(ShowLayoutColumn $column) {
                         $column->withSingleField("title")
+                            ->withSingleField("slug")
                             ->withSingleField("admin_label");
                     })
-                    ->addColumn(6, function(ShowLayoutColumn $column) {
+                    ->addColumn(5, function(ShowLayoutColumn $column) {
                         $column->withSingleField("heading_text");
                     });
             })

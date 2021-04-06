@@ -26,7 +26,7 @@ class Page extends Model
         "tileblocks"
     ];
 
-    public static function buildBreadcrumbFromPath(string $path, ?string $domain): Collection
+    public static function buildBreadcrumbFromPath(string $path, ?string $domain = null): Collection
     {
         $currentPage = Page::home($domain)
             ->with("tileblocks")
@@ -36,7 +36,9 @@ class Page extends Model
 
         foreach(explode("/", $path) as $segment) {
             $pages = Page::where("slug", $segment)
-                ->where("domain", $domain)
+                ->when($domain, function($query, $domain)  {
+                    return $query->where("domain", $domain);
+                })
                 ->with("tileblocks")
                 ->get();
 
