@@ -11,8 +11,6 @@ trait SharpFormWithStyleKey
 
     protected function stylesDefined(): ?array
     {
-        return config(
-            "gum.styles" . (SharpGumSessionValue::getDomain() ? "." . SharpGumSessionValue::getDomain() : "")
-        );
+        return config("gum.styles");
     }
 }

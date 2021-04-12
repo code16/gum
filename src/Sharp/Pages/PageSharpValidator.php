@@ -11,8 +11,6 @@ class PageSharpValidator extends FormRequest
     {
         return [
             "title" => "required",
-            "body_text" => "required",
-            "visual" => "required",
             "slug" => new SlugRule()
         ];
     }

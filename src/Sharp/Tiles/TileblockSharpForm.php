@@ -1,13 +1,11 @@
 <?php
 
-namespace Code16\Gum\Sharp\Tiles\Forms;
+namespace Code16\Gum\Sharp\Tiles;
 
 use Code16\Gum\Models\Page;
-use Code16\Gum\Models\Pagegroup;
-use Code16\Gum\Models\Section;
+use Code16\Gum\Models\Tile;
 use Code16\Gum\Models\Tileblock;
 use Code16\Gum\Sharp\Utils\SharpFormWithStyleKey;
-use Code16\Gum\Sharp\Utils\SharpGumSessionValue;
 use Code16\Sharp\Form\Eloquent\Uploads\Transformers\SharpUploadModelFormAttributeTransformer;
 use Code16\Sharp\Form\Eloquent\WithSharpFormEloquentUpdater;
 use Code16\Sharp\Form\Fields\SharpFormAutocompleteField;
@@ -20,6 +18,7 @@ use Code16\Sharp\Form\Fields\SharpFormTextField;
 use Code16\Sharp\Form\Fields\SharpFormUploadField;
 use Code16\Sharp\Form\Layout\FormLayoutColumn;
 use Code16\Sharp\Form\SharpForm;
+use Illuminate\Support\Str;
 
 abstract class TileblockSharpForm extends SharpForm
 {
@@ -34,9 +33,9 @@ abstract class TileblockSharpForm extends SharpForm
                     ->setLabel("Type de tuiles")
             )
             ->addField(
-                SharpFormTextField::make("section_label")
+                SharpFormTextField::make("page_label")
                     ->setReadOnly()
-                    ->setLabel("Section")
+                    ->setLabel("Page")
             )
             ->addField(
                 $this->createTilesListField()
@@ -57,7 +56,7 @@ abstract class TileblockSharpForm extends SharpForm
                     ->setLabel("Thème")
                     ->setClearable()
                     ->setDisplayAsDropdown()
-                    ->setHelpMessage("Laisser vide à moins de ne pas vouloir reprendre le thème de la section dans laquelle se trouvent les tuiles")
+                    ->setHelpMessage("Laisser vide à moins de ne pas vouloir reprendre le thème de la page dans laquelle se trouvent les tuiles")
             );
         }
     }
@@ -66,7 +65,7 @@ abstract class TileblockSharpForm extends SharpForm
     {
         $this
             ->addColumn(4, function (FormLayoutColumn $column) {
-                $column->withSingleField("section_label")
+                $column->withSingleField("page_label")
                     ->withSingleField("layout_label");
     
                 if($this->hasLayoutVariants()) {
@@ -106,7 +105,7 @@ abstract class TileblockSharpForm extends SharpForm
                         }
     
                         if($this->tileHasLink()) {
-                            $item->withFields("link_type|4", "free_link_url|8", "section|8", "pagegroup|8", "page|8");
+                            $item->withFields("link_type|4", "free_link_url|8", "page_id|8", "orphan_page_id|8", "new_page_title|8");
                         }
     
                         $item->withFields("visibility|4", "published_at|4", "unpublished_at|4");
@@ -118,25 +117,18 @@ abstract class TileblockSharpForm extends SharpForm
     {
         return $this
             ->setCustomTransformer('tiles[visual]', SharpUploadModelFormAttributeTransformer::class)
-            ->setCustomTransformer('section_label', function($value, $tileblock) {
-                return $tileblock->section->title;
+            ->setCustomTransformer('page_label', function($value, Tileblock $tileblock) {
+                return $tileblock->page->title;
             })
-            ->setCustomTransformer('layout_label', function($value, $tileblock) {
+            ->setCustomTransformer('layout_label', function() {
                 return $this->layoutLabel();
             })
-            ->setCustomTransformer('tiles[page]', function($value, $tile) {
-                return $tile->linkable_type == Page::class ? $tile->linkable_id : null;
+            ->setCustomTransformer('tiles[link_type]', function($value, Tile $tile) {
+                return $tile->page_id ? "page": "free";
             })
-            ->setCustomTransformer('tiles[section]', function($value, $tile) {
-                return $tile->linkable_type == Section::class ? $tile->linkable_id : null;
-            })
-            ->setCustomTransformer('tiles[pagegroup]', function($value, $tile) {
-                return $tile->linkable_type == Pagegroup::class ? $tile->linkable_id : null;
-            })
-            ->setCustomTransformer('tiles[link_type]', function($value, $tile) {
-                return $tile->linkable_type ?: "free";
-            })
-            ->transform(Tileblock::with("tiles", "tiles.visual", "section")->findOrFail($id));
+            ->transform(
+                Tileblock::with("tiles", "tiles.visual", "page")->findOrFail($id)
+            );
     }
 
     public function create(): array
@@ -145,19 +137,53 @@ abstract class TileblockSharpForm extends SharpForm
             ->setCustomTransformer('layout_label', function($value, $tileblock) {
                 return $this->layoutLabel();
             })
-            ->setCustomTransformer('section_label', function($value, $tileblock) {
-                return Section::find(SharpGumSessionValue::get("section"))->title;
+            ->setCustomTransformer('page_label', function($value, $tileblock) {
+                return $this->getPreviousPageInBreadcrumb()->title;
             })
             ->transform(new Tileblock());
     }
 
     function update($id, array $data)
     {
-        $tileblock = $id ? Tileblock::findOrFail($id) : new Tileblock();
+        $tileblock = $id 
+            ? Tileblock::findOrFail($id) 
+            : new Tileblock([
+                "layout" => $this->layoutKey(),
+                "page_id" => $this->getPreviousPageInBreadcrumb()->id
+            ]);
+        
+        unset($data["page_label"], $data["layout_label"]);
 
-        $this
-            ->ignore(["section_label", "layout_label"])
-            ->save($tileblock, $this->cleanUpData($data));
+        if($this->tileHasLink()) {
+            $data["tiles"] = collect($data["tiles"] ?? [])
+                ->map(function($dataTile) use($tileblock) {
+                    if ($dataTile["link_type"] === "free") {
+                        $dataTile["page_id"] = null;
+                        
+                    } else {
+                        $dataTile["free_link_url"] = null;
+                        
+                        if ($dataTile["link_type"] === "orphan") {
+                            $dataTile["page_id"] = $dataTile["orphan_page_id"];
+
+                        } elseif (in_array($dataTile["link_type"], ["new", "new_pagegroup"])) {
+                            $dataTile["page_id"] = Page::create([
+                                "domain" => gum_sharp_current_domain(),
+                                "title" => $dataTile["new_page_title"],
+                                "slug" => Str::slug($dataTile["new_page_title"]),
+                                "is_pagegroup" => $dataTile["link_type"] == "new_pagegroup"
+                            ])->id;
+                        }
+                    }
+                    
+                    unset($dataTile["link_type"], $dataTile["orphan_page_id"], $dataTile["new_page_title"]);
+                    
+                    return $dataTile;
+                })
+                ->toArray();
+        }
+        
+        $this->save($tileblock, $data);
 
         return $tileblock->id;
     }
@@ -208,32 +234,6 @@ abstract class TileblockSharpForm extends SharpForm
         return in_array($field, $this->tileFields());
     }
 
-    protected function cleanUpData($data): array
-    {
-        if(isset($data["tiles"])) {
-            if($this->tileHasLink()) {
-                foreach ($data["tiles"] as &$dataTile) {
-                    if ($dataTile["link_type"] != "free") {
-                        $dataTile["linkable_type"] = $dataTile["link_type"];
-                        $dataTile["linkable_id"] = $dataTile[strtolower(basename(str_replace('\\', '/', $dataTile["link_type"])))];
-                    } else {
-                        $dataTile["linkable_type"] = null;
-                        $dataTile["linkable_id"] = null;
-                    }
-
-                    unset($dataTile["link_type"], $dataTile["page"], $dataTile["section"], $dataTile["pagegroup"]);
-                }
-            }
-        }
-
-        if(currentSharpRequest()->isCreation()) {
-            $data["layout"] = $this->layoutKey();
-            $data["section_id"] = SharpGumSessionValue::get("section");
-        }
-
-        return $data;
-    }
-
     protected function createTilesListField(): SharpFormListField
     {
         $listField = SharpFormListField::make("tiles")
@@ -249,17 +249,19 @@ abstract class TileblockSharpForm extends SharpForm
         }
 
         if($this->tileHasField("visual")) {
-            $listField->addItemField(
-                SharpFormUploadField::make("visual")
-                    ->setLabel("Visuel")
-                    ->setFileFilterImages()
-                    ->setMaxFileSize(5)
-                    ->setStorageDisk("local")
-                    ->setCompactThumbnail()
-                    ->setStorageBasePath("data/tiles/{id}")
-            )->addItemField(
-                SharpFormCheckField::make("visual:is_video", "Tuile vidéo")
-            );
+            $listField
+                ->addItemField(
+                    SharpFormUploadField::make("visual")
+                        ->setLabel("Visuel")
+                        ->setFileFilterImages()
+                        ->setMaxFileSize(5)
+                        ->setStorageDisk("local")
+                        ->setCompactThumbnail()
+                        ->setStorageBasePath("data/tiles/{id}")
+                )
+                ->addItemField(
+                    SharpFormCheckField::make("visual:is_video", "Tuile vidéo")
+                );
 
             foreach($this->additionalVisualFields() as $field) {
                 $listField->addItemField($field);
@@ -317,39 +319,36 @@ abstract class TileblockSharpForm extends SharpForm
                 ->addItemField(
                     SharpFormSelectField::make("link_type", [
                         "free" => "Lien libre",
-                        Page::class => "Page",
-                        Pagegroup::class => "Groupe de pages",
-                        Section::class => "Section",
+                        "page" => "Page",
+                        "orphan" => "Page orpheline",
+                        "new" => "Nouvelle page",
+                        "new_pagegroup" => "Nouveau groupe",
                     ])
                         ->setDisplayAsDropdown()
                         ->setLabel("Lien")
                 )
                 ->addItemField(
-                    SharpFormAutocompleteField::make("section", "local")
-                        ->setLocalSearchKeys(["title"])
-                        ->addConditionalDisplay("link_type", Section::class)
-                        ->setResultItemInlineTemplate("{{title}} <small>{{url ? url.uri : ''}}</small>")
-                        ->setListItemInlineTemplate("{{title}}<br><small>{{url ? url.uri : ''}}</small>")
-                        ->setLocalValues(Section::domain(SharpGumSessionValue::getDomain())->with("url")->orderBy("title")->get()->toArray())
-                        ->setLabel("Section")
-                )
-                ->addItemField(
-                    SharpFormAutocompleteField::make("page", "local")
-                        ->setLocalSearchKeys(["label"])
-                        ->addConditionalDisplay("link_type", Page::class)
-                        ->setResultItemInlineTemplate("{{title}} <small>{{slug}}</small>")
-                        ->setListItemInlineTemplate("{{title}}<br><small>{{slug}}</small>")
-                        ->setLocalValues(Page::whereNull("pagegroup_id")->orderBy("title")->get()->all())
+                    SharpFormAutocompleteField::make("page_id", "local")
                         ->setLabel("Page")
+                        ->setLocalValues(Page::domain(gum_sharp_current_domain())->notHome()->notOrphan()->notSubpage()->orderBy("title")->get())
+                        ->setLocalSearchKeys(["title", "slug"])
+                        ->setResultItemInlineTemplate("{{title}} <span class='badge text-white rounded bg-primary' style='font-size:.7em'>{{admin_label}}</span>")
+                        ->setListItemInlineTemplate("{{title}} <div><span class='badge text-white rounded bg-primary' style='font-size:.7em'>{{admin_label}}</span> <span class='text-muted'><small>{{slug}}</small></span></div>")
+                        ->addConditionalDisplay("link_type", "page")
                 )
                 ->addItemField(
-                    SharpFormAutocompleteField::make("pagegroup", "local")
-                        ->setLocalSearchKeys(["label"])
-                        ->addConditionalDisplay("link_type", Pagegroup::class)
-                        ->setResultItemInlineTemplate("{{title}} <small>{{slug}}</small>")
-                        ->setListItemInlineTemplate("{{title}}<br><small>{{slug}}</small>")
-                        ->setLocalValues(Pagegroup::orderBy("title")->get()->all())
-                        ->setLabel("Groupe de pages")
+                    SharpFormAutocompleteField::make("orphan_page_id", "local")
+                        ->setLabel("Page")
+                        ->setLocalValues(Page::domain(gum_sharp_current_domain())->notHome()->orphan()->notSubpage()->orderBy("title")->get())
+                        ->setLocalSearchKeys(["title", "slug"])
+                        ->setResultItemInlineTemplate("{{title}} <span class='badge text-white rounded bg-primary' style='font-size:.7em'>{{admin_label}}</span>")
+                        ->setListItemInlineTemplate("{{title}} <div><span class='badge text-white rounded bg-primary' style='font-size:.7em'>{{admin_label}}</span> <span class='text-muted'><small>{{slug}}</small></span></div>")
+                        ->addConditionalDisplay("link_type", "orphan")
+                )
+                ->addItemField(
+                    SharpFormTextField::make("new_page_title")
+                        ->addConditionalDisplay("link_type", ["new", "new_pagegroup"])
+                        ->setLabel("Titre de la page")
                 )
                 ->addItemField(
                     SharpFormTextField::make("free_link_url")
@@ -359,5 +358,14 @@ abstract class TileblockSharpForm extends SharpForm
         }
 
         return $listField;
+    }
+
+    private function getPreviousPageInBreadcrumb(): Page
+    {
+        if($pageId = currentSharpRequest()->getPreviousShowFromBreadcrumbItems()->instanceId()) {
+            return Page::find($pageId);
+        }
+        
+        return Page::home(gum_sharp_current_domain())->first();
     }
 }

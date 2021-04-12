@@ -292,15 +292,9 @@ class NewsSharpForm extends SharpForm
 
     protected function deleteOrphanTags(): void
     {
-        $tags = Tag::whereNotIn("id", function($query) {
+        Tag::whereNotIn("id", function($query) {
             return $query->select("tag_id")
                 ->from("taggables");
-        });
-
-        if(config('gum.domains')) {
-            $tags->whereNotIn("name", array_keys(config('gum.domains')));
-        }
-
-        $tags->delete();
+        })->delete();
     }
 }

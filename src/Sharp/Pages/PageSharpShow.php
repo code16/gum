@@ -2,15 +2,13 @@
 
 namespace Code16\Gum\Sharp\Pages;
 
-use Code16\Gum\Models\ContentUrl;
 use Code16\Gum\Models\Page;
-use Code16\Gum\Sharp\Utils\SharpGumSessionValue;
 use Code16\Sharp\Show\Fields\SharpShowEntityListField;
 use Code16\Sharp\Show\Fields\SharpShowTextField;
 use Code16\Sharp\Show\Layout\ShowLayoutColumn;
 use Code16\Sharp\Show\Layout\ShowLayoutSection;
 use Code16\Sharp\Show\SharpShow;
-use Code16\Sharp\Utils\Links\LinkToShowPage;
+use Illuminate\Support\Str;
 
 class PageSharpShow extends SharpShow
 {
@@ -21,23 +19,38 @@ class PageSharpShow extends SharpShow
             ->addField(SharpShowTextField::make("title")
                 ->setLabel("Titre")
             )
+            ->addField(SharpShowTextField::make("slug")
+                ->setLabel("Adresse")
+            )
+            ->addField(SharpShowTextField::make("admin_label"))
             ->addField(SharpShowTextField::make("heading_text")
-                ->setLabel("Chapeau")
                 ->collapseToWordCount(25)
             )
-            ->addField(SharpShowTextField::make("pagegroup")
-                ->setLabel("Groupe de pages")
-            )
-            ->addField(SharpShowTextField::make("urls")
-                ->setLabel("URLs")
+            ->addField(
+                SharpShowTextField::make("body_text")
+                    ->collapseToWordCount(100)
             )
             ->addField(
-                SharpShowEntityListField::make("page_sidepanels", "page_sidepanels")
+                SharpShowEntityListField::make("subpages", "pages")
                     ->showCreateButton(true)
-                    ->setLabel("Panneaux page")
-                    ->hideFilterWithValue('domain',null)
-                    ->hideFilterWithValue("container", function($instanceId) {
-                        SharpGumSessionValue::set("sidepanel_container_type", Page::class);
+                    ->setLabel("Sous-pages")
+                    ->hideFilterWithValue("pagegroup", function($instanceId) {
+                        return $instanceId;
+                    })
+            )
+            ->addField(
+                SharpShowEntityListField::make("sidepanels", "sidepanels")
+                    ->showCreateButton(true)
+                    ->setLabel("Panneaux latéraux")
+                    ->hideFilterWithValue("page", function($instanceId) {
+                        return $instanceId;
+                    })
+            )
+            ->addField(
+                SharpShowEntityListField::make("tileblocks", "tileblocks")
+                    ->showCreateButton(true)
+                    ->setLabel("Tuiles")
+                    ->hideFilterWithValue("page", function($instanceId) {
                         return $instanceId;
                     })
             );
@@ -45,52 +58,59 @@ class PageSharpShow extends SharpShow
 
     function buildShowLayout(): void
     {
+        $page = Page::findOrFail(currentSharpRequest()->instanceId());
+        
         $this
             ->addSection("Page", function(ShowLayoutSection $section) {
                 $section
-                    ->addColumn(6, function(ShowLayoutColumn $column) {
-                        $column
-                            ->withSingleField("title")
-                            ->withSingleField("pagegroup")
-                            ->withSingleField("urls");
+                    ->addColumn(7, function(ShowLayoutColumn $column) {
+                        $column->withSingleField("title")
+                            ->withSingleField("slug")
+                            ->withSingleField("admin_label");
                     })
-                    ->addColumn(6, function(ShowLayoutColumn $column) {
+                    ->addColumn(5, function(ShowLayoutColumn $column) {
                         $column->withSingleField("heading_text");
                     });
             })
-            ->addEntityListSection("page_sidepanels");
+            ->addSection("Texte", function(ShowLayoutSection $section) {
+                $section->addColumn(8, function(ShowLayoutColumn $column) {
+                    $column->withSingleField("body_text");
+                });
+            });
+        
+        if($page->isPagegroup()) {
+            $this->addEntityListSection("subpages");
+        } else {
+            $this->addEntityListSection("sidepanels")
+                ->addEntityListSection("tileblocks");
+        }
     }
 
     public function buildShowConfig(): void
     {
-        $this->setBreadcrumbCustomLabelAttribute("title");
+        $this->setBreadcrumbCustomLabelAttribute("breadcrumb_label");
     }
 
     function find($id): array
     {
-        $page = Page::with("pagegroup", "urls")->find($id);
-
         return $this
-            ->setCustomTransformer("pagegroup", function() use ($page) {
-                if(!$page->pagegroup_id) {
-                    return null;
-                }
-                
-                return LinkToShowPage::make("pagegroups", $page->pagegroup_id)
-                    ->renderAsText($page->pagegroup->title);
+            ->setCustomTransformer("breadcrumb_label", function($value, Page $page) {
+                return Str::limit($page->title, 35);
             })
-            ->setCustomTransformer("urls", function() use ($page) {
-                $urls = ContentUrl::where('content_id', $page->id)
-                    ->where('content_type', Page::class)
-                    ->get()
-                    ->map(function ($value) {
-                        return $value->uri;
-                    })
-                    ->flatten()
-                    ->implode('<br>');
-
-                return $urls ?: '<span class="mb-2" style="color:orange"><small>pas de lien</small></span>';
+            ->setCustomTransformer("admin_label", function($value) {
+                return $value 
+                    ? sprintf('<span class="badge text-white p-1 bg-primary"><small>%s</small></span>', $value)
+                    : null;
             })
-            ->transform($page);
+            ->setCustomTransformer("heading_text", function($value) {
+                return gum_markdown($value);
+            })
+            ->setCustomTransformer("body_text", function($value) {
+                return gum_markdown($value);
+            })
+            ->transform(
+                Page::with("tileblocks")
+                    ->findOrFail($id)
+            );
     }
 }
