@@ -147,11 +147,8 @@ class Page extends Model
 
     public function getOnlineTileblocksAttribute(): Collection
     {
-        // TODO refactor this to a proper sql query
-        return $this
-            ->tileblocks()
-            ->with("tiles")
-            ->get()
+        return $this->tileblocks
+            ->loadMissing("tiles", "tiles.page")
             ->filter(function(Tileblock $tileblock) {
                 $tileblock->tiles = $tileblock->tiles
                     ->filter(function(Tile $tile) {
