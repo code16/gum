@@ -49,10 +49,10 @@ class News extends Model
     public function scopeNewest(Builder $query)
     {
         if(config("database.default") == 'mysql') {
-            return $query->orderByRaw(DB::raw("(ABS(DATEDIFF(NOW(), news.published_at))+1) * news.importance ASC"));
+            $query->orderByRaw(DB::raw("(ABS(DATEDIFF(NOW(), news.published_at))+1) * news.importance ASC"));
+        } else {
+            $query->orderBy("news.published_at", "desc");
         }
-
-        $query->orderBy("news.published_at", "desc");
     }
 
     public function scopeOnline(Builder $query)

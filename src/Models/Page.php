@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Laravel\Scout\Searchable;
 
@@ -188,25 +189,58 @@ class Page extends Model
         return $this->slug === null || $this->slug === "";
     }
 
-    public function findUri(string $currentPath = ""): ?string
+    public function findUriWithoutCache(string $currentPath = "", array $additionalTileRawConditions = []): ?string
     {
         if($this->isHome()) {
             return $currentPath;
         }
 
         if($this->pagegroup_id) {
-            return $this->pagegroup->findUri("{$this->slug}/{$currentPath}");
+            return $this->pagegroup->findUriWithoutCache("{$this->slug}/{$currentPath}", $additionalTileRawConditions);
         }
-        
+
         $tile = Tile::select("tiles.*")
             ->visible()->published()
             ->with("tileblock", "tileblock.page")
             ->leftJoin("tileblocks", "tiles.tileblock_id", "=", "tileblocks.id")
-            ->where("tileblocks.layout", "!=", "text") // Text layout is considered as "not publicly linked tile"
+            ->when($additionalTileRawConditions, function($query, $additionalTileRawConditions) {
+                foreach($additionalTileRawConditions as $condition) {
+                    $query->whereRaw($condition);
+                }
+            })
             ->where("tiles.page_id", $this->id)
             ->first();
+
+        return $tile
+            ? $tile->tileblock->page->findUriWithoutCache("{$this->slug}/{$currentPath}", $additionalTileRawConditions)
+            : null;
+    }
+
+    public function findUri(string $currentPath = "", array $additionalTileRawConditions = []): ?string
+    {
+        if(!config("gum.cache.enabled")) {
+            return $this->findUriWithoutCache($currentPath, $additionalTileRawConditions);
+        }
         
-        return $tile ? $tile->tileblock->page->findUri("{$this->slug}/{$currentPath}") : "";
+        $cacheKey = "gum.pages.uri.{$this->id}." . md5(implode("-", $additionalTileRawConditions));
+        $ttl = config('gum.cache.ttl', now()->addHour());
+        
+        if($cacheTag = config('gum.cache.tag')) {
+            return Cache::tags($cacheTag)
+                ->remember(
+                    $cacheKey, 
+                    $ttl,
+                    function () use($currentPath, $additionalTileRawConditions) {
+                        return $this->findUriWithoutCache($currentPath, $additionalTileRawConditions);
+                    });
+        }
+        
+        return Cache::remember(
+            $cacheKey, 
+            $ttl, 
+            function () use($currentPath, $additionalTileRawConditions) {
+                return $this->findUriWithoutCache($currentPath, $additionalTileRawConditions);
+            });
     }
 
     public function getDefaultAttributesFor(string $attribute): array
@@ -214,11 +248,6 @@ class Page extends Model
         return in_array($attribute, ["visual"])
             ? ["model_key" => $attribute]
             : [];
-    }
-
-    public function searchableAs(): string
-    {
-        return env('SCOUT_PREFIX') . 'content';
     }
 
     public function toSearchableArray(): array
@@ -236,26 +265,10 @@ class Page extends Model
             return false;
         }
         
-        if($this->isHome()) {
-            return true;
-        }
+        $uri = $this->findUriWithoutCache(
+            "", ["tileblocks.layout != 'text'"] // Text layout is considered as "not publicly linked tile"
+        ); 
         
-        if($this->pagegroup_id) {
-            return $this->pagegroup->shouldBeSearchable();
-        }
-        
-        $tile = Tile::select("tiles.*")
-            ->visible()
-            ->published()
-            ->with("tileblock", "tileblock.page")
-            ->leftJoin("tileblocks", "tiles.tileblock_id", "=", "tileblocks.id")
-            ->where("tileblocks.layout", "!=", "text") // Text layout is considered as "not publicly linked tile"
-            ->where("tiles.page_id", $this->id)
-            ->get()
-            ->first(function(Tile $tile) {
-                return $tile->tileblock->page->shouldBeSearchable();
-            });
-        
-        return $tile !== null;
+        return $uri !== null;
     }
 }
