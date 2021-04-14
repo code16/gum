@@ -2,9 +2,9 @@
 
 namespace Code16\Gum\Tests\Feature\Sharp;
 
+use Code16\Gum\Models\Page;
 use Code16\Gum\Models\Tile;
 use Code16\Gum\Models\Tileblock;
-use Code16\Gum\Sharp\Menus\MenuSharpForm;
 
 class MenuSharpTest extends GumSharpTestCase
 {
@@ -20,9 +20,13 @@ class MenuSharpTest extends GumSharpTestCase
     /** @test */
     function we_can_create_menus()
     {
+        factory(Page::class)->create([
+            "slug" => ""
+        ]);
+
         $this
             ->storeSharpForm("menus",
-                $tileblockAttributes = factory(Tileblock::class)
+                factory(Tileblock::class)
                     ->make([
                         "layout" => "_menu"
                     ])
@@ -31,8 +35,8 @@ class MenuSharpTest extends GumSharpTestCase
             ->assertOk();
 
         $this
-            ->assertDatabaseHas("menus", [
-                "layout" => $tileblockAttributes['layout']
+            ->assertDatabaseHas("tileblocks", [
+                "layout" => "_menu"
             ]);
     }
 
@@ -62,10 +66,12 @@ class MenuSharpTest extends GumSharpTestCase
             )
             ->assertOk();
 
-        $this
-            ->assertDatabaseHas("tileblocks", [
-                "id" => $tileblockAttributes['id'],
-                "layout" => "layout"
-            ]);
+        foreach ($tileblockAttributes["tiles"] as $key=>$tile) {
+            $this
+                ->assertDatabaseHas("tiles", [
+                    "id" => $tile['id'],
+                    "order" => $key+1
+                ]);
+        }
     }
 }

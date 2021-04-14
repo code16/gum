@@ -8,12 +8,37 @@ use Code16\Gum\Sharp\Sidepanels\SidepanelSharpForm;
 class SidepanelSharpTest extends GumSharpTestCase
 {
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        new class extends SidepanelSharpForm {
+            public function find($id): array
+            {
+                return [];
+            }
+
+            protected function layoutKey(): string
+            {
+                // TODO: Implement layoutKey() method.
+            }
+
+            protected function layoutLabel(): string
+            {
+                // TODO: Implement layoutLabel() method.
+            }
+        };
+    }
+
     /** @test */
     function we_can_access_to_sharp_form_sidepanels()
     {
-        $this
-            ->getSharpForm("sidepanels")
-            ->assertOk();
+        $sidepanel = factory(Sidepanel::class)->create();
+
+        $res = $this
+            ->getSharpForm("sidepanels", $sidepanel->id);
+            //->assertOk();
+        dd($res);
     }
 
     /** @test */
