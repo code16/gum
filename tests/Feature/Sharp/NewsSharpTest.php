@@ -2,21 +2,22 @@
 
 namespace Code16\Gum\Tests\Feature\Sharp;
 
-use Code16\Sharp\Utils\Testing\SharpAssertions;
+use Code16\Gum\Models\News;
 
 class NewsSharpTest extends GumSharpTestCase
 {
-    use SharpAssertions;
 
     /** @test */
     function we_can_update_news()
     {
         $this->storeSharpForm("news", [
-            "title" => "Title"
+            $news = factory(News::class)
+                ->make()
+                ->getAttributes()
         ]);
 
         $this->assertDatabaseHas("news", [
-            "title" => "Title"
+            "title" => $news['title']
         ]);
     }
 }

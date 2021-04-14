@@ -47,13 +47,6 @@ class GumSharpTestCase extends TestCase
     {
         parent::getEnvironmentSetUp($app);
 
-        $app['config']->set('database.default', 'testbench');
-        $app['config']->set('database.connections.testbench', [
-            'driver'   => 'sqlite',
-            'database' => ':memory:',
-            'prefix'   => '',
-        ]);
-
         $app['config']->set([
             "sharp" => [
                 "entities" => [
