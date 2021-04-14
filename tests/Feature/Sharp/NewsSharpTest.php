@@ -10,23 +10,26 @@ class NewsSharpTest extends GumSharpTestCase
     /** @test */
     function we_can_access_to_sharp_form_news()
     {
-        $this->getSharpForm("news")
+        $this
+            ->getSharpForm("news")
             ->assertOk();
     }
 
     /** @test */
     function we_can_create_news()
     {
-        $this->storeSharpForm("news",
-            $newsAttributes = factory(News::class)
-                ->make()
-                ->getAttributes()
-        )
+        $this
+            ->storeSharpForm("news",
+                $newsAttributes = factory(News::class)
+                    ->make()
+                    ->getAttributes()
+            )
             ->assertOk();
 
-        $this->assertDatabaseHas("news", [
-            "title" => $newsAttributes['title']
-        ]);
+        $this
+            ->assertDatabaseHas("news", [
+                "title" => $newsAttributes['title']
+            ]);
     }
 
     /** @test */
@@ -39,15 +42,17 @@ class NewsSharpTest extends GumSharpTestCase
 
         $newsAttributes["title"] = "Updated";
 
-        $this->updateSharpForm("news",
-            $newsAttributes['id'],
-            $newsAttributes
+        $this
+            ->updateSharpForm("news",
+                $newsAttributes['id'],
+                $newsAttributes
         )
             ->assertOk();
 
-        $this->assertDatabaseHas("news", [
-            "id" => $newsAttributes['id'],
-            "title" => "Updated"
+        $this
+            ->assertDatabaseHas("news", [
+                "id" => $newsAttributes['id'],
+                "title" => "Updated"
         ]);
     }
 }

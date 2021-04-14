@@ -89,13 +89,13 @@ class MenuSharpForm extends SharpForm
                         ])->id;
                     }
                 }
-                
+
                 unset($dataTile["link_type"], $dataTile["orphan_page_id"], $dataTile["new_page_title"]);
                 
                 return $dataTile;
             })
             ->toArray();
-        
+
         $this->save($menu, $data);
 
         return $menu->id;

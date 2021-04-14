@@ -10,23 +10,26 @@ class PageSharpTest extends GumSharpTestCase
     /** @test */
     function we_can_access_to_sharp_form_pages()
     {
-        $this->getSharpForm("pages")
+        $this
+            ->getSharpForm("pages")
             ->assertOk();
     }
 
     /** @test */
     function we_can_create_pages()
     {
-        $this->storeSharpForm("pages",
-            $pageAttributes = factory(Page::class)
-                ->make()
-                ->getAttributes()
-        )
+        $this
+            ->storeSharpForm("pages",
+                $pageAttributes = factory(Page::class)
+                    ->make()
+                    ->getAttributes()
+            )
             ->assertOk();
 
-        $this->assertDatabaseHas("pages", [
-            "title" => $pageAttributes['title']
-        ]);
+        $this
+            ->assertDatabaseHas("pages", [
+                "title" => $pageAttributes['title']
+            ]);
     }
 
     /** @test */
@@ -39,15 +42,17 @@ class PageSharpTest extends GumSharpTestCase
 
         $pageAttributes["title"] = "Updated";
 
-        $this->updateSharpForm("pages",
-            $pageAttributes['id'],
-            $pageAttributes
-        )
+        $this
+            ->updateSharpForm("pages",
+                $pageAttributes['id'],
+                $pageAttributes
+            )
             ->assertOk();
 
-        $this->assertDatabaseHas("pages", [
-            "id" => $pageAttributes['id'],
-            "title" => "Updated"
-        ]);
+        $this
+            ->assertDatabaseHas("pages", [
+                "id" => $pageAttributes['id'],
+                "title" => "Updated"
+            ]);
     }
 }
