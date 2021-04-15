@@ -85,7 +85,8 @@ class TileblockSharpTest extends GumSharpTestCase
             $this
                 ->assertDatabaseHas("tiles", [
                     "id" => $tile['id'],
-                    "order" => $key+1
+                    "order" => $key + 1,
+                    "free_link_url" => "https://code16.fr"
                 ]);
         }
     }

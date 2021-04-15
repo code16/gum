@@ -70,7 +70,7 @@ class MenuSharpTest extends GumSharpTestCase
             $this
                 ->assertDatabaseHas("tiles", [
                     "id" => $tile['id'],
-                    "order" => $key+1
+                    "order" => $key + 1
                 ]);
         }
     }
