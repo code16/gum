@@ -2,77 +2,60 @@
 
 namespace Code16\Gum\Tests\Feature\Sharp;
 
+use Code16\Gum\Models\Page;
 use Code16\Gum\Models\Sidepanel;
-use Code16\Gum\Sharp\Sidepanels\SidepanelSharpForm;
+use Code16\Gum\Tests\Feature\Utils\FakeSidepanelSharpForm;
+use Code16\Gum\Tests\Feature\Utils\WithSharpFaker;
 
 class SidepanelSharpTest extends GumSharpTestCase
 {
-
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        new class extends SidepanelSharpForm {
-            public function find($id): array
-            {
-                return [];
-            }
-
-            protected function layoutKey(): string
-            {
-                // TODO: Implement layoutKey() method.
-            }
-
-            protected function layoutLabel(): string
-            {
-                // TODO: Implement layoutLabel() method.
-            }
-        };
-    }
+    use WithSharpFaker;
 
     /** @test */
     function we_can_access_to_sharp_form_sidepanels()
     {
-        $sidepanel = factory(Sidepanel::class)->create();
+        $this->fakeSidepanelSharpForm(new class extends FakeSidepanelSharpForm {});
 
-        $res = $this
-            ->getSharpForm("sidepanels", $sidepanel->id);
-            //->assertOk();
-        dd($res);
+        $sidepanel = factory(Sidepanel::class)->create([
+            "page_id" => factory(Page::class)->create()->id
+        ]);
+
+        $this
+            ->getSharpForm("sidepanels", $sidepanel->id)
+            ->assertOk();
     }
 
     /** @test */
     function we_can_create_sidepanels()
     {
-        $this
-            ->getMockForAbstractClass(SidepanelSharpForm::class);
+        $this->fakeSidepanelSharpForm(new class extends FakeSidepanelSharpForm {});
 
         $this
+            ->withSharpCurrentBreadcrumb([
+                ["show", "pages"]
+            ])
             ->storeSharpForm("sidepanels",
-                $sidepanelAttributes = factory(Sidepanel::class)
+                factory(Sidepanel::class)
                     ->make()
                     ->getAttributes()
             )
             ->assertOk();
 
         $this
-            ->assertDatabaseHas("sidepanels", [
-                "title" => $sidepanelAttributes['title']
-            ]);
+            ->assertCount(1, Sidepanel::all());
     }
 
     /** @test */
     function we_can_update_sidepanels()
     {
-        $this
-            ->getMockForAbstractClass(SidepanelSharpForm::class);
+        $this->fakeSidepanelSharpForm(new class extends FakeSidepanelSharpForm {});
 
         $sidepanelAttributes = factory(Sidepanel::class)->create([
-            "title" => "Title"
+            "layout" => "visual"
         ])
             ->getAttributes();
 
-        $sidepanelAttributes["title"] = "Updated";
+        $sidepanelAttributes['layout'] = "breadcrumb";
 
         $this
             ->updateSharpForm("sidepanels",
@@ -84,7 +67,7 @@ class SidepanelSharpTest extends GumSharpTestCase
         $this
             ->assertDatabaseHas("sidepanels", [
                 "id" => $sidepanelAttributes['id'],
-                "title" => "Updated"
+                "layout" => "breadcrumb"
             ]);
     }
 }
