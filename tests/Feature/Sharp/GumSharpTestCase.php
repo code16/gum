@@ -21,11 +21,12 @@ use Code16\Gum\Tests\TestCase;
 use Code16\Sharp\Utils\Testing\SharpAssertions;
 use Faker\Generator;
 use Illuminate\Database\Eloquent\Factory;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
 
 class GumSharpTestCase extends TestCase
 {
-    use SharpAssertions;
+    use SharpAssertions, RefreshDatabase;
 
     protected function setUp(): void
     {

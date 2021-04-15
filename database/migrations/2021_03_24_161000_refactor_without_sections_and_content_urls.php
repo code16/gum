@@ -22,9 +22,11 @@ class RefactorWithoutSectionsAndContentUrls extends Migration
         
         $this->adaptPagesTable();
 
-        Schema::dropIfExists("sections");
-        Schema::dropIfExists("pagegroups");
-        Schema::dropIfExists("content_urls");
+        if(config("database.default") != "sqlite") {
+            Schema::dropIfExists("sections");
+            Schema::dropIfExists("content_urls");
+            Schema::dropIfExists("pagegroups");
+        }
     }
 
     private function migrateSectionsToPages()
