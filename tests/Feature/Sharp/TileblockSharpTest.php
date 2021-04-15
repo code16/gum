@@ -55,7 +55,7 @@ class TileblockSharpTest extends GumSharpTestCase
     }
 
     /** @test */
-    function we_can_update_tiles_tileblock()
+    function we_can_update_tiles_in_tileblock()
     {
         $this->fakeTileblockSharpForm(new class extends FakeTileblockSharpForm {});
 
