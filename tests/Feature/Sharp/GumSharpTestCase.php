@@ -7,8 +7,6 @@ use Code16\Gum\Sharp\Menus\MenuSharpList;
 use Code16\Gum\Sharp\News\NewsSharpForm;
 use Code16\Gum\Sharp\News\NewsSharpList;
 use Code16\Gum\Sharp\News\NewsSharpValidator;
-use Code16\Gum\Sharp\Pages\HomepageSharpShow;
-use Code16\Gum\Sharp\Pages\OrphanPageSharpList;
 use Code16\Gum\Sharp\Pages\PageInPagegroupSharpEmbeddedList;
 use Code16\Gum\Sharp\Pages\PageSharpForm;
 use Code16\Gum\Sharp\Pages\PageSharpShow;
@@ -50,9 +48,6 @@ class GumSharpTestCase extends TestCase
         $app['config']->set([
             "sharp" => [
                 "entities" => [
-                    "homepage" => [
-                        "show" => HomepageSharpShow::class
-                    ],
                     "menus" => [
                         "form" => MenuSharpForm::class,
                         "list" => MenuSharpList::class
@@ -61,12 +56,6 @@ class GumSharpTestCase extends TestCase
                         "list" => NewsSharpList::class,
                         "form" => NewsSharpForm::class,
                         "validator" => NewsSharpValidator::class
-                    ],
-                    "orphan_pages" => [
-                        "form" => PageSharpForm::class,
-                        "list" => OrphanPageSharpList::class,
-                        "show" => PageSharpShow::class,
-                        "validator" => PageSharpValidator::class
                     ],
                     "sidepanels" => [
                         "list" => SidepanelSharpList::class,
