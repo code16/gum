@@ -59,37 +59,40 @@ class TileblockSharpTest extends GumSharpTestCase
     {
         $this->fakeTileblockSharpForm(new class extends FakeTileblockSharpForm {});
 
-        $tileblockAttributes = factory(Tileblock::class)->create()
-            ->getAttributes();
+        $tileblock = factory(Tileblock::class)->create();
 
         $tiles = factory(Tile::class, 5)->create([
-            "tileblock_id" => $tileblockAttributes["id"],
+            "tileblock_id" => $tileblock->id,
             "free_link_url" => null
         ]);
 
-        $tileblockAttributes["tiles"] = $tiles->map(function ($tile) {
-            return [
-                "id" => $tile->id,
-                "link_type" => "free",
-                "free_link_url" => "https://code16.fr"
-            ];
-        });
-
         $this
             ->updateSharpForm("tileblocks",
-                $tileblockAttributes['id'],
-                $tileblockAttributes
+                $tileblock->id,
+                collect($tileblock->getAttributes())
+                    ->merge([
+                        "tiles" => $tiles
+                            ->map(function (Tile $tile) {
+                                return [
+                                    "id" => $tile->id,
+                                    "link_type" => "free",
+                                    "free_link_url" => "https://code16.fr/" . $tile->id
+                                ];
+                            })
+                            ->reverse()
+                            ->values()
+                    ])
+                    ->toArray()
             )
             ->assertOk();
-
-        foreach ($tileblockAttributes["tiles"] as $key=>$tile) {
-            $this
-                ->assertDatabaseHas("tiles", [
-                    "id" => $tile['id'],
-                    "order" => $key + 1,
-                    "free_link_url" => "https://code16.fr"
-                ]);
-        }
+        
+        $tiles->each(function(Tile $tile, $order) use($tiles) {
+            $this->assertDatabaseHas("tiles", [
+                "id" => $tile->id,
+                "order" => count($tiles) - $order, // Reversed order
+                "free_link_url" => "https://code16.fr/" . $tile->id
+            ]);
+        });
     }
 
     /** @test */
@@ -97,36 +100,29 @@ class TileblockSharpTest extends GumSharpTestCase
     {
         $this->fakeTileblockSharpForm(new class extends FakeTileblockSharpForm {});
 
-        $tileblockAttributes = factory(Tileblock::class)->create()
-            ->getAttributes();
+        $tileblock = factory(Tileblock::class)->create();
 
-        $tiles = factory(Tile::class, 2)->create([
-            "tileblock_id" => $tileblockAttributes["id"],
-            "free_link_url" => "https://code16.fr"
+        $tile = factory(Tile::class)->create([
+            "tileblock_id" => $tileblock->id
         ]);
-
-        $tileblockAttributes["tiles"] = $tiles->map(function ($tile) {
-            return [
-                "id" => $tile->id,
-                "link_type" => "free",
-                "free_link_url" => null
-            ];
-        });
 
         $this
             ->updateSharpForm("tileblocks",
-                $tileblockAttributes['id'],
-                $tileblockAttributes
+                $tileblock->id,
+                collect($tileblock->getAttributes())
+                    ->merge([
+                        "tiles" => [
+                            [
+                                "id" => $tile->id,
+                                "link_type" => "free",
+                                "free_link_url" => null
+                            ]
+                        ]
+                    ])
+                    ->toArray()
             )
-            ->assertStatus(422);
-
-        foreach ($tileblockAttributes["tiles"] as $tile) {
-            $this
-                ->assertDatabaseMissing("tiles", [
-                    "id" => $tile['id'],
-                    "free_link_url" => null
-                ]);
-        }
+            ->assertStatus(422)
+            ->assertJsonValidationErrors("tiles.0.free_link_url");
     }
 
     /** @test */
@@ -134,35 +130,29 @@ class TileblockSharpTest extends GumSharpTestCase
     {
         $this->fakeTileblockSharpForm(new class extends FakeTileblockSharpForm {});
 
-        $tileblockAttributes = factory(Tileblock::class)->create()
-            ->getAttributes();
-
-        $tiles = factory(Tile::class, 2)->create([
-            "tileblock_id" => $tileblockAttributes["id"],
+        $tileblock = factory(Tileblock::class)->create();
+        
+        $tile = factory(Tile::class)->create([
+            "tileblock_id" => $tileblock->id,
             "page_id" => factory(Page::class)->create()->id
         ]);
 
-        $tileblockAttributes["tiles"] = $tiles->map(function ($tile) {
-            return [
-                "id" => $tile->id,
-                "link_type" => "page",
-                "page_id" => null
-            ];
-        });
-
         $this
             ->updateSharpForm("tileblocks",
-                $tileblockAttributes['id'],
-                $tileblockAttributes
+                $tileblock->id,
+                collect($tileblock->getAttributes())
+                    ->merge([
+                        "tiles" => [
+                            [
+                                "id" => $tile->id,
+                                "link_type" => "page",
+                                "page_id" => null
+                            ]
+                        ]
+                    ])
+                    ->toArray()
             )
-            ->assertStatus(422);
-
-        foreach ($tileblockAttributes["tiles"] as $tile) {
-            $this
-                ->assertDatabaseMissing("tiles", [
-                    "id" => $tile['id'],
-                    "page_id" => null
-                ]);
-        }
+            ->assertStatus(422)
+            ->assertJsonValidationErrors("tiles.0.page_id");
     }
 }

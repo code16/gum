@@ -35,24 +35,19 @@ class NewsSharpTest extends GumSharpTestCase
     /** @test */
     function we_can_update_news()
     {
-        $newsAttributes = factory(News::class)->create([
-            "title" => "Title"
-        ])
-            ->getAttributes();
-
-        $newsAttributes["title"] = "Updated";
+        $news = factory(News::class)->create();
 
         $this
-            ->updateSharpForm("news",
-                $newsAttributes['id'],
-                $newsAttributes
-        )
+            ->updateSharpForm(
+                "news", 
+                $news->id,
+                collect($news->getAttributes())->merge(['title' => 'Updated'])->toArray()
+            )
             ->assertOk();
 
-        $this
-            ->assertDatabaseHas("news", [
-                "id" => $newsAttributes['id'],
-                "title" => "Updated"
+        $this->assertDatabaseHas("news", [
+            "id" => $news->id,
+            "title" => "Updated"
         ]);
     }
 }

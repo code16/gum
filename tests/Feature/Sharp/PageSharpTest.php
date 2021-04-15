@@ -35,23 +35,18 @@ class PageSharpTest extends GumSharpTestCase
     /** @test */
     function we_can_update_pages()
     {
-        $pageAttributes = factory(Page::class)->create([
-            "title" => "Title"
-        ])
-            ->getAttributes();
-
-        $pageAttributes["title"] = "Updated";
+        $page = factory(Page::class)->create();
 
         $this
             ->updateSharpForm("pages",
-                $pageAttributes['id'],
-                $pageAttributes
+                $page->id,
+                collect($page->getAttributes())->merge(['title' => 'Updated'])->toArray()
             )
             ->assertOk();
 
         $this
             ->assertDatabaseHas("pages", [
-                "id" => $pageAttributes['id'],
+                "id" => $page->id,
                 "title" => "Updated"
             ]);
     }
