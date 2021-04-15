@@ -175,7 +175,7 @@ abstract class SidepanelSharpForm extends SharpForm
 
     function update($id, array $data)
     {
-        $sidepanel = $id 
+        $sidepanel = $id
             ? Sidepanel::findOrFail($id) 
             : new Sidepanel([
                 "layout" => $this->layoutKey(),
