@@ -90,4 +90,78 @@ class TileblockSharpTest extends GumSharpTestCase
                 ]);
         }
     }
+
+    /** @test */
+    function we_cant_update_tiles_in_tileblock_without_free_link()
+    {
+        $this->fakeTileblockSharpForm(new class extends FakeTileblockSharpForm {});
+
+        $tileblockAttributes = factory(Tileblock::class)->create()
+            ->getAttributes();
+
+        $tiles = factory(Tile::class, 2)->create([
+            "tileblock_id" => $tileblockAttributes["id"],
+            "free_link_url" => "https://code16.fr"
+        ]);
+
+        $tileblockAttributes["tiles"] = $tiles->map(function ($tile) {
+            return [
+                "id" => $tile->id,
+                "link_type" => "free",
+                "free_link_url" => null
+            ];
+        });
+
+        $this
+            ->updateSharpForm("tileblocks",
+                $tileblockAttributes['id'],
+                $tileblockAttributes
+            )
+            ->assertStatus(422);
+
+        foreach ($tileblockAttributes["tiles"] as $tile) {
+            $this
+                ->assertDatabaseMissing("tiles", [
+                    "id" => $tile['id'],
+                    "free_link_url" => null
+                ]);
+        }
+    }
+
+    /** @test */
+    function we_cant_update_tiles_in_tileblock_without_associated_page_link()
+    {
+        $this->fakeTileblockSharpForm(new class extends FakeTileblockSharpForm {});
+
+        $tileblockAttributes = factory(Tileblock::class)->create()
+            ->getAttributes();
+
+        $tiles = factory(Tile::class, 2)->create([
+            "tileblock_id" => $tileblockAttributes["id"],
+            "page_id" => factory(Page::class)->create()->id
+        ]);
+
+        $tileblockAttributes["tiles"] = $tiles->map(function ($tile) {
+            return [
+                "id" => $tile->id,
+                "link_type" => "page",
+                "page_id" => null
+            ];
+        });
+
+        $this
+            ->updateSharpForm("tileblocks",
+                $tileblockAttributes['id'],
+                $tileblockAttributes
+            )
+            ->assertStatus(422);
+
+        foreach ($tileblockAttributes["tiles"] as $tile) {
+            $this
+                ->assertDatabaseMissing("tiles", [
+                    "id" => $tile['id'],
+                    "page_id" => null
+                ]);
+        }
+    }
 }
