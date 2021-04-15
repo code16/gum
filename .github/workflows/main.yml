@@ -51,7 +51,7 @@ jobs:
       - name: Execute tests via PHPUnit
         run: ./vendor/bin/phpunit
       - uses: 8398a7/action-slack@v3
-        if: failure()
+#        if: failure()
         with:
           status: ${{ job.status }}
           fields: job, message, author
