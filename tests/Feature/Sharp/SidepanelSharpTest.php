@@ -16,12 +16,16 @@ class SidepanelSharpTest extends GumSharpTestCase
     {
         $this->fakeSidepanelSharpForm(new class extends FakeSidepanelSharpForm {});
 
-        $sidepanel = factory(Sidepanel::class)->create([
-            "page_id" => factory(Page::class)->create()->id
-        ]);
+        $page = factory(Page::class)->create();
 
         $this
-            ->getSharpForm("sidepanels", $sidepanel->id)
+            ->withSharpCurrentBreadcrumb(
+                [
+                    ["list", "pages"],
+                    ["show", "pages", $page->id]
+                ]
+            )
+            ->getSharpForm("sidepanels")
             ->assertOk();
     }
 
@@ -30,10 +34,15 @@ class SidepanelSharpTest extends GumSharpTestCase
     {
         $this->fakeSidepanelSharpForm(new class extends FakeSidepanelSharpForm {});
 
+        $page = factory(Page::class)->create();
+
         $this
-            ->withSharpCurrentBreadcrumb([
-                ["show", "pages"]
-            ])
+            ->withSharpCurrentBreadcrumb(
+                [
+                    ["list", "pages"],
+                    ["show", "pages", $page->id]
+                ]
+            )
             ->storeSharpForm("sidepanels",
                 factory(Sidepanel::class)
                     ->make()
@@ -41,8 +50,7 @@ class SidepanelSharpTest extends GumSharpTestCase
             )
             ->assertOk();
 
-        $this
-            ->assertCount(1, Sidepanel::all());
+        $this->assertCount(1, Sidepanel::all());
     }
 
     /** @test */
@@ -50,24 +58,25 @@ class SidepanelSharpTest extends GumSharpTestCase
     {
         $this->fakeSidepanelSharpForm(new class extends FakeSidepanelSharpForm {});
 
-        $sidepanelAttributes = factory(Sidepanel::class)->create([
+        $sidepanel = factory(Sidepanel::class)->create([
             "layout" => "visual"
-        ])
-            ->getAttributes();
-
-        $sidepanelAttributes['layout'] = "breadcrumb";
+        ]);
 
         $this
-            ->updateSharpForm("sidepanels",
-                $sidepanelAttributes['id'],
-                $sidepanelAttributes
-            )
+            ->updateSharpForm("sidepanels", $sidepanel->id, [
+                "downloadableFile:title" => "title",
+                "downloadableFile" => "file.pdf"
+            ])
             ->assertOk();
 
         $this
-            ->assertDatabaseHas("sidepanels", [
-                "id" => $sidepanelAttributes['id'],
-                "layout" => "breadcrumb"
+            ->assertDatabaseHas("medias", [
+                "id" => 1,
+                "model_type" => Sidepanel::class,
+                "model_key" => "downloadableFile",
+                "custom_properties" => json_encode([
+                    "title" => "title"
+                ])
             ]);
     }
 }

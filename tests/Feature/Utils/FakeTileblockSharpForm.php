@@ -2,9 +2,9 @@
 
 namespace Code16\Gum\Tests\Feature\Utils;
 
-use Code16\Gum\Sharp\Sidepanels\SidepanelSharpForm;
+use Code16\Gum\Sharp\Tiles\TileblockSharpForm;
 
-class FakeSidepanelSharpForm extends SidepanelSharpForm
+class FakeTileblockSharpForm extends TileblockSharpForm
 {
 
     function create(): array

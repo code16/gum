@@ -60,13 +60,13 @@ class GumSharpTestCase extends TestCase
                     "news" => [
                         "list" => NewsSharpList::class,
                         "form" => NewsSharpForm::class,
-                        "validator" => NewsSharpValidator::class,
+                        "validator" => NewsSharpValidator::class
                     ],
                     "orphan_pages" => [
                         "form" => PageSharpForm::class,
                         "list" => OrphanPageSharpList::class,
                         "show" => PageSharpShow::class,
-                        "validator" => PageSharpValidator::class,
+                        "validator" => PageSharpValidator::class
                     ],
                     "sidepanels" => [
                         "list" => SidepanelSharpList::class,
@@ -76,7 +76,7 @@ class GumSharpTestCase extends TestCase
                         "form" => PageSharpForm::class,
                         "list" => PageInPagegroupSharpEmbeddedList::class,
                         "show" => PageSharpShow::class,
-                        "validator" => PageSharpValidator::class,
+                        "validator" => PageSharpValidator::class
                     ],
                     "tileblocks" => [
                         "list" => TileblockSharpList::class,

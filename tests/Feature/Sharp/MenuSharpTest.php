@@ -41,7 +41,7 @@ class MenuSharpTest extends GumSharpTestCase
     }
 
     /** @test */
-    function we_can_update_menus()
+    function we_can_update_tiles_in_menu()
     {
         $tileblockAttributes = factory(Tileblock::class)->create([
             "layout" => "_menu"
