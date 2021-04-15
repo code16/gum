@@ -50,3 +50,11 @@ jobs:
           composer update --prefer-stable --prefer-dist --no-interaction
       - name: Execute tests via PHPUnit
         run: ./vendor/bin/phpunit
+      - uses: 8398a7/action-slack@v3
+        if: failure()
+        with:
+          status: ${{ job.status }}
+          fields: job, message, author
+        env:
+          MATRIX_CONTEXT: ${{ toJson(matrix) }}
+          SLACK_WEBHOOK_URL: https://hooks.slack.com/services/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
