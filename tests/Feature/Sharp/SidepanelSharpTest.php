@@ -54,7 +54,7 @@ class SidepanelSharpTest extends GumSharpTestCase
     }
 
     /** @test */
-    function we_can_update_sidepanels()
+    function we_can_update_media_in_sidepanels()
     {
         $this->fakeSidepanelSharpForm(new class extends FakeSidepanelSharpForm {});
 

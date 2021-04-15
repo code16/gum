@@ -18,44 +18,46 @@ class MenuSharpTest extends GumSharpTestCase
     }
 
     /** @test */
-    function we_can_create_menus()
+    function we_can_create_menu_tileblocks()
     {
-        factory(Page::class)->create([
+        $page = factory(Page::class)->create([
             "slug" => ""
         ]);
 
         $this
+            ->withSharpCurrentBreadcrumb(
+                [
+                    ["list", "pages"],
+                    ["show", "pages", $page->id]
+                ]
+            )
             ->storeSharpForm("menus",
                 factory(Tileblock::class)
-                    ->make([
-                        "layout" => "_menu"
-                    ])
+                    ->make()
                     ->getAttributes()
             )
             ->assertOk();
 
-        $this
-            ->assertDatabaseHas("tileblocks", [
-                "layout" => "_menu"
-            ]);
+        $this->assertCount(1, Tileblock::all());
     }
 
     /** @test */
-    function we_can_update_tiles_in_menu()
+    function we_can_update_tiles_in_menu_tileblocks()
     {
-        $tileblockAttributes = factory(Tileblock::class)->create([
-            "layout" => "_menu"
-        ])
+        $tileblockAttributes = factory(Tileblock::class)
+            ->create()
             ->getAttributes();
 
         $tiles = factory(Tile::class, 5)->create([
-            "tileblock_id" => $tileblockAttributes["id"]
+            "tileblock_id" => $tileblockAttributes["id"],
+            "free_link_url" => null
         ]);
 
         $tileblockAttributes["tiles"] = $tiles->map(function ($tile) {
             return [
                 "id" => $tile->id,
-                "link_type" => "free"
+                "link_type" => "free",
+                "free_link_url" => "https://code16.fr"
             ];
         });
 
@@ -70,7 +72,8 @@ class MenuSharpTest extends GumSharpTestCase
             $this
                 ->assertDatabaseHas("tiles", [
                     "id" => $tile['id'],
-                    "order" => $key + 1
+                    "order" => $key + 1,
+                    "free_link_url" => "https://code16.fr"
                 ]);
         }
     }

@@ -55,7 +55,7 @@ class TileblockSharpTest extends GumSharpTestCase
     }
 
     /** @test */
-    function we_can_update_tiles_in_tileblock()
+    function we_can_update_tiles_in_tileblocks()
     {
         $this->fakeTileblockSharpForm(new class extends FakeTileblockSharpForm {});
 
@@ -63,7 +63,8 @@ class TileblockSharpTest extends GumSharpTestCase
             ->getAttributes();
 
         $tiles = factory(Tile::class, 5)->create([
-            "tileblock_id" => $tileblockAttributes["id"]
+            "tileblock_id" => $tileblockAttributes["id"],
+            "free_link_url" => null
         ]);
 
         $tileblockAttributes["tiles"] = $tiles->map(function ($tile) {
