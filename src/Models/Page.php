@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Laravel\Scout\Searchable;
 
 class Page extends Model
@@ -47,7 +48,7 @@ class Page extends Model
                 if($currentPage->is_pagegroup) {
                     // Check that $page is subpage of $currentPage
                     $isSegmentValid = $page->pagegroup_id === $currentPage->id;
-                    
+
                 } else {
                     // Look for an online tile which links $currentPage -> $page 
                     $isSegmentValid = Tile::where("page_id", $page->id)
@@ -60,14 +61,14 @@ class Page extends Model
                 if($isSegmentValid) {
                     $breadcrumb->add($page);
                     $currentPage = $page;
-                    
+
                     continue 2;
                 }
             }
 
             throw new ModelNotFoundException();
         }
-        
+
         return $breadcrumb;
     }
 
@@ -188,8 +189,12 @@ class Page extends Model
 
     public function findUriWithoutCache(string $currentPath = "", array $additionalTileRawConditions = []): ?string
     {
+        while(Str::length($currentPath) > 1 && Str::endsWith($currentPath, "/")) {
+            $currentPath = Str::beforeLast($currentPath, "/");
+        }
+
         if($this->isHome()) {
-            return $currentPath;
+            return "/{$currentPath}";
         }
 
         if($this->pagegroup_id) {
@@ -218,23 +223,23 @@ class Page extends Model
         if(!config("gum.cache.enabled")) {
             return $this->findUriWithoutCache($currentPath, $additionalTileRawConditions);
         }
-        
+
         $cacheKey = "gum.pages.uri.{$this->id}." . md5(implode("-", $additionalTileRawConditions));
         $ttl = config('gum.cache.ttl', now()->addHour());
-        
+
         if($cacheTag = config('gum.cache.tag')) {
             return Cache::tags($cacheTag)
                 ->remember(
-                    $cacheKey, 
+                    $cacheKey,
                     $ttl,
                     function () use($currentPath, $additionalTileRawConditions) {
                         return $this->findUriWithoutCache($currentPath, $additionalTileRawConditions);
                     });
         }
-        
+
         return Cache::remember(
-            $cacheKey, 
-            $ttl, 
+            $cacheKey,
+            $ttl,
             function () use($currentPath, $additionalTileRawConditions) {
                 return $this->findUriWithoutCache($currentPath, $additionalTileRawConditions);
             });
@@ -261,11 +266,11 @@ class Page extends Model
         if(!config("gum.scout_enabled")) {
             return false;
         }
-        
+
         $uri = $this->findUriWithoutCache(
             "", ["tileblocks.layout != 'text'"] // Text layout is considered as "not publicly linked tile"
-        ); 
-        
+        );
+
         return $uri !== null;
     }
 }
