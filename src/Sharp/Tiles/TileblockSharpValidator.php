@@ -27,6 +27,9 @@ class TileblockSharpValidator extends FormRequest
                 "required_if:tiles.*.link_type,free",
                 new FreeLinkRule()
             ],
+            "tiles.*.new_page_title" => [
+                "required_if:tiles.*.link_type,new,new_pagegroup"
+            ],
             "tiles.*.published_at" => [
                 "date", 
                 "nullable"
