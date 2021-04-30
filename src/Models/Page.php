@@ -143,7 +143,7 @@ class Page extends Model
 
     public function getMenuTitleAttribute(): string
     {
-        return $this->attributes["short_title"] ?: $this->attributes["title"];
+        return $this->short_title ?: $this->title;
     }
 
     public function getOnlineTileblocksAttribute(): Collection
