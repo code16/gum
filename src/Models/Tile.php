@@ -64,14 +64,14 @@ class Tile extends Model
         if($this->isFreeLink()) {
             return $this->free_link_url;
         }
-        
+
         if($this->page) {
             return route(
                 "page.show",
                 implode("/", request()->segments()) . "/{$this->page->slug}"
             );
         }
-        
+
         return "";
     }
 

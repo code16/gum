@@ -10,12 +10,19 @@ class Tileblock extends Model
 {
     protected $guarded = [];
     protected $dates = ["created_at", "updated_at", "published_at", "unpublished_at"];
-    protected $touches = ['tiles'];
+    protected $touches = ['onlineTiles'];
 
     public function tiles(): HasMany
     {
         return $this->hasMany(Tile::class)
             ->orderBy("order");
+    }
+
+    public function onlineTiles(): HasMany
+    {
+        return $this->tiles()
+            ->visible()
+            ->published();
     }
 
     public function page(): BelongsTo

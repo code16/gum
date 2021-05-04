@@ -40,7 +40,7 @@ abstract class TileblockSharpForm extends SharpForm
             ->addField(
                 $this->createTilesListField()
             );
-    
+
         if($this->hasLayoutVariants()) {
             $this->addField(
                 SharpFormSelectField::make("layout_variant", $this->layoutVariants())
@@ -67,11 +67,11 @@ abstract class TileblockSharpForm extends SharpForm
             ->addColumn(4, function (FormLayoutColumn $column) {
                 $column->withSingleField("page_label")
                     ->withSingleField("layout_label");
-    
+
                 if($this->hasLayoutVariants()) {
                     $column->withSingleField("layout_variant");
                 }
-    
+
                 if($this->hasStylesDefined()) {
                     $column->withSingleField("style_key");
                 }
@@ -82,20 +82,20 @@ abstract class TileblockSharpForm extends SharpForm
                     ->withSingleField("tiles", function (FormLayoutColumn $item) {
                         if($this->tileHasField("visual")) {
                             $item->withSingleField("visual");
-    
+
                             if($this->tileHasField("video")) {
                                 $item->withSingleField("visual:is_video");
                             }
                         }
-    
+
                         foreach ($this->additionalVisualFields() as $key => $field) {
                             $item->withSingleField($key);
                         }
-    
+
                         if($this->tileHasField("surtitle")) {
                             $item->withSingleField("surtitle");
                         }
-    
+
                         if($this->tileHasField("title") && $this->tileHasField("body_text")) {
                             $item->withFields("title|6", "body_text|6");
                         } elseif($this->tileHasField("title")) {
@@ -103,11 +103,11 @@ abstract class TileblockSharpForm extends SharpForm
                         } elseif($this->tileHasField("body_text")) {
                             $item->withSingleField("body_text");
                         }
-    
+
                         if($this->tileHasLink()) {
                             $item->withFields("link_type|4", "free_link_url|8", "page_id|8", "orphan_page_id|8", "new_page_title|8");
                         }
-    
+
                         $item->withFields("visibility|4", "published_at|4", "unpublished_at|4");
                     });
             });
@@ -145,13 +145,13 @@ abstract class TileblockSharpForm extends SharpForm
 
     function update($id, array $data)
     {
-        $tileblock = $id 
-            ? Tileblock::findOrFail($id) 
+        $tileblock = $id
+            ? Tileblock::findOrFail($id)
             : new Tileblock([
                 "layout" => $this->layoutKey(),
                 "page_id" => $this->getPreviousPageInBreadcrumb()->id
             ]);
-        
+
         unset($data["page_label"], $data["layout_label"]);
 
         if($this->tileHasLink()) {
@@ -159,10 +159,10 @@ abstract class TileblockSharpForm extends SharpForm
                 ->map(function($dataTile) use($tileblock) {
                     if ($dataTile["link_type"] === "free") {
                         $dataTile["page_id"] = null;
-                        
+
                     } else {
                         $dataTile["free_link_url"] = null;
-                        
+
                         if ($dataTile["link_type"] === "orphan") {
                             $dataTile["page_id"] = $dataTile["orphan_page_id"];
 
@@ -175,14 +175,14 @@ abstract class TileblockSharpForm extends SharpForm
                             ])->id;
                         }
                     }
-                    
+
                     unset($dataTile["link_type"], $dataTile["orphan_page_id"], $dataTile["new_page_title"]);
-                    
+
                     return $dataTile;
                 })
                 ->toArray();
         }
-        
+
         $this->save($tileblock, $data);
 
         return $tileblock->id;
@@ -315,46 +315,46 @@ abstract class TileblockSharpForm extends SharpForm
             );
 
         if($this->tileHasLink()) {
-            $listField
-                ->addItemField(
-                    SharpFormSelectField::make("link_type", [
-                        "free" => "Lien libre",
-                        "page" => "Page",
-                        "orphan" => "Page orpheline",
-                        "new" => "Nouvelle page",
-                        "new_pagegroup" => "Nouveau groupe",
-                    ])
-                        ->setDisplayAsDropdown()
-                        ->setLabel("Lien")
-                )
-                ->addItemField(
-                    SharpFormAutocompleteField::make("page_id", "local")
-                        ->setLabel("Page")
-                        ->setLocalValues(Page::domain(gum_sharp_current_domain())->notHome()->notOrphan()->notSubpage()->orderBy("title")->get())
-                        ->setLocalSearchKeys(["title", "slug"])
-                        ->setResultItemInlineTemplate("{{title}} <span class='badge text-white rounded bg-primary' style='font-size:.7em'>{{admin_label}}</span>")
-                        ->setListItemInlineTemplate("{{title}} <div><span class='badge text-white rounded bg-primary' style='font-size:.7em'>{{admin_label}}</span> <span class='text-muted'><small>{{slug}}</small></span></div>")
-                        ->addConditionalDisplay("link_type", "page")
-                )
-                ->addItemField(
-                    SharpFormAutocompleteField::make("orphan_page_id", "local")
-                        ->setLabel("Page")
-                        ->setLocalValues(Page::domain(gum_sharp_current_domain())->notHome()->orphan()->notSubpage()->orderBy("title")->get())
-                        ->setLocalSearchKeys(["title", "slug"])
-                        ->setResultItemInlineTemplate("{{title}} <span class='badge text-white rounded bg-primary' style='font-size:.7em'>{{admin_label}}</span>")
-                        ->setListItemInlineTemplate("{{title}} <div><span class='badge text-white rounded bg-primary' style='font-size:.7em'>{{admin_label}}</span> <span class='text-muted'><small>{{slug}}</small></span></div>")
-                        ->addConditionalDisplay("link_type", "orphan")
-                )
-                ->addItemField(
-                    SharpFormTextField::make("new_page_title")
-                        ->addConditionalDisplay("link_type", ["new", "new_pagegroup"])
-                        ->setLabel("Titre de la page")
-                )
-                ->addItemField(
-                    SharpFormTextField::make("free_link_url")
-                        ->addConditionalDisplay("link_type", "free")
-                        ->setLabel("Lien")
-                );
+                $listField
+                    ->addItemField(
+                        SharpFormSelectField::make("link_type", [
+                            "free" => "Lien libre",
+                            "page" => "Page",
+                            "orphan" => "Page orpheline",
+                            "new" => "Nouvelle page",
+                            "new_pagegroup" => "Nouveau groupe",
+                        ])
+                            ->setDisplayAsDropdown()
+                            ->setLabel("Lien")
+                    )
+                    ->addItemField(
+                        SharpFormAutocompleteField::make("page_id", "local")
+                            ->setLabel("Page")
+                            ->setLocalValues(Page::domain(gum_sharp_current_domain())->select("id", "title", "slug", "admin_label")->notHome()->notOrphan()->notSubpage()->orderBy("title")->get())
+                            ->setLocalSearchKeys(["title", "slug"])
+                            ->setResultItemInlineTemplate("{{title}} <span class='badge text-white rounded bg-primary' style='font-size:.7em'>{{admin_label}}</span>")
+                            ->setListItemInlineTemplate("{{title}} <div><span class='badge text-white rounded bg-primary' style='font-size:.7em'>{{admin_label}}</span> <span class='text-muted'><small>{{slug}}</small></span></div>")
+                            ->addConditionalDisplay("link_type", "page")
+                    )
+                    ->addItemField(
+                        SharpFormAutocompleteField::make("orphan_page_id", "local")
+                            ->setLabel("Page")
+                            ->setLocalValues(Page::domain(gum_sharp_current_domain())->select("id", "title", "slug", "admin_label")->notHome()->orphan()->notSubpage()->orderBy("title")->get())
+                            ->setLocalSearchKeys(["title", "slug"])
+                            ->setResultItemInlineTemplate("{{title}} <span class='badge text-white rounded bg-primary' style='font-size:.7em'>{{admin_label}}</span>")
+                            ->setListItemInlineTemplate("{{title}} <div><span class='badge text-white rounded bg-primary' style='font-size:.7em'>{{admin_label}}</span> <span class='text-muted'><small>{{slug}}</small></span></div>")
+                            ->addConditionalDisplay("link_type", "orphan")
+                    )
+                    ->addItemField(
+                        SharpFormTextField::make("new_page_title")
+                            ->addConditionalDisplay("link_type", ["new", "new_pagegroup"])
+                            ->setLabel("Titre de la page")
+                    )
+                    ->addItemField(
+                        SharpFormTextField::make("free_link_url")
+                            ->addConditionalDisplay("link_type", "free")
+                            ->setLabel("Lien")
+                    );
         }
 
         return $listField;
@@ -365,7 +365,7 @@ abstract class TileblockSharpForm extends SharpForm
         if($pageId = currentSharpRequest()->getPreviousShowFromBreadcrumbItems()->instanceId()) {
             return Page::find($pageId);
         }
-        
+
         return Page::home(gum_sharp_current_domain())->first();
     }
 }
